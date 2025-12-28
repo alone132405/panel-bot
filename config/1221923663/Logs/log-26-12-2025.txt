@@ -1,0 +1,61 @@
+[ 12-26 10:47:49 PM ] [ Login ] Attempting to Login | Game Version 2.183.283
+[ 12-26 10:48:06 PM ] [ Notice ] Current Configuration Saved
+[ 12-26 10:48:10 PM ] [ Login Error ] Waiting 5 seconds before reconnecting
+[ 12-26 10:48:15 PM ] [ Notice ] Current Configuration Saved
+[ 12-26 10:48:15 PM ] [ Notice ] Current Configuration Saved
+[ 12-26 10:48:16 PM ] [ Login ] Attempting to Login | Game Version 2.183.283
+[ 12-26 10:48:16 PM ] [ Login ] Attempting to Join IGG Server
+[ 12-26 10:48:19 PM ] [ Login ] Server Time: 26-12 10:50:36 PM
+[ 12-26 10:48:19 PM ] [ Login ] Connected Successfully! Player Name: DAVY D JOHNS
+[ 12-26 10:48:25 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:48:27 PM ] [ Notice ] Current Configuration Saved
+[ 12-26 10:48:27 PM ] [ Notice ] Current Configuration Saved
+[ 12-26 10:48:50 PM ] [ Game Event ] Sent Help to 1 Guild Member(s)
+[ 12-26 10:48:55 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:49:02 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:49:07 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:49:11 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:49:15 PM ] [ Notice ] Current Configuration Saved
+[ 12-26 10:49:17 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:49:23 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:49:33 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:49:41 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:49:49 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:49:54 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:50:00 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:50:06 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:50:11 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:50:18 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:50:23 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:50:29 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:50:33 PM ] [ Notice ] Current Configuration Saved
+[ 12-26 10:50:34 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:50:41 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:50:41 PM ] [ Notice ] Reloaded settings.json
+[ 12-26 10:50:45 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:50:45 PM ] [ Game Event ] Activating Food Boost (25%)
+[ 12-26 10:50:48 PM ] [ Game Event ] Activating Stone Boost (25%)
+[ 12-26 10:50:50 PM ] [ Game Event ] Activating Ore Boost (25%)
+[ 12-26 10:50:53 PM ] [ Game Event ] Activating Gather Boost (50%)
+[ 12-26 10:51:01 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:51:05 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:51:11 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:51:17 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:51:24 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:51:31 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:51:36 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:51:44 PM ] [ Notice ] Current Configuration Saved
+[ 12-26 10:51:46 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:51:55 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:51:59 PM ] [ Notice ] Current Configuration Saved
+[ 12-26 10:52:01 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:52:09 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:52:15 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:52:19 PM ] [ Notice ] Current Configuration Saved
+[ 12-26 10:52:20 PM ] [ Notice ] Current Configuration Saved
+[ 12-26 10:52:21 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:52:26 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:52:31 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:52:38 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:52:44 PM ] [ Warning ] Update the game to access this feature!
+[ 12-26 10:52:50 PM ] [ Warning ] Update the game to access this feature!

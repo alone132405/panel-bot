@@ -1,0 +1,17 @@
+{
+  "connectionSettings": {
+    "reconnectTime": 5,
+    "otherLoginTime": 30
+  },
+  "miscSettings": {
+    "useVipPoints": true,
+    "useExpItems": true
+  },
+  "questSettings": {
+    "dailyLoginGift": true
+  },
+  "guildSettings": {
+    "sendGuildHelp": true,
+    "requestGuildHelp": true
+  }
+}

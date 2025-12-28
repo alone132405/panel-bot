@@ -1,0 +1,536 @@
+{
+  "enableBank": false,
+  "clearOutgoingData": true,
+  "clearOutgoingDataTime": 7,
+  "lastClearCheckTime": 0,
+  "ignoreBalance": false,
+  "allowAdminBalance": false,
+  "allowAdminSkipLimit": true,
+  "useBagRss": false,
+  "saveLogToFile": false,
+  "allowChatCommands": true,
+  "allowMailCommands": true,
+  "autoDeleteCmdMail": false,
+  "disableMailResponse": false,
+  "disableErrorResponse": false,
+  "cmdPrefix": "!",
+  "adminRssLimit": [
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "maxSendLimit": 40000000,
+  "maxSendDistance": 50.0,
+  "BuildspamMinimum": 3,
+  "allowExternalCommands": false,
+  "guildCommands": [
+    {
+      "listCmdIndex": 0,
+      "bCommand": 2,
+      "commadReference": "bal",
+      "enableCommand": true,
+      "minRank": 1
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 5,
+      "commadReference": "setacc",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 6,
+      "commadReference": "food",
+      "enableCommand": true,
+      "minRank": 1
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 7,
+      "commadReference": "stone",
+      "enableCommand": true,
+      "minRank": 1
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 8,
+      "commadReference": "wood",
+      "enableCommand": true,
+      "minRank": 1
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 9,
+      "commadReference": "ore",
+      "enableCommand": true,
+      "minRank": 1
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 10,
+      "commadReference": "gold",
+      "enableCommand": true,
+      "minRank": 1
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 11,
+      "commadReference": "adminfood",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 12,
+      "commadReference": "adminstone",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 13,
+      "commadReference": "adminwood",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 14,
+      "commadReference": "adminore",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 15,
+      "commadReference": "admingold",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 16,
+      "commadReference": "donatefood",
+      "enableCommand": true,
+      "minRank": 1
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 17,
+      "commadReference": "donatestone",
+      "enableCommand": true,
+      "minRank": 1
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 18,
+      "commadReference": "donatewood",
+      "enableCommand": true,
+      "minRank": 1
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 19,
+      "commadReference": "donateore",
+      "enableCommand": true,
+      "minRank": 1
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 20,
+      "commadReference": "donategold",
+      "enableCommand": true,
+      "minRank": 1
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 21,
+      "commadReference": "setrsslimit",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 22,
+      "commadReference": "adminbal",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 23,
+      "commadReference": "setbal",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 24,
+      "commadReference": "stop",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 25,
+      "commadReference": "shield",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 27,
+      "commadReference": "findtile",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 28,
+      "commadReference": "findmonster",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 29,
+      "commadReference": "pos",
+      "enableCommand": true,
+      "minRank": 1
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 30,
+      "commadReference": "hunt",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 31,
+      "commadReference": "relocate",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 32,
+      "commadReference": "guild",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 33,
+      "commadReference": "abort",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 34,
+      "commadReference": "buildspam",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 35,
+      "commadReference": "addtitle",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 36,
+      "commadReference": "deltitle",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 37,
+      "commadReference": "transfer",
+      "enableCommand": true,
+      "minRank": 1
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 38,
+      "commadReference": "stats",
+      "enableCommand": true,
+      "minRank": 1
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 39,
+      "commadReference": "rss",
+      "enableCommand": true,
+      "minRank": 1
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 40,
+      "commadReference": "adminrss",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 41,
+      "commadReference": "whitelist",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 42,
+      "commadReference": "blacklist",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 43,
+      "commadReference": "unlistwhite",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 44,
+      "commadReference": "unlistblack",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 45,
+      "commadReference": "purge",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 46,
+      "commadReference": "quest",
+      "enableCommand": true,
+      "minRank": 1
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 47,
+      "commadReference": "yell",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 48,
+      "commadReference": "camp",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 49,
+      "commadReference": "campleader",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 50,
+      "commadReference": "recall",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 51,
+      "commadReference": "adminbag",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 52,
+      "commadReference": "snowbeast",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 53,
+      "commadReference": "setgather",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 54,
+      "commadReference": "relocatekvk",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 55,
+      "commadReference": "reloadacc",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 56,
+      "commadReference": "members",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 57,
+      "commadReference": "findtilelocal",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 58,
+      "commadReference": "findmonsterlocal",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 59,
+      "commadReference": "migrate",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 60,
+      "commadReference": "pstats",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 61,
+      "commadReference": "findnest",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 62,
+      "commadReference": "findnestlocal",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 63,
+      "commadReference": "reguser",
+      "enableCommand": true,
+      "minRank": 1
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 64,
+      "commadReference": "unreguser",
+      "enableCommand": true,
+      "minRank": 1
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 65,
+      "commadReference": "gryphon",
+      "enableCommand": true,
+      "minRank": 4
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 66,
+      "commadReference": "busrank",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 67,
+      "commadReference": "resetstats",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 68,
+      "commadReference": "payransom",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 69,
+      "commadReference": "clearboard",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 70,
+      "commadReference": "ess",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 71,
+      "commadReference": "joingvg",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 72,
+      "commadReference": "leavegvg",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 73,
+      "commadReference": "joinda",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 74,
+      "commadReference": "joinca",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 75,
+      "commadReference": "leaveca",
+      "enableCommand": true,
+      "minRank": 6
+    },
+    {
+      "listCmdIndex": 0,
+      "bCommand": 76,
+      "commadReference": "leaveda",
+      "enableCommand": true,
+      "minRank": 6
+    }
+  ],
+  "accountData": [],
+  "outgoingData": []
+}

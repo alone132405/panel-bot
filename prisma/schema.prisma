@@ -1,0 +1,117 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique
+  password      String
+  name          String
+  accountStatus AccountStatus @default(PENDING)
+  contactType   ContactType?
+  contactValue  String?
+  role          Role          @default(USER)
+  selectedIggId String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  iggIds        IggId[]
+  subscription  Subscription?
+  activityLogs  ActivityLog[]
+}
+
+model IggId {
+  id          String   @id @default(cuid())
+  iggId       String   @unique
+  displayName String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isActive    Boolean  @default(true)
+  status      Status   @default(OFFLINE)
+  lastSync    DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Subscription {
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan      Plan      @default(BANK_BOT)
+  status    SubStatus @default(ACTIVE)
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String
+  iggId     String?
+  category  String?
+  details   Json?
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Status {
+  ONLINE
+  OFFLINE
+  ERROR
+}
+
+enum ContactType {
+  WHATSAPP
+  LINE
+  TELEGRAM
+}
+
+enum Plan {
+  BANK_BOT
+  BANK_BOT_WHATSAPP
+}
+
+enum SubStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum AccountStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model AdminRequest {
+  id          String        @id @default(cuid())
+  requesterId String // User who made the request
+  iggId       String // IGG ID this request is for
+  adminUserId String // UserID of the admin being requested
+  adminName   String // Name of the admin being requested
+  requestType RequestType   @default(ADD) // ADD or DELETE
+  status      RequestStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+enum RequestType {
+  ADD
+  DELETE
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
