@@ -184,12 +184,10 @@ export default function ArtifactsModal({ isOpen, onClose, iggId }: ArtifactsModa
                                             ].map((option, index) => (
                                                 <label key={index} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
                                                     <input
-                                                        type="number"
-                                                        value={option.value ? 1 : 0} // Assuming 1 for checked, 0 for unchecked for number input
-                                                        min={0}
-                                                        max={1}
-                                                        onChange={(e) => option.setter(Number(e.target.value) === 1)}
-                                                        className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
+                                                        type="checkbox"
+                                                        checked={option.value}
+                                                        onChange={(e) => option.setter(e.target.checked)}
+                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
                                                     />
                                                     <span className="text-sm text-white">{option.label}</span>
                                                 </label>

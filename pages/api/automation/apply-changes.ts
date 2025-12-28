@@ -433,7 +433,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponseS
             success: true,
             message: 'Automation started in background',
             queuePosition
-        })
+        });
 
     } catch (error: any) {
         console.error('Automation error:', error)
