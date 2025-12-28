@@ -281,9 +281,10 @@ Write-Output "Step 1: Clicking 'Search' at ($searchX, $searchY)"
 Click-At -x $searchX -y $searchY
 Start-Sleep -Seconds 2
 
-Write-Output "Step 2: Pasting IGG ID: ${iggId}"
-Set-Clipboard -Value "${iggId}"
-[System.Windows.Forms.SendKeys]::SendWait("^v")
+Write-Output "Step 2: Typing IGG ID: ${iggId}"
+[System.Windows.Forms.SendKeys]::SendWait("${iggId}")
+Start-Sleep -Seconds 1
+[System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
 Start-Sleep -Seconds 2
 
 # Step 3: Double Click Account - Relative (342, 216)
