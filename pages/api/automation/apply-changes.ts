@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextApiRequest } from 'next'
+import { NextApiResponseServerIO } from '@/types/socket'
 import { exec } from 'child_process'
 import { promisify } from 'util'
 import fs from 'fs/promises'
@@ -16,22 +17,56 @@ interface QueueItem {
 let isRunning = false
 const queue: QueueItem[] = []
 
-async function processQueue() {
+// Broadcast queue status to all connected clients
+const broadcastQueueStatus = (io: any) => {
+    if (!io) return
+    io.emit('queue_update', {
+        isRunning,
+        queueLength: queue.length,
+        queuedIggIds: queue.map(item => item.iggId),
+        currentItem: isRunning && queue.length > 0 ? queue[0].iggId : null // Note: This might need refinement if current is shifted out
+    })
+}
+
+async function processQueue(io: any) {
     if (isRunning || queue.length === 0) return
 
     isRunning = true
-    const item = queue.shift()!
+    const item = queue[0] // Peek at first item, don't shift yet so we can show it as "processing"
+
+    // Broadcast that we are starting
+    broadcastQueueStatus(io)
+
+    // Notify specific channel for this IGG ID that it's starting
+    if (io) {
+        io.to(`igg-${item.iggId}`).emit('automation_status', { status: 'processing', message: 'Applying changes...' })
+    }
 
     try {
         const result = await runAutomation(item.iggId)
+
+        // Remove from queue after done
+        queue.shift()
+
         item.resolve(result)
-    } catch (error) {
+        if (io) {
+            io.to(`igg-${item.iggId}`).emit('automation_status', { status: 'completed', message: 'Changes applied successfully' })
+        }
+    } catch (error: any) {
+        // Remove from queue after error
+        queue.shift()
+
         item.reject(error)
+        if (io) {
+            io.to(`igg-${item.iggId}`).emit('automation_status', { status: 'error', message: error.message || 'Automation failed' })
+        }
     } finally {
         isRunning = false
+        broadcastQueueStatus(io)
+
         // Process next item in queue
         if (queue.length > 0) {
-            processQueue()
+            processQueue(io)
         }
     }
 }
@@ -263,46 +298,52 @@ Write-Output "SUCCESS: Automation completed"
     }
 }
 
-export async function POST(request: NextRequest) {
+export default async function handler(req: NextApiRequest, res: NextApiResponseServerIO) {
+    if (req.method === 'GET') {
+        return res.status(200).json({
+            isRunning,
+            queueLength: queue.length,
+            queuedIggIds: queue.map(item => item.iggId)
+        })
+    }
+
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' })
+    }
+
     try {
-        const { iggId } = await request.json()
+        const { iggId } = req.body
 
         if (!iggId) {
-            return NextResponse.json({ error: 'IGG ID is required' }, { status: 400 })
+            return res.status(400).json({ error: 'IGG ID is required' })
         }
 
         console.log('Received automation request for IGG ID:', iggId)
 
-        // Check queue position
+        // Queue info
         const queuePosition = queue.length + (isRunning ? 1 : 0)
 
-        if (queuePosition > 0) {
-            console.log(`Request queued at position ${queuePosition + 1}`)
+        // Broadcast that we have a new item
+        if (res.socket.server.io) {
+            // We can't really broadcast here because we haven't added it to queue yet?
+            // Actually we should add it then broadcast.
         }
 
         // Create a promise that will be resolved when this request is processed
         const result = await new Promise<any>((resolve, reject) => {
             queue.push({ iggId, resolve, reject })
-            processQueue()
+            broadcastQueueStatus(res.socket.server.io)
+            processQueue(res.socket.server.io)
         })
 
-        return NextResponse.json(result)
+        return res.status(200).json(result)
 
     } catch (error: any) {
         console.error('Automation error:', error)
-        return NextResponse.json({
+        return res.status(500).json({
             success: false,
             error: error.message || 'Automation failed',
             details: error.stderr || error.stdout || ''
-        }, { status: 500 })
+        })
     }
-}
-
-// GET endpoint to check queue status
-export async function GET() {
-    return NextResponse.json({
-        isRunning,
-        queueLength: queue.length,
-        queuedIggIds: queue.map(item => item.iggId)
-    })
 }

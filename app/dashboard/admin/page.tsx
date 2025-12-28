@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Users, Shield, Activity, Search, Plus, Trash2, Clock, Check, X, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
+import UserManagementModal from '@/components/modals/UserManagementModal'
 
 interface User {
     id: string
@@ -59,6 +60,8 @@ export default function AdminPage() {
     const [searchTerm, setSearchTerm] = useState('')
     const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'all' | 'adminRequests'>('pending')
     const [selectedUser, setSelectedUser] = useState<User | null>(null)
+    const [selectedUserForModal, setSelectedUserForModal] = useState<User | null>(null)
+    const [isUserModalOpen, setIsUserModalOpen] = useState(false)
     const [showAssignModal, setShowAssignModal] = useState(false)
     const [showApprovalModal, setShowApprovalModal] = useState(false)
     const [assignFormData, setAssignFormData] = useState({ nickname: '', iggId: '' })
@@ -423,7 +426,14 @@ export default function AdminPage() {
                                 </tr>
                             ) : (
                                 filteredUsers.map((user) => (
-                                    <tr key={user.id} className="hover:bg-white/5 transition-colors">
+                                    <tr
+                                        key={user.id}
+                                        className="hover:bg-white/5 transition-colors cursor-pointer group"
+                                        onClick={() => {
+                                            setSelectedUserForModal(user)
+                                            setIsUserModalOpen(true)
+                                        }}
+                                    >
                                         <td className="px-6 py-4">
                                             <div>
                                                 <p className="text-white font-medium">{user.name}</p>
@@ -575,8 +585,8 @@ export default function AdminPage() {
                                             </td>
                                             <td className="px-6 py-4 text-center">
                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${request.requestType === 'DELETE'
-                                                        ? 'bg-red-500/20 text-red-400'
-                                                        : 'bg-blue-500/20 text-blue-400'
+                                                    ? 'bg-red-500/20 text-red-400'
+                                                    : 'bg-blue-500/20 text-blue-400'
                                                     }`}>
                                                     {request.requestType || 'ADD'}
                                                 </span>
@@ -832,6 +842,17 @@ export default function AdminPage() {
                     </motion.div>
                 </div>
             )}
+            {/* User Management Modal */}
+            <UserManagementModal
+                isOpen={isUserModalOpen}
+                onClose={() => {
+                    setIsUserModalOpen(false)
+                    setSelectedUserForModal(null)
+                }}
+                user={selectedUserForModal}
+                onUpdate={fetchData}
+                onRevokeIgg={handleRevokeIggId}
+            />
         </div>
     )
 }
