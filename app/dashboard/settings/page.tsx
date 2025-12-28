@@ -23,8 +23,10 @@ import {
     Calendar,
     Trophy,
     ChevronRight,
-    Loader2
+    Loader2,
+    Clock
 } from 'lucide-react'
+import { useSocket } from '@/hooks/useSocket'
 import SettingsModal from '@/components/modals/SettingsModal'
 import ProtectionModal from '@/components/modals/ProtectionModal'
 import SupplyModal from '@/components/modals/SupplyModal'
@@ -77,7 +79,107 @@ export default function SettingsPage() {
     const [selectedCategory, setSelectedCategory] = useState<SettingCategory | null>(null)
     const [selectedIggId, setSelectedIggId] = useState<string | null>(null)
     const [applying, setApplying] = useState(false)
-    const [queuePosition, setQueuePosition] = useState(0)
+    const [cooldown, setCooldown] = useState(0)
+    const { queueStatus, automationStatus } = useSocket(selectedIggId || undefined)
+
+    // Load cooldown from local storage
+    useEffect(() => {
+        if (!selectedIggId) return
+
+        const checkCooldown = () => {
+            const savedExpiry = localStorage.getItem(`automation_cooldown_settings_${selectedIggId}`)
+            if (savedExpiry) {
+                const expiryTime = parseInt(savedExpiry)
+                const now = Date.now()
+                const remaining = Math.ceil((expiryTime - now) / 1000)
+
+                if (remaining > 0) {
+                    setCooldown(remaining)
+                } else {
+                    localStorage.removeItem(`automation_cooldown_settings_${selectedIggId}`)
+                    setCooldown(0)
+                }
+            } else {
+                setCooldown(0)
+            }
+        }
+
+        checkCooldown()
+        const interval = setInterval(checkCooldown, 1000)
+        return () => clearInterval(interval)
+    }, [selectedIggId])
+
+    // Update queue position and status from socket
+    useEffect(() => {
+        if (!selectedIggId || !queueStatus) {
+            if (!applying) setQueuePosition(0) // Only reset if not locally "applying" (keep spinner if just clicked)
+            return
+        }
+
+        const index = queueStatus.queuedIggIds.indexOf(selectedIggId)
+        if (index !== -1) {
+            // User is in queue
+            // If index is 0 and isRunning is true, they are being processed
+            // But we actually want to show "Applying..." in that case, handled by 'applying' state usually,
+            // or we can derive it here.
+
+            // To match User 2 requirement: "waiting in queue" vs "applying changes"
+            if (index === 0 && queueStatus.isRunning) {
+                // Currently processing this user
+                setApplying(true) // Force applying state to show spinner
+                setQueuePosition(0) // 0 means "current/processing" in our UI logic usually
+            } else {
+                // Waiting in queue
+                setApplying(true) // Keep button disabled/showing status
+                setQueuePosition(index + (queueStatus.isRunning ? 0 : 1)) // If running, 0 is active, so index 1 is pos 1? 
+                // Actually: queueStatus.queuedIggIds includes the running one if running?
+                // Let's check api logic: queue includes all.
+                // If running, queue[0] is the running one.
+                // So index 0 = running. Index 1 = waiting #1.
+                // If NOT running, index 0 = waiting #1.
+
+                // Let's simplify:
+                // If index == 0 && queueStatus.isRunning -> Processing
+                // Else -> Position = index (if running) or index + 1 (if not running)?
+                // Actually queue array is just the list. 
+                // broadcastQueueStatus sends entire queue.
+                // processQueue: "item = queue[0]... broadcast... run... shift"
+                // So queue[0] IS the one running if isRunning=true.
+
+                if (queueStatus.isRunning) {
+                    setQueuePosition(index) // 0 means running
+                } else {
+                    setQueuePosition(index + 1)
+                }
+            }
+        } else {
+            // Not in queue
+            if (cooldown > 0) {
+                setApplying(false)
+            } else {
+                // Only turn off applying if we think we are done (handled by automationStatus or local timeout? 
+                // Actually fire-and-forget means we stop "applying" immediately after API return?
+                // No, implementation plan said: "User 2 clicks apply... User 2 should automtically update to Applying..."
+                // So we should let socket state drive "applying" variable essentially.
+                if (queueStatus.queuedIggIds.length > 0) {
+                    // We are not in queue, but queue exists? We are just idle.
+                    setApplying(false)
+                    setQueuePosition(0)
+                }
+            }
+        }
+    }, [queueStatus, selectedIggId])
+
+    // Handle completion via socket event to clear state if needed
+    useEffect(() => {
+        if (automationStatus?.status === 'completed' || automationStatus?.status === 'error') {
+            setApplying(false)
+            setQueuePosition(0)
+            if (automationStatus.status === 'completed') {
+                // ensure cooldown is set if missed (redundant but safe)
+            }
+        }
+    }, [automationStatus])
 
     const handleApplyChanges = async () => {
         if (!selectedIggId) {
@@ -85,21 +187,12 @@ export default function SettingsPage() {
             return
         }
 
-        setApplying(true)
-
-        // Check queue status first
-        try {
-            const statusRes = await fetch('/api/automation/apply-changes')
-            const statusData = await statusRes.json()
-
-            if (statusData.isRunning || statusData.queueLength > 0) {
-                const position = statusData.queueLength + 1
-                setQueuePosition(position)
-                toast.info(`Another user is applying changes. You are #${position} in queue. Please wait...`)
-            }
-        } catch (e) {
-            // Ignore queue check errors
+        if (cooldown > 0) {
+            toast.warning(`Please wait ${Math.ceil(cooldown / 60)} minutes before applying changes again.`)
+            return
         }
+
+        setApplying(true)
 
         try {
             const res = await fetch('/api/automation/apply-changes', {
@@ -111,16 +204,25 @@ export default function SettingsPage() {
             const data = await res.json()
 
             if (data.success) {
-                toast.success('Changes applied successfully!')
+                toast.success('Request sent to queue!')
+                // Set cooldown
+                const expiry = Date.now() + 5 * 60 * 1000 // 5 minutes
+                localStorage.setItem(`automation_cooldown_settings_${selectedIggId}`, expiry.toString())
+                setCooldown(300)
             } else {
                 toast.error(data.error || 'Failed to apply changes')
+                setApplying(false)
             }
         } catch (error: any) {
             toast.error(error.message || 'Error applying changes')
-        } finally {
             setApplying(false)
-            setQueuePosition(0)
         }
+    }
+
+    const formatCooldown = (seconds: number) => {
+        const m = Math.floor(seconds / 60)
+        const s = seconds % 60
+        return `${m}:${s.toString().padStart(2, '0')}`
     }
 
     const categories: SettingCategory[] = [
@@ -393,21 +495,19 @@ export default function SettingsPage() {
             >
                 <button
                     onClick={handleApplyChanges}
-                    disabled={applying || !selectedIggId}
+                    disabled={applying || !selectedIggId || cooldown > 0}
                     className="btn-primary px-12 py-4 text-lg flex items-center gap-3 shadow-glow hover:shadow-glow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {applying ? (
-                        queuePosition > 0 ? (
-                            <>
-                                <Loader2 className="w-6 h-6 animate-spin" />
-                                Waiting in Queue (#{queuePosition})...
-                            </>
-                        ) : (
-                            <>
-                                <Loader2 className="w-6 h-6 animate-spin" />
-                                Applying...
-                            </>
-                        )
+                        <>
+                            <Loader2 className="w-6 h-6 animate-spin" />
+                            {queuePosition > 0 ? `Waiting in Queue (#${queuePosition})...` : 'Applying...'}
+                        </>
+                    ) : cooldown > 0 ? (
+                        <>
+                            <Clock className="w-6 h-6" />
+                            Wait {formatCooldown(cooldown)}
+                        </>
                     ) : (
                         <>
                             <Settings className="w-6 h-6" />
