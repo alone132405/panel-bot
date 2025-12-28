@@ -7,6 +7,8 @@ interface SubscriptionTimerProps {
     expiresAt: string | Date
     plan: string
     status: string
+    iggId?: string
+    nickname?: string | null
 }
 
 interface TimeRemaining {
@@ -17,7 +19,7 @@ interface TimeRemaining {
     total: number
 }
 
-export default function SubscriptionTimer({ expiresAt, plan, status }: SubscriptionTimerProps) {
+export default function SubscriptionTimer({ expiresAt, plan, status, iggId, nickname }: SubscriptionTimerProps) {
     const [timeRemaining, setTimeRemaining] = useState<TimeRemaining>({
         days: 0,
         hours: 0,
@@ -89,8 +91,9 @@ export default function SubscriptionTimer({ expiresAt, plan, status }: Subscript
                     </div>
                     <div>
                         <h3 className="text-xl font-bold text-white mb-1">
-                            {plan} Plan
+                            {nickname ? `${nickname} (${iggId})` : iggId ? `IGG: ${iggId}` : `${plan} Plan`}
                         </h3>
+
                         <p className={`text-sm ${getTextColor()}`}>
                             {isExpired
                                 ? 'Your subscription has expired'

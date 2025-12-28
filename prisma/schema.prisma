@@ -20,7 +20,6 @@ model User {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   iggIds        IggId[]
-  subscription  Subscription?
   activityLogs  ActivityLog[]
 }
 
@@ -35,12 +34,13 @@ model IggId {
   lastSync    DateTime @default(now())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  subscription Subscription?
 }
 
 model Subscription {
   id        String    @id @default(cuid())
-  userId    String    @unique
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  iggId     String    @unique
+  igg       IggId     @relation(fields: [iggId], references: [iggId], onDelete: Cascade)
   plan      Plan      @default(BANK_BOT)
   status    SubStatus @default(ACTIVE)
   expiresAt DateTime

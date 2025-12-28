@@ -4,6 +4,7 @@ import { exec } from 'child_process'
 import { promisify } from 'util'
 import fs from 'fs/promises'
 import path from 'path'
+import { prisma } from '@/lib/prisma'
 
 const execAsync = promisify(exec)
 
@@ -28,8 +29,63 @@ const broadcastQueueStatus = (io: any) => {
     })
 }
 
+// Check if it is safe to run automation (Headless/Console session)
+async function checkSafeToRun(): Promise<boolean> {
+    try {
+        const { stdout } = await execAsync('quser')
+        // Output format:
+        //  USERNAME              SESSIONNAME        ID  STATE   IDLE TIME  LOGON TIME
+        // >Administrator         rdp-tcp#0           2  Active          .  12/12/2024 10:00
+        // >Administrator         console             1  Active          .  12/12/2024 10:00
+
+        // We look for the line starting with '>' (current session)
+        const lines = stdout.split('\n')
+        const currentSessionLine = lines.find(line => line.trim().startsWith('>'))
+
+        if (!currentSessionLine) return true // Default to true if current session not marked (unlikely)
+
+        // Basic parsing - split by whitespace
+        const parts = currentSessionLine.trim().split(/\s+/)
+        // parts[0] is >USERNAME
+        // parts[1] is SESSIONNAME (usually)
+
+        // If session name includes 'rdp' or 'tcp', it's likely an RDP session -> UNSAFE
+        const sessionName = parts[1].toLowerCase()
+        if (sessionName.includes('rdp') || sessionName.includes('tcp')) {
+            console.log('Detected active RDP session:', parts[1], '- Pausing automation.')
+            return false
+        }
+
+        // If 'console', it's safe (Headless)
+        if (sessionName.includes('console')) {
+            return true
+        }
+
+        return true // Default safe
+    } catch (error) {
+        console.error('Error checking session state:', error)
+        return true // Fail open? Or fail closed? user wants safety. But if quser fails, we might be safe.
+    }
+}
+
 async function processQueue(io: any) {
     if (isRunning || queue.length === 0) return
+
+    // Check if safe to run (RDP check)
+    const isSafe = await checkSafeToRun()
+    if (!isSafe) {
+        // Not safe, wait and try again
+        if (io) {
+            // Notify user that we are waiting
+            const item = queue[0]
+            io.to(`igg-${item.iggId}`).emit('automation_status', {
+                status: 'waiting',
+                message: 'Waiting for RDP to disconnect (Headless Mode)...'
+            })
+        }
+        setTimeout(() => processQueue(io), 5000) // Check again in 5 seconds
+        return
+    }
 
     isRunning = true
     const item = queue[0] // Peek at first item, don't shift yet so we can show it as "processing"
@@ -320,20 +376,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponseS
 
         console.log('Received automation request for IGG ID:', iggId)
 
+        // Verify Subscription
+        const iggIdRecord = await prisma.iggId.findUnique({
+            where: { iggId },
+            include: { subscription: true }
+        })
+
+        if (iggIdRecord?.subscription?.expiresAt && new Date(iggIdRecord.subscription.expiresAt) < new Date()) {
+            return res.status(403).json({
+                success: false,
+                error: 'Subscription expired. Cannot apply changes.'
+            })
+        }
+
         // Queue info
         const queuePosition = queue.length + (isRunning ? 1 : 0)
 
-        // Broadcast that we have a new item
-        if (res.socket.server.io) {
-            // We can't really broadcast here because we haven't added it to queue yet?
-            // Actually we should add it then broadcast.
+        // Get IO instance, trying both standard attachment and global fallback (for dev)
+        const io = res.socket.server.io || (global as any).io
+
+        // Broadcast that we have a new item (if io is available)
+        if (io) {
+            // We could broadcast queue updates here immediately
         }
 
         // Create a promise that will be resolved when this request is processed
         const result = await new Promise<any>((resolve, reject) => {
             queue.push({ iggId, resolve, reject })
-            broadcastQueueStatus(res.socket.server.io)
-            processQueue(res.socket.server.io)
+            broadcastQueueStatus(io)
+            processQueue(io)
         })
 
         return res.status(200).json(result)

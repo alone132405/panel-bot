@@ -2,18 +2,18 @@
   "enableBank": true,
   "clearOutgoingData": true,
   "clearOutgoingDataTime": 7,
-  "lastClearCheckTime": 1766839440,
-  "ignoreBalance": true,
-  "allowAdminBalance": true,
-  "allowAdminSkipLimit": true,
-  "useBagRss": true,
+  "lastClearCheckTime": 1766741730,
+  "ignoreBalance": false,
+  "allowAdminBalance": false,
+  "allowAdminSkipLimit": false,
+  "useBagRss": false,
   "saveLogToFile": false,
   "allowChatCommands": true,
   "allowMailCommands": true,
-  "autoDeleteCmdMail": true,
-  "disableMailResponse": true,
-  "disableErrorResponse": true,
-  "cmdPrefix": "@",
+  "autoDeleteCmdMail": false,
+  "disableMailResponse": false,
+  "disableErrorResponse": false,
+  "cmdPrefix": "!",
   "adminRssLimit": [
     0,
     0,
@@ -21,17 +21,17 @@
     0,
     0
   ],
-  "maxSendLimit": 7,
-  "maxSendDistance": 7,
-  "BuildspamMinimum": 7,
+  "maxSendLimit": 40000000,
+  "maxSendDistance": 50,
+  "BuildspamMinimum": 3,
   "allowExternalCommands": true,
   "guildCommands": [
     {
       "listCmdIndex": 0,
       "bCommand": 2,
       "commadReference": "bal",
-      "enableCommand": false,
-      "minRank": 3
+      "enableCommand": true,
+      "minRank": 6
     },
     {
       "listCmdIndex": 1,
@@ -528,9 +528,1454 @@
       "bCommand": 76,
       "commadReference": "leaveda",
       "enableCommand": true,
-      "minRank": 6
+      "minRank": 1
     }
   ],
-  "accountData": [],
-  "outgoingData": []
+  "accountData": [
+    {
+      "highAuth": false,
+      "UserID": 987303841,
+      "AccountName": "DarkVenom24",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": true,
+      "UserID": 358718983,
+      "AccountName": "FKM Ray",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 580513717,
+      "AccountName": "VKK1king",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1102200717,
+      "AccountName": "Suspecting",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        857925575,
+        0,
+        58381570
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1772743628,
+      "AccountName": "KonohaXfood",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        487923263,
+        18886780,
+        12751072,
+        9679825,
+        110317771
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 320216663,
+      "AccountName": "Jiraiya 24",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        435554002,
+        11466042,
+        4532106,
+        68185570
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 781847681,
+      "AccountName": "FKM Eeell",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 741357660,
+      "AccountName": "SUPERFANSx27",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 590149241,
+      "AccountName": "Rest IP here",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 601791991,
+      "AccountName": "I Hong Qi",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1351742598,
+      "AccountName": "zZ Aakash Zz",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 501666208,
+      "AccountName": "Evrick",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 838622529,
+      "AccountName": "NN Mr Thanos",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 585421523,
+      "AccountName": "Surakartans7",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 761259230,
+      "AccountName": "jackeerr",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 351396037,
+      "AccountName": "GunsNRoses2",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 802271002,
+      "AccountName": "Hot Cake 124",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1087954867,
+      "AccountName": "Mr Akin",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 343830282,
+      "AccountName": "Pretty Kayna",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 817968044,
+      "AccountName": "FKM LOVE",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 956158040,
+      "AccountName": "meeehhhhhhhh",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 528755442,
+      "AccountName": "ROYAL MINTS",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1221724225,
+      "AccountName": "Gsm Lovely 1",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1043381362,
+      "AccountName": "Champ Queen",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1004538006,
+      "AccountName": "DHARA R 143",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 689696861,
+      "AccountName": "Renegado9",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1387296103,
+      "AccountName": "IL BiG BULL",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1083919580,
+      "AccountName": "DHARA 143",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 921796158,
+      "AccountName": "Gsm Lovely 0",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 842087035,
+      "AccountName": "DFW 4ever",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 597448619,
+      "AccountName": "Im Arya",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1246538429,
+      "AccountName": "POLARxBEAR",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 973646630,
+      "AccountName": "IISAMUDRAII",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 535083964,
+      "AccountName": "LOVEKRITI",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 698521631,
+      "AccountName": "love u jaan",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1867556527,
+      "AccountName": "XxAk47xX",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 766139552,
+      "AccountName": "Ac28",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 811372784,
+      "AccountName": "IIDRAGONL9OD",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 893750023,
+      "AccountName": "AnIsH 01pr",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 597397156,
+      "AccountName": "Avalancheee",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1245771961,
+      "AccountName": "I AM  WoLf",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 408213200,
+      "AccountName": "P 21",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 806921665,
+      "AccountName": "x War x",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 649466322,
+      "AccountName": "SCORPION NK",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1505468775,
+      "AccountName": "X501",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 979082092,
+      "AccountName": "Hitesh426",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1247366941,
+      "AccountName": "D A Y A N A",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 441264542,
+      "AccountName": "revo29",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 911242628,
+      "AccountName": "OneDayFamous",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 585109690,
+      "AccountName": "x Scoober",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 815934533,
+      "AccountName": "G  U  R  U",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 773748554,
+      "AccountName": "GT 24",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 473051498,
+      "AccountName": "ARSHxWoLf",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 426809437,
+      "AccountName": "xMELLOWMISTx",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 466075518,
+      "AccountName": "lilrevo25",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 376725099,
+      "AccountName": "ss206",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 371810213,
+      "AccountName": "B3siktASK06",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1543649002,
+      "AccountName": "maanmeenu",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1096754602,
+      "AccountName": "Maryam 1",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 638864762,
+      "AccountName": "Devil Veer",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1627365634,
+      "AccountName": "lil RubyJane",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 738636341,
+      "AccountName": "LoveKRITI1",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1051768182,
+      "AccountName": "ZG SUPERVERA",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 828142789,
+      "AccountName": "xLULA LADRAO",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 572927689,
+      "AccountName": "Kolkata King",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1787846189,
+      "AccountName": "PANDAxBEAR",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 738151277,
+      "AccountName": "EmberKENN",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 514038190,
+      "AccountName": "anakk 2orga",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 736967507,
+      "AccountName": "SCORPION NK2",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 663501378,
+      "AccountName": "generasi 2k",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 797592189,
+      "AccountName": "IHT Olympic7",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1386578192,
+      "AccountName": "white armyx6",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1386758217,
+      "AccountName": "Yesh0007",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 844310409,
+      "AccountName": "King Supri",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 739247500,
+      "AccountName": "SPYCY CHEETO",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 990512382,
+      "AccountName": "Macazzar Mo",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 470853179,
+      "AccountName": "LuckyLuck321",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 657554931,
+      "AccountName": "ZOMBI3 I",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 427481682,
+      "AccountName": "Soooock Xue",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1049933699,
+      "AccountName": "Slientsounds",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1540078634,
+      "AccountName": "AAA D",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1691143304,
+      "AccountName": "treasure98",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 538240916,
+      "AccountName": "C Buju",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1905835620,
+      "AccountName": "Sooc Xun3",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 387531159,
+      "AccountName": "IIDRAGONLORD",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 803582704,
+      "AccountName": "IIISAMUDRAII",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1051381507,
+      "AccountName": "oOoDheOoOo",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 992060600,
+      "AccountName": "DarthVaderr9",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 911958174,
+      "AccountName": "chaudhry1234",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1754594012,
+      "AccountName": "Mystary Lord",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 337944366,
+      "AccountName": "Im Deluxe",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 1058889997,
+      "AccountName": "EMPERORR ASH",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 856063393,
+      "AccountName": "SP AR TA 1",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 408011012,
+      "AccountName": "xKiller Jack",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    },
+    {
+      "highAuth": false,
+      "UserID": 788620310,
+      "AccountName": "xMustangx",
+      "deferAccountName": "none",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    }
+  ],
+  "outgoingData": [
+    {
+      "UserID": 763601427,
+      "playerName": "Eren  Yaeger",
+      "Tag": "Bns",
+      "resourceLog": []
+    },
+    {
+      "UserID": 1610983022,
+      "playerName": "KonohaWallet",
+      "Tag": "MHX",
+      "resourceLog": []
+    },
+    {
+      "UserID": 619863061,
+      "playerName": "l BAD HADES",
+      "Tag": "CA-",
+      "resourceLog": []
+    }
+  ]
 }

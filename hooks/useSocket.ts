@@ -10,49 +10,74 @@ export const useSocket = (iggId?: string) => {
     const [automationStatus, setAutomationStatus] = useState<any>(null)
 
     useEffect(() => {
+        let mounted = true
+
         const socketInitializer = async () => {
             await fetch('/api/socket')
 
-            if (!socket) {
-                socket = io(undefined as any, {
-                    path: '/api/socket',
+            if (!mounted) return
+
+            if (!(global as any).socket) {
+                (global as any).socket = io(undefined as any, {
+                    path: '/api/socket/io',
                     addTrailingSlash: false,
                 })
             }
 
-            socket.on('connect', () => {
+            const socket = (global as any).socket as Socket
+
+            if (socket.connected) {
                 setIsConnected(true)
+                if (iggId) socket.emit('subscribe', iggId)
+            }
+
+            const onConnect = () => {
+                if (!mounted) return
+                setIsConnected(true)
+                console.log('Socket connected')
                 if (iggId) {
                     socket.emit('subscribe', iggId)
                 }
-            })
+            }
 
-            socket.on('disconnect', () => {
+            const onDisconnect = () => {
+                if (!mounted) return
                 setIsConnected(false)
-            })
+                console.log('Socket disconnected')
+            }
 
-            socket.on('queue_update', (data) => {
-                setQueueStatus(data)
-            })
+            const onQueueUpdate = (data: any) => {
+                if (mounted) setQueueStatus(data)
+            }
 
-            socket.on('automation_status', (data) => {
-                setAutomationStatus(data)
-            })
-        }
+            const onAutomationStatus = (data: any) => {
+                if (mounted) setAutomationStatus(data)
+            }
 
-        socketInitializer()
+            socket.on('connect', onConnect)
+            socket.on('disconnect', onDisconnect)
+            socket.on('queue_update', onQueueUpdate)
+            socket.on('automation_status', onAutomationStatus)
 
-        return () => {
-            if (socket) {
+            // Clean up listeners on unmount/re-run
+            return () => {
+                socket.off('connect', onConnect)
+                socket.off('disconnect', onDisconnect)
+                socket.off('queue_update', onQueueUpdate)
+                socket.off('automation_status', onAutomationStatus)
                 if (iggId) {
                     socket.emit('unsubscribe', iggId)
                 }
-                // We don't disconnect socket here as it might be shared
-                socket.off('queue_update')
-                socket.off('automation_status')
             }
+        }
+
+        const cleanupPromise = socketInitializer()
+
+        return () => {
+            mounted = false
+            cleanupPromise.then(cleanup => cleanup && cleanup())
         }
     }, [iggId])
 
-    return { isConnected, socket, queueStatus, automationStatus }
+    return { isConnected, socket: (global as any).socket, queueStatus, automationStatus }
 }

@@ -69,7 +69,21 @@ export async function PATCH(
                 iggId,
                 userId: session.user.id,
             },
+            include: {
+                subscription: true,
+            },
         })
+
+        if (!iggIdRecord) {
+            return NextResponse.json({ error: 'IGG ID not found or unauthorized' }, { status: 404 })
+        }
+
+        // Check subscription expiry
+        if (iggIdRecord.subscription?.expiresAt && new Date(iggIdRecord.subscription.expiresAt) < new Date()) {
+            return NextResponse.json({
+                error: 'Subscription expired. Please renew to make changes.'
+            }, { status: 403 })
+        }
 
         if (!iggIdRecord) {
             return NextResponse.json({ error: 'IGG ID not found or unauthorized' }, { status: 404 })

@@ -21,12 +21,19 @@ interface ActionCard {
 
 export default function DashboardPage() {
     const router = useRouter()
-    const [subscription, setSubscription] = useState<any>(null)
+    const [subscriptions, setSubscriptions] = useState<any[]>([])
 
     useEffect(() => {
         fetch('/api/subscription')
             .then(res => res.json())
-            .then(data => setSubscription(data))
+            .then(data => {
+                if (Array.isArray(data)) {
+                    setSubscriptions(data)
+                } else {
+                    console.error('Failed to fetch subscriptions:', data)
+                    setSubscriptions([])
+                }
+            })
             .catch(err => console.error(err))
     }, [])
 
@@ -125,8 +132,8 @@ export default function DashboardPage() {
                     })}
                 </div>
 
-                {/* Mobile List View */}
-                <div className="sm:hidden space-y-3">
+                {/* Mobile List View - Redesigned */}
+                <div className="sm:hidden grid grid-cols-1 gap-4">
                     {actionCards.map((card) => {
                         const Icon = card.icon
                         return (
@@ -135,25 +142,35 @@ export default function DashboardPage() {
                                 variants={itemVariants}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => router.push(card.href)}
-                                className="glass-card p-4 cursor-pointer group relative overflow-hidden flex items-center gap-4"
+                                className="glass-card p-5 cursor-pointer group relative overflow-hidden"
                             >
-                                {/* Icon */}
-                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${card.gradient} flex items-center justify-center shadow-md flex-shrink-0`}>
-                                    <Icon className="w-6 h-6 text-white" />
-                                </div>
+                                {/* Subtle Gradient Background */}
+                                <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-5 group-active:opacity-10 transition-opacity duration-300`} />
 
-                                {/* Content */}
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="text-base font-bold text-white mb-1 truncate">
-                                        {card.title}
-                                    </h3>
-                                    <p className="text-gray-400 text-xs truncate">
-                                        {card.description}
-                                    </p>
-                                </div>
+                                <div className="relative flex items-start justify-between gap-4">
+                                    <div className="flex-1">
+                                        {/* Icon & Title Row */}
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${card.gradient} flex items-center justify-center shadow-lg`}>
+                                                <Icon className="w-5 h-5 text-white" />
+                                            </div>
+                                            <h3 className="text-lg font-bold text-white">
+                                                {card.title}
+                                            </h3>
+                                        </div>
 
-                                {/* Arrow */}
-                                <ArrowRight className="w-5 h-5 text-gray-500 group-hover:text-primary-400 group-hover:translate-x-1 transition-all flex-shrink-0" />
+                                        {/* Description */}
+                                        <p className="text-gray-400 text-xs leading-relaxed mb-4">
+                                            {card.description}
+                                        </p>
+
+                                        {/* Action Button */}
+                                        <div className={`inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 group-active:bg-white/10 transition-colors ${card.gradient.includes('primary') ? 'text-primary-400' : card.gradient.includes('emerald') ? 'text-accent-emerald' : 'text-accent-purple'}`}>
+                                            <span>Open Dashboard</span>
+                                            <ArrowRight className="w-3.5 h-3.5" />
+                                        </div>
+                                    </div>
+                                </div>
                             </motion.div>
                         )
                     })}
@@ -161,19 +178,26 @@ export default function DashboardPage() {
             </motion.div>
 
             {/* Subscription Status */}
-            {subscription && (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="max-w-7xl"
-                >
-                    <SubscriptionTimer
-                        expiresAt={subscription.expiresAt}
-                        plan={subscription.plan}
-                        status={subscription.status}
-                    />
-                </motion.div>
+            {subscriptions.length > 0 && (
+                <div className="space-y-4">
+                    {subscriptions.map((sub: any) => (
+                        <motion.div
+                            key={sub.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5 }}
+                            className="max-w-7xl"
+                        >
+                            <SubscriptionTimer
+                                expiresAt={sub.expiresAt}
+                                plan={sub.plan}
+                                status={sub.status}
+                                iggId={sub.igg?.iggId}
+                                nickname={sub.igg?.displayName}
+                            />
+                        </motion.div>
+                    ))}
+                </div>
             )}
         </div>
     )

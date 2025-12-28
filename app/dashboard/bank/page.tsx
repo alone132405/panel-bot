@@ -219,12 +219,19 @@ export default function BankSettingsPage() {
 
         try {
             // Just fire and forget - socket will handle status updates
-            await fetch('/api/automation/apply-changes', {
+            const res = await fetch('/api/automation/apply-changes', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ iggId: selectedIggId })
             })
-            // Toast is handled by socket now (or immediately here)
+
+            const data = await res.json()
+
+            if (!res.ok) {
+                toast.error(data.error || 'Failed to start automation')
+                return
+            }
+
             toast.info('Request sent to automation queue...')
 
         } catch (error) {

@@ -14,7 +14,26 @@ export async function GET(
     }
 
     try {
-        const exportedPath = path.join(process.cwd(), 'config', params.iggId, 'stats', 'exported')
+        let exportedPath: string
+
+        if (process.env.EXTERNAL_CONFIG_ROOT) {
+            exportedPath = path.join(process.env.EXTERNAL_CONFIG_ROOT, params.iggId, 'stats', 'exported')
+        } else {
+            exportedPath = path.join(process.cwd(), 'config', params.iggId, 'stats', 'exported')
+        }
+
+        // Try to read settings.json for custom reports path
+        try {
+            const settingsPath = path.join(process.cwd(), 'config', params.iggId, 'settings.json')
+            const settingsContent = await fs.readFile(settingsPath, 'utf-8')
+            const settings = JSON.parse(settingsContent)
+
+            if (settings.reportsPath) {
+                exportedPath = settings.reportsPath
+            }
+        } catch (e) {
+            // Use default path if settings fail
+        }
 
         // Check if directory exists
         try {

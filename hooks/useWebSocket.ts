@@ -10,7 +10,7 @@ export function useWebSocket(iggId: string | null, onSettingsUpdate: (data: any)
         // Initialize socket connection
         if (!socket) {
             socket = io(process.env.NEXT_PUBLIC_WS_URL || window.location.origin, {
-                path: '/api/socket',
+                path: '/api/socket/io',
             })
 
             socket.on('connect', () => {

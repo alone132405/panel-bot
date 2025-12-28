@@ -26,13 +26,13 @@ export async function GET(req: Request) {
                         isActive: true,
                         status: true,
                         lastSync: true,
-                    },
-                },
-                subscription: {
-                    select: {
-                        plan: true,
-                        status: true,
-                        expiresAt: true,
+                        subscription: {
+                            select: {
+                                plan: true,
+                                status: true,
+                                expiresAt: true,
+                            },
+                        },
                     },
                 },
             },

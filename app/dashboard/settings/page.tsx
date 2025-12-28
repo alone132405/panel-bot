@@ -96,11 +96,9 @@ export default function SettingsPage() {
                 const position = statusData.queueLength + 1
                 setQueuePosition(position)
                 toast.info(`Another user is applying changes. You are #${position} in queue. Please wait...`)
-            } else {
-                toast.info('Applying changes to Lords Mobile Bot...')
             }
         } catch (e) {
-            toast.info('Applying changes to Lords Mobile Bot...')
+            // Ignore queue check errors
         }
 
         try {

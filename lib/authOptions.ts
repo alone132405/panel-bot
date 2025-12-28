@@ -20,7 +20,6 @@ export const authOptions: NextAuthOptions = {
                     where: { email: credentials.email },
                     include: {
                         iggIds: true,
-                        subscription: true,
                     },
                 })
 

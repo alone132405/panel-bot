@@ -15,7 +15,7 @@ const ioHandler = (req: NextApiRequest, res: NextApiResponseServerIO) => {
 
         const httpServer: HTTPServer = res.socket.server as any
         const io = new SocketIOServer(httpServer, {
-            path: '/api/socket',
+            path: '/api/socket/io',
             addTrailingSlash: false,
             cors: {
                 origin: '*',
@@ -42,6 +42,9 @@ const ioHandler = (req: NextApiRequest, res: NextApiResponseServerIO) => {
         })
 
         res.socket.server.io = io
+
+            // Store in global for development HMR access
+            ; (global as any).io = io
     } else {
         console.log('Socket.IO server already running')
     }

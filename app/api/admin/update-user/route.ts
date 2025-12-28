@@ -44,22 +44,8 @@ export async function PUT(req: Request) {
                 role,
                 contactType,
                 contactValue,
-                subscription: subscriptionExpiresAt ? {
-                    upsert: {
-                        create: {
-                            expiresAt: new Date(subscriptionExpiresAt),
-                            status: 'ACTIVE'
-                        },
-                        update: {
-                            expiresAt: new Date(subscriptionExpiresAt),
-                            status: 'ACTIVE'
-                        }
-                    }
-                } : undefined
+                contactValue,
             },
-            include: {
-                subscription: true
-            }
         })
 
         return NextResponse.json({ user: updatedUser })

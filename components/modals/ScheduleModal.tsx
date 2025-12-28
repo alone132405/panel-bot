@@ -86,9 +86,19 @@ export default function ScheduleModal({ isOpen, onClose, iggId }: ScheduleModalP
 
     const updateSettingsObject = (path: string, value: any) => {
         const keys = path.split('.')
-        const newSettings = { ...settings }
+        // Deep clone to avoid mutation issues
+        const newSettings = JSON.parse(JSON.stringify(settings || {}))
+
+        // Ensure scheduleSettings exists if that's what we're updating
+        if (keys[0] === 'scheduleSettings' && !newSettings.scheduleSettings) {
+            newSettings.scheduleSettings = {}
+        }
+
         let current: any = newSettings
         for (let i = 0; i < keys.length - 1; i++) {
+            if (!current[keys[i]]) {
+                current[keys[i]] = {}
+            }
             current = current[keys[i]]
         }
         current[keys[keys.length - 1]] = value
@@ -104,11 +114,18 @@ export default function ScheduleModal({ isOpen, onClose, iggId }: ScheduleModalP
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(settings),
             })
+
+            const data = await res.json().catch(() => ({}))
+
             if (res.ok) {
                 toast.success('Schedule settings saved!')
                 onClose()
             } else {
-                toast.error('Failed to save settings')
+                if (res.status === 403) {
+                    toast.error(data.error || 'Subscription expired')
+                } else {
+                    toast.error(data.error || 'Failed to save settings')
+                }
             }
         } catch (error) {
             toast.error('Error saving settings')

@@ -14,15 +14,29 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const subscription = await prisma.subscription.findUnique({
-            where: { userId: session.user.id },
+        // Fetch all subscriptions associated with the user's IGG IDs
+        const subscriptions = await prisma.subscription.findMany({
+            where: {
+                igg: {
+                    userId: session.user.id
+                }
+            },
+            include: {
+                igg: {
+                    select: {
+                        iggId: true,
+                        displayName: true
+                    }
+                }
+            }
         })
 
-        if (!subscription) {
-            return NextResponse.json({ error: 'No subscription found' }, { status: 404 })
+        if (!subscriptions || subscriptions.length === 0) {
+            return NextResponse.json({ error: 'No active subscriptions found' }, { status: 404 })
         }
 
-        return NextResponse.json(subscription)
+        // Return the list of subscriptions
+        return NextResponse.json(subscriptions)
     } catch (error) {
         console.error('Subscription fetch error:', error)
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/authOptions'
+import { prisma } from '@/lib/prisma'
 import fs from 'fs/promises'
 import path from 'path'
 
@@ -58,11 +59,32 @@ export async function PUT(
     { params }: { params: { iggId: string } }
 ) {
     const session = await getServerSession(authOptions)
-    if (!session) {
+    if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     try {
+        // Verify ownership and subscription
+        const iggIdRecord = await prisma.iggId.findFirst({
+            where: {
+                iggId: params.iggId,
+                userId: session.user.id,
+            },
+            include: {
+                subscription: true,
+            },
+        })
+
+        if (!iggIdRecord) {
+            return NextResponse.json({ error: 'IGG ID not found or unauthorized' }, { status: 404 })
+        }
+
+        if (iggIdRecord.subscription?.expiresAt && new Date(iggIdRecord.subscription.expiresAt) < new Date()) {
+            return NextResponse.json({
+                error: 'Subscription expired. Please renew to make changes.'
+            }, { status: 403 })
+        }
+
         const settings = await req.json()
         const filePath = path.join(process.cwd(), 'config', params.iggId, 'banksettings.json')
 

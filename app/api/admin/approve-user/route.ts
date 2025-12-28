@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
         // Check if user exists and is pending
         const user = await prisma.user.findUnique({
             where: { id: userId },
-            include: { subscription: true },
+            include: { iggIds: true },
         })
 
         if (!user) {
@@ -120,28 +120,7 @@ export async function POST(req: NextRequest) {
                 },
             })
 
-            // Create or update subscription
-            if (user.subscription) {
-                await tx.subscription.update({
-                    where: { id: user.subscription.id },
-                    data: {
-                        plan: plan || 'BANK_BOT',
-                        status: 'ACTIVE',
-                        expiresAt,
-                    },
-                })
-            } else {
-                await tx.subscription.create({
-                    data: {
-                        userId,
-                        plan: plan || 'BANK_BOT',
-                        status: 'ACTIVE',
-                        expiresAt,
-                    },
-                })
-            }
-
-            // Create IGG ID record
+            // Create IGG ID record with subscription
             await tx.iggId.create({
                 data: {
                     iggId,
@@ -149,6 +128,13 @@ export async function POST(req: NextRequest) {
                     userId,
                     isActive: true,
                     status: 'OFFLINE',
+                    subscription: {
+                        create: {
+                            plan: plan || 'BANK_BOT',
+                            status: 'ACTIVE',
+                            expiresAt,
+                        }
+                    }
                 },
             })
 

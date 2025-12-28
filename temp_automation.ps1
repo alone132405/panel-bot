@@ -128,8 +128,8 @@ Write-Output "Step 1: Clicking 'Search' at ($searchX, $searchY)"
 Click-At -x $searchX -y $searchY
 Start-Sleep -Seconds 2
 
-Write-Output "Step 2: Pasting IGG ID: 1221923663"
-Set-Clipboard -Value "1221923663"
+Write-Output "Step 2: Pasting IGG ID: 1102200717"
+Set-Clipboard -Value "1102200717"
 [System.Windows.Forms.SendKeys]::SendWait("^v")
 Start-Sleep -Seconds 2
 

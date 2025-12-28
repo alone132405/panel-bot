@@ -15,9 +15,6 @@ interface User {
     contactValue: string | null
     selectedIggId: string | null
     createdAt: string
-    subscription: {
-        expiresAt: string
-    } | null
     iggIds: {
         id: string
         iggId: string
@@ -25,6 +22,10 @@ interface User {
         isActive: boolean
         status: string
         lastSync: string
+        subscription: {
+            expiresAt: string
+            status: string
+        } | null
     }[]
 }
 
@@ -44,9 +45,10 @@ export default function UserManagementModal({ isOpen, onClose, user, onUpdate, o
         role: 'USER',
         contactType: 'WHATSAPP',
         contactValue: '',
-        subscriptionExpiresAt: ''
     })
     const [saving, setSaving] = useState(false)
+
+    const [expiryDates, setExpiryDates] = useState<Record<string, string>>({})
 
     useEffect(() => {
         if (user) {
@@ -56,8 +58,20 @@ export default function UserManagementModal({ isOpen, onClose, user, onUpdate, o
                 role: user.role || 'USER',
                 contactType: user.contactType || 'WHATSAPP',
                 contactValue: user.contactValue || '',
-                subscriptionExpiresAt: user.subscription?.expiresAt ? new Date(user.subscription.expiresAt).toISOString().split('T')[0] : ''
             })
+
+            // Initialize expiry dates
+            const dates: Record<string, string> = {}
+            user.iggIds.forEach(igg => {
+                if (igg.subscription?.expiresAt) {
+                    try {
+                        dates[igg.iggId] = new Date(igg.subscription.expiresAt).toISOString().split('T')[0]
+                    } catch (e) {
+                        dates[igg.iggId] = ''
+                    }
+                }
+            })
+            setExpiryDates(dates)
         }
     }, [user])
 
@@ -86,6 +100,28 @@ export default function UserManagementModal({ isOpen, onClose, user, onUpdate, o
             toast.error('Failed to update user')
         } finally {
             setSaving(false)
+        }
+    }
+
+    const handleUpdateSubscription = async (iggId: string, date: string) => {
+        try {
+            const res = await fetch('/api/admin/update-igg-subscription', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    iggId,
+                    expiresAt: date
+                })
+            })
+
+            if (res.ok) {
+                toast.success('Subscription updated')
+                onUpdate()
+            } else {
+                toast.error('Failed to update subscription')
+            }
+        } catch (error) {
+            toast.error('Error updating subscription')
         }
     }
 
@@ -222,28 +258,6 @@ export default function UserManagementModal({ isOpen, onClose, user, onUpdate, o
                                             </div>
                                         </div>
 
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-medium text-gray-400">Subscription Expiry</label>
-                                            <div className="relative">
-                                                <input
-                                                    type="date"
-                                                    value={formData.subscriptionExpiresAt}
-                                                    onChange={(e) => setFormData({ ...formData, subscriptionExpiresAt: e.target.value })}
-                                                    className="w-full px-4 py-2 bg-background-primary border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 appearance-none [&::-webkit-calendar-picker-indicator]:invert"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="pt-4 flex justify-end">
-                                        <button
-                                            onClick={handleSave}
-                                            disabled={saving}
-                                            className="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
-                                        >
-                                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                                            Save Changes
-                                        </button>
                                     </div>
                                 </div>
                             ) : (
@@ -266,6 +280,19 @@ export default function UserManagementModal({ isOpen, onClose, user, onUpdate, o
                                                         )}
                                                     </div>
                                                     <div className="flex items-center gap-4">
+                                                        <div className="flex flex-col items-end mr-4">
+                                                            <span className="text-xs text-gray-500 mb-1">Expires</span>
+                                                            <input
+                                                                type="date"
+                                                                value={expiryDates[igg.iggId] || ''}
+                                                                onChange={(e) => {
+                                                                    const newDate = e.target.value
+                                                                    setExpiryDates(prev => ({ ...prev, [igg.iggId]: newDate }))
+                                                                    handleUpdateSubscription(igg.iggId, newDate)
+                                                                }}
+                                                                className="px-2 py-1 bg-surface border border-white/10 rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-primary-500/50 [&::-webkit-calendar-picker-indicator]:invert"
+                                                            />
+                                                        </div>
                                                         <div className={`px-2 py-1 rounded-lg text-xs font-medium ${igg.isActive
                                                             ? 'bg-green-500/10 text-green-400'
                                                             : 'bg-red-500/10 text-red-400'
