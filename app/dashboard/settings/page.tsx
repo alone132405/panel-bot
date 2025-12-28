@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import {
     Settings,
@@ -79,6 +79,7 @@ export default function SettingsPage() {
     const [selectedCategory, setSelectedCategory] = useState<SettingCategory | null>(null)
     const [selectedIggId, setSelectedIggId] = useState<string | null>(null)
     const [applying, setApplying] = useState(false)
+    const [queuePosition, setQueuePosition] = useState(0)
     const [cooldown, setCooldown] = useState(0)
     const { queueStatus, automationStatus } = useSocket(selectedIggId || undefined)
 

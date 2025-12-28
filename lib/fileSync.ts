@@ -5,9 +5,8 @@ import { Server as SocketIOServer } from 'socket.io'
 import { Server as HTTPServer } from 'http'
 
 // Config directory - can be set via environment variable
-// On VPS: C:\Users\Administrator\Downloads\LordsBot-Release\config
-// Locally: ./config (relative to project)
-const CONFIG_DIR = process.env.CONFIG_DIR || path.join(process.cwd(), 'config')
+// Defaults to user specified path
+const CONFIG_DIR = process.env.CONFIG_DIR || 'C:\\Users\\Administrator\\Downloads\\LordsBot-Release\\config'
 
 // File system operations
 export async function readSettingsFile(iggId: string): Promise<any> {
@@ -16,8 +15,19 @@ export async function readSettingsFile(iggId: string): Promise<any> {
     return JSON.parse(content)
 }
 
+export async function readBankSettingsFile(iggId: string): Promise<any> {
+    const filePath = path.join(CONFIG_DIR, iggId, 'banksettings.json')
+    const content = await fs.readFile(filePath, 'utf-8')
+    return JSON.parse(content)
+}
+
 export async function writeSettingsFile(iggId: string, settings: any): Promise<void> {
     const filePath = path.join(CONFIG_DIR, iggId, 'settings.json')
+    await fs.writeFile(filePath, JSON.stringify(settings, null, 2), 'utf-8')
+}
+
+export async function writeBankSettingsFile(iggId: string, settings: any): Promise<void> {
+    const filePath = path.join(CONFIG_DIR, iggId, 'banksettings.json')
     await fs.writeFile(filePath, JSON.stringify(settings, null, 2), 'utf-8')
 }
 

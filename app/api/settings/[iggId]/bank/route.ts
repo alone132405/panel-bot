@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/authOptions'
 import { prisma } from '@/lib/prisma'
-import fs from 'fs/promises'
-import path from 'path'
+import { readBankSettingsFile, writeBankSettingsFile } from '@/lib/fileSync'
 
 export async function GET(
     req: Request,
@@ -15,11 +14,9 @@ export async function GET(
     }
 
     try {
-        const filePath = path.join(process.cwd(), 'config', params.iggId, 'banksettings.json')
-
         try {
-            const content = await fs.readFile(filePath, 'utf-8')
-            return NextResponse.json(JSON.parse(content))
+            const settings = await readBankSettingsFile(params.iggId)
+            return NextResponse.json(settings)
         } catch {
             // Return default settings if file doesn't exist
             return NextResponse.json({
@@ -86,14 +83,9 @@ export async function PUT(
         }
 
         const settings = await req.json()
-        const filePath = path.join(process.cwd(), 'config', params.iggId, 'banksettings.json')
-
-        // Ensure directory exists
-        const dirPath = path.dirname(filePath)
-        await fs.mkdir(dirPath, { recursive: true })
 
         // Write settings to file
-        await fs.writeFile(filePath, JSON.stringify(settings, null, 2), 'utf-8')
+        await writeBankSettingsFile(params.iggId, settings)
 
         return NextResponse.json({ success: true })
     } catch (error) {

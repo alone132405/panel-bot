@@ -168,57 +168,95 @@ export default function BankSettingsPage() {
     const [applying, setApplying] = useState(false)
     const { queueStatus, automationStatus } = useSocket(selectedIggId || undefined)
     const [queuePosition, setQueuePosition] = useState(0)
-    const [isProcessing, setIsProcessing] = useState(false)
+    const [cooldown, setCooldown] = useState(0)
     const [showApplyButton, setShowApplyButton] = useState(false)
 
+    // Load cooldown from local storage
+    useEffect(() => {
+        if (!selectedIggId) return
+
+        const checkCooldown = () => {
+            const savedExpiry = localStorage.getItem(`automation_cooldown_bank_${selectedIggId}`)
+            if (savedExpiry) {
+                const expiryTime = parseInt(savedExpiry)
+                const now = Date.now()
+                const remaining = Math.ceil((expiryTime - now) / 1000)
+
+                if (remaining > 0) {
+                    setCooldown(remaining)
+                } else {
+                    localStorage.removeItem(`automation_cooldown_bank_${selectedIggId}`)
+                    setCooldown(0)
+                }
+            } else {
+                setCooldown(0)
+            }
+        }
+
+        checkCooldown()
+        const interval = setInterval(checkCooldown, 1000)
+        return () => clearInterval(interval)
+    }, [selectedIggId])
+
     // Update queue status from socket
+    // Update queue position and status from socket
     useEffect(() => {
         if (!selectedIggId || !queueStatus) {
-            setQueuePosition(0)
-            setIsProcessing(false)
+            if (!applying) setQueuePosition(0)
             return
         }
 
-        const { queuedIggIds, currentItem, isRunning } = queueStatus
-
-        // Check if we are currently processing
-        if (isRunning && currentItem === selectedIggId) {
-            setIsProcessing(true)
-            setQueuePosition(0)
-            return
-        } else {
-            setIsProcessing(false)
-        }
-
-        // Check if we are in queue
-        const index = queuedIggIds.indexOf(selectedIggId)
+        const index = queueStatus.queuedIggIds.indexOf(selectedIggId)
         if (index !== -1) {
-            // If running, the first item is processing, so queue position is index (0-based in array, but effectively 1st in wait line is index 1 if index 0 is running)
-            // But wait, my API implementation keeps the running item in queue[0] until finished.
-            // So if index is 0 and isRunning is true, we are processing (handled above).
-            // If index > 0, we are in queue.
-            setQueuePosition(index) // Position 1 means 1 person ahead of you (index 0 is running)
+            if (index === 0 && queueStatus.isRunning) {
+                setApplying(true)
+                setQueuePosition(0)
+            } else {
+                setApplying(true)
+                if (queueStatus.isRunning) {
+                    setQueuePosition(index)
+                } else {
+                    setQueuePosition(index + 1)
+                }
+            }
         } else {
-            setQueuePosition(0)
+            if (cooldown > 0) {
+                setApplying(false)
+            } else {
+                if (queueStatus.queuedIggIds.length > 0) {
+                    setApplying(false)
+                    setQueuePosition(0)
+                }
+            }
         }
-
     }, [queueStatus, selectedIggId])
 
     // Listen for automation completion to hide button
+    // Listen for automation completion to update UI
     useEffect(() => {
-        if (automationStatus?.status === 'completed') {
-            toast.success('Changes applied successfully!')
-            setShowApplyButton(false)
-        } else if (automationStatus?.status === 'error') {
-            toast.error(automationStatus.message || 'Automation failed')
+        if (automationStatus?.status === 'completed' || automationStatus?.status === 'error') {
+            setApplying(false)
+            setQueuePosition(0)
+            if (automationStatus.status === 'completed') {
+                toast.success('Changes applied successfully!')
+                setShowApplyButton(false)
+            } else {
+                toast.error(automationStatus.message || 'Automation failed')
+            }
         }
     }, [automationStatus])
 
     const handleApplyChanges = async () => {
         if (!selectedIggId) return
 
+        if (cooldown > 0) {
+            toast.warning(`Please wait ${Math.ceil(cooldown / 60)} minutes before applying changes again.`)
+            return
+        }
+
+        setApplying(true)
+
         try {
-            // Just fire and forget - socket will handle status updates
             const res = await fetch('/api/automation/apply-changes', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -227,15 +265,21 @@ export default function BankSettingsPage() {
 
             const data = await res.json()
 
-            if (!res.ok) {
+            if (!res.ok || !data.success) {
                 toast.error(data.error || 'Failed to start automation')
+                setApplying(false)
                 return
             }
 
-            toast.info('Request sent to automation queue...')
+            toast.success('Request sent to queue!')
+            // Set cooldown
+            const expiry = Date.now() + 5 * 60 * 1000 // 5 minutes
+            localStorage.setItem(`automation_cooldown_bank_${selectedIggId}`, expiry.toString())
+            setCooldown(300)
 
         } catch (error) {
             toast.error('Failed to connect to automation server')
+            setApplying(false)
         }
     }
 
@@ -1044,41 +1088,7 @@ export default function BankSettingsPage() {
                     </motion.div>
 
                     {/* Apply Changes Button - Only shown after saving */}
-                    {/* Apply Changes Button & Queue Status */}
-                    <AnimatePresence>
-                        {(showApplyButton || isProcessing || queuePosition > 0) && (
-                            <motion.div
-                                initial={{ opacity: 0, height: 0, y: -10 }}
-                                animate={{ opacity: 1, height: 'auto', y: 0 }}
-                                exit={{ opacity: 0, height: 0, y: -10 }}
-                                className="flex flex-col items-center justify-center pt-4 gap-3"
-                            >
-                                {isProcessing && (
-                                    <div className="flex items-center gap-2 px-6 py-2 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20 shadow-lg shadow-blue-500/5">
-                                        <Loader2 className="w-5 h-5 animate-spin" />
-                                        <span className="font-medium">Applying Changes...</span>
-                                    </div>
-                                )}
-                                {queuePosition > 0 && (
-                                    <div className="flex items-center gap-2 px-6 py-2 bg-yellow-500/10 text-yellow-400 rounded-xl border border-yellow-500/20 shadow-lg shadow-yellow-500/5">
-                                        <Clock className="w-5 h-5 animate-pulse" />
-                                        <span className="font-medium">Queue Position: #{queuePosition}</span>
-                                    </div>
-                                )}
 
-                                {!isProcessing && queuePosition === 0 && showApplyButton && (
-                                    <button
-                                        onClick={handleApplyChanges}
-                                        disabled={!selectedIggId}
-                                        className="btn-primary w-full sm:w-auto px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg flex items-center justify-center gap-2 sm:gap-3 shadow-glow hover:shadow-glow-lg transition-all bg-accent-emerald hover:bg-accent-emerald/90"
-                                    >
-                                        <Settings className="w-5 h-5 sm:w-6 sm:h-6" />
-                                        Apply Changes to Bot
-                                    </button>
-                                )}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
                 </>
             )}
 
