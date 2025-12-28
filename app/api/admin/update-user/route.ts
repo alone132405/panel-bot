@@ -44,7 +44,6 @@ export async function PUT(req: Request) {
                 role,
                 contactType,
                 contactValue,
-                contactValue,
             },
         })
 

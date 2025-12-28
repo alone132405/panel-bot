@@ -23,6 +23,10 @@ interface User {
         isActive: boolean
         status: string
         lastSync: string
+        subscription: {
+            expiresAt: string
+            status: string
+        } | null
     }[]
     subscription: {
         plan: string

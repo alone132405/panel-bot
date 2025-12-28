@@ -11,8 +11,6 @@ const execAsync = promisify(exec)
 // Queue system for automation
 interface QueueItem {
     iggId: string
-    resolve: (value: any) => void
-    reject: (error: any) => void
 }
 
 let isRunning = false
@@ -104,7 +102,6 @@ async function processQueue(io: any) {
         // Remove from queue after done
         queue.shift()
 
-        item.resolve(result)
         if (io) {
             io.to(`igg-${item.iggId}`).emit('automation_status', { status: 'completed', message: 'Changes applied successfully' })
         }
@@ -112,7 +109,6 @@ async function processQueue(io: any) {
         // Remove from queue after error
         queue.shift()
 
-        item.reject(error)
         if (io) {
             io.to(`igg-${item.iggId}`).emit('automation_status', { status: 'error', message: error.message || 'Automation failed' })
         }
@@ -400,14 +396,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponseS
             // We could broadcast queue updates here immediately
         }
 
-        // Create a promise that will be resolved when this request is processed
-        const result = await new Promise<any>((resolve, reject) => {
-            queue.push({ iggId, resolve, reject })
-            broadcastQueueStatus(io)
-            processQueue(io)
-        })
+        // Add to queue
+        queue.push({ iggId })
 
-        return res.status(200).json(result)
+        // Trigger processing (fire and forget)
+        // We catch errors here just to prevent unhandled promise rejections, 
+        // but the main error handling happens inside processQueue via sockets
+        processQueue(io).catch(err => console.error('Queue processing error:', err))
+
+        // Return immediately
+        return res.status(200).json({
+            success: true,
+            message: 'Automation started in background',
+            queuePosition
+        })
 
     } catch (error: any) {
         console.error('Automation error:', error)
