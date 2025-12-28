@@ -251,6 +251,25 @@ export default function BankSettingsPage() {
         }
     }, [automationStatus])
 
+    // Listen for file updates via socket
+    const { socket } = useSocket(selectedIggId || undefined)
+    useEffect(() => {
+        if (!socket || !selectedIggId) return
+
+        const onBankSettingsUpdated = (data: { iggId: string, settings: BankSettings }) => {
+            if (data.iggId === selectedIggId) {
+                console.log('BankPage: Received external settings update')
+                setSettings(data.settings)
+            }
+        }
+
+        socket.on('bank-settings-updated', onBankSettingsUpdated)
+
+        return () => {
+            socket.off('bank-settings-updated', onBankSettingsUpdated)
+        }
+    }, [socket, selectedIggId])
+
     const handleApplyChanges = async () => {
         if (!selectedIggId) return
 

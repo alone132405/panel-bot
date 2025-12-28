@@ -70,24 +70,35 @@ async function processQueue(io: any) {
     if (isRunning || queue.length === 0) return
 
     // Check if safe to run (RDP check)
+    // Check if safe to run (RDP check)
     const isSafe = await checkSafeToRun()
+
+    // RE-CHECK: State might have changed while we were awaiting
+    if (isRunning || queue.length === 0) return
+
     if (!isSafe) {
         // Not safe, wait and try again
         if (io) {
             // Notify user that we are waiting
             const item = queue[0]
-            io.to(`igg-${item.iggId}`).emit('automation_status', {
-                status: 'waiting',
-                message: 'Waiting for RDP to disconnect (Headless Mode)...',
-                timestamp: Date.now()
-            })
+            if (item) {
+                io.to(`igg-${item.iggId}`).emit('automation_status', {
+                    status: 'waiting',
+                    message: 'Waiting for RDP to disconnect (Headless Mode)...',
+                    timestamp: Date.now()
+                })
+            }
         }
         setTimeout(() => processQueue(io), 5000) // Check again in 5 seconds
         return
     }
 
     isRunning = true
-    const item = queue[0] // Peek at first item, don't shift yet so we can show it as "processing"
+    const item = queue[0]
+    if (!item) {
+        isRunning = false;
+        return;
+    }
 
     // Broadcast that we are starting
     broadcastQueueStatus(io)

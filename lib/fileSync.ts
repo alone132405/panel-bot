@@ -95,7 +95,7 @@ export function initializeWebSocket(server: HTTPServer) {
 export function initializeFileWatcher() {
     if (watcher) return watcher
 
-    watcher = chokidar.watch(`${CONFIG_DIR}/*/settings.json`, {
+    watcher = chokidar.watch([`${CONFIG_DIR}/*/settings.json`, `${CONFIG_DIR}/*/banksettings.json`], {
         persistent: true,
         ignoreInitial: true,
         awaitWriteFinish: {
@@ -107,18 +107,28 @@ export function initializeFileWatcher() {
     watcher.on('change', async (filePath) => {
         try {
             const iggId = path.basename(path.dirname(filePath))
-            console.log(`Settings file changed for IGG ID: ${iggId}`)
+            const fileName = path.basename(filePath)
+            console.log(`File changed for IGG ID ${iggId}: ${fileName}`)
 
-            // Read the updated settings
-            const settings = await readSettingsFile(iggId)
-
-            // Emit to all clients subscribed to this IGG ID
-            if (io) {
-                io.to(`igg-${iggId}`).emit('settings-updated', {
-                    iggId,
-                    settings,
-                    timestamp: new Date().toISOString(),
-                })
+            if (fileName.toLowerCase() === 'banksettings.json') {
+                const settings = await readBankSettingsFile(iggId)
+                if (io) {
+                    io.to(`igg-${iggId}`).emit('bank-settings-updated', {
+                        iggId,
+                        settings,
+                        timestamp: new Date().toISOString(),
+                    })
+                }
+            } else {
+                // Default to settings.json
+                const settings = await readSettingsFile(iggId)
+                if (io) {
+                    io.to(`igg-${iggId}`).emit('settings-updated', {
+                        iggId,
+                        settings,
+                        timestamp: new Date().toISOString(),
+                    })
+                }
             }
         } catch (error) {
             console.error('Error processing file change:', error)
