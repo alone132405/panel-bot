@@ -233,14 +233,19 @@ export default function BankSettingsPage() {
 
     // Listen for automation completion to hide button
     // Listen for automation completion to update UI
+    // Listen for automation completion to update UI
     useEffect(() => {
+        console.log('BankPage: automationStatus updated:', automationStatus)
         if (automationStatus?.status === 'completed' || automationStatus?.status === 'error') {
+            console.log('BankPage: Automation finished with status:', automationStatus.status)
             setApplying(false)
             setQueuePosition(0)
             if (automationStatus.status === 'completed') {
-                toast.success('Changes applied successfully!')
+                console.log('BankPage: Triggering success toast')
+                toast.success('Changes applied successfully!', { duration: 5000 })
                 setShowApplyButton(false)
             } else {
+                console.log('BankPage: Triggering error toast')
                 toast.error(automationStatus.message || 'Automation failed')
             }
         }
@@ -848,9 +853,9 @@ export default function BankSettingsPage() {
                                             <span className="text-gray-400 text-xs sm:text-sm">Buildspam Delay:</span>
                                             <input
                                                 type="number"
-                                                value={settings.BuildspamMinimum}
+                                                value={settings.BuildspamMinimum || ''}
                                                 onChange={(e) => {
-                                                    const val = Math.max(0, Math.min(3600, parseInt(e.target.value) || 0))
+                                                    const val = e.target.value === '' ? 0 : Math.max(0, Math.min(3600, parseInt(e.target.value)))
                                                     setSettings({ ...settings, BuildspamMinimum: val })
                                                 }}
                                                 min={0}
@@ -868,9 +873,9 @@ export default function BankSettingsPage() {
                                             <span className="text-gray-400 text-xs sm:text-sm">Max Send Limit:</span>
                                             <input
                                                 type="number"
-                                                value={settings.maxSendLimit}
+                                                value={settings.maxSendLimit || ''}
                                                 onChange={(e) => {
-                                                    const val = Math.max(0, Math.min(4290000000, parseInt(e.target.value) || 0))
+                                                    const val = e.target.value === '' ? 0 : Math.max(0, Math.min(4290000000, parseInt(e.target.value)))
                                                     setSettings({ ...settings, maxSendLimit: val })
                                                 }}
                                                 min={0}
@@ -882,9 +887,9 @@ export default function BankSettingsPage() {
                                             <span className="text-gray-400 text-xs sm:text-sm">Max Distance:</span>
                                             <input
                                                 type="number"
-                                                value={settings.maxSendDistance}
+                                                value={settings.maxSendDistance || ''}
                                                 onChange={(e) => {
-                                                    const val = Math.max(0, Math.min(1000, parseFloat(e.target.value) || 0))
+                                                    const val = e.target.value === '' ? 0 : Math.max(0, Math.min(1000, parseFloat(e.target.value)))
                                                     setSettings({ ...settings, maxSendDistance: val })
                                                 }}
                                                 min={0}
@@ -1071,23 +1076,59 @@ export default function BankSettingsPage() {
                         )}
                     </AnimatePresence>
 
-                    {/* Save Button */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                        className="flex justify-center"
-                    >
-                        <button
-                            onClick={saveSettings}
-                            className="btn-primary w-full sm:w-auto px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg flex items-center justify-center gap-2 sm:gap-3 shadow-glow hover:shadow-glow-lg transition-all"
+                    {/* Save Button - Only show when NOT applying/waiting */}
+                    {!(showApplyButton || applying || cooldown > 0 || queuePosition > 0) && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="flex justify-center"
                         >
-                            <Save className="w-5 h-5 sm:w-6 sm:h-6" />
-                            Save Changes
-                        </button>
-                    </motion.div>
+                            <button
+                                onClick={saveSettings}
+                                className="btn-primary w-full sm:w-auto px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg flex items-center justify-center gap-2 sm:gap-3 shadow-glow hover:shadow-glow-lg transition-all"
+                            >
+                                <Save className="w-5 h-5 sm:w-6 sm:h-6" />
+                                Save Changes
+                            </button>
+                        </motion.div>
+                    )}
 
-                    {/* Apply Changes Button - Only shown after saving */}
+                    {/* Apply Changes Button - Only shown after saving or if active */}
+                    {(showApplyButton || applying || cooldown > 0 || queuePosition > 0) && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex justify-center pt-8"
+                        >
+                            <button
+                                onClick={handleApplyChanges}
+                                disabled={applying || !selectedIggId || cooldown > 0}
+                                className="btn-primary px-12 py-4 text-lg flex items-center gap-3 shadow-glow hover:shadow-glow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {applying ? (
+                                    <>
+                                        <Loader2 className="w-6 h-6 animate-spin" />
+                                        {queuePosition > 0 ? `Waiting in Queue (#${queuePosition})...` : 'Applying...'}
+                                    </>
+                                ) : cooldown > 0 ? (
+                                    <>
+                                        <Clock className="w-6 h-6" />
+                                        {(() => {
+                                            const m = Math.floor(cooldown / 60)
+                                            const s = cooldown % 60
+                                            return `Wait ${m}:${s.toString().padStart(2, '0')}`
+                                        })()}
+                                    </>
+                                ) : (
+                                    <>
+                                        <Settings className="w-6 h-6" />
+                                        Apply Changes to Bot
+                                    </>
+                                )}
+                            </button>
+                        </motion.div>
+                    )}
 
                 </>
             )}

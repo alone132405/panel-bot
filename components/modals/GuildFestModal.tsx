@@ -389,11 +389,11 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                                                             <td className="px-4 py-3 text-center">
                                                                 <input
                                                                     type="number"
+                                                                    value={mission.minPoints}
                                                                     min={0}
                                                                     max={355}
-                                                                    value={mission.minPoints}
                                                                     onChange={(e) => updateMission(index, 'minPoints', parseInt(e.target.value) || 0)}
-                                                                    className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                                    className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
                                                                 />
                                                             </td>
                                                             <td className="px-4 py-3 text-center">

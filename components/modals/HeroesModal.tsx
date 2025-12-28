@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -236,31 +236,15 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
     }
 
     if (!iggId) {
+        if (!isOpen) return null
         return (
-            <AnimatePresence>
-                {isOpen && (
-                    <>
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={onClose}
-                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-                        />
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="fixed inset-4 md:inset-20 bg-background-secondary rounded-2xl border border-white/10 shadow-2xl z-50 flex items-center justify-center"
-                        >
-                            <div className="text-center">
-                                <p className="text-xl text-white mb-2">No IGG ID Selected</p>
-                                <p className="text-gray-400">Please select an IGG ID to configure heroes settings</p>
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
+            <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+                <div className="relative bg-background-secondary rounded-2xl border border-white/10 shadow-2xl p-6 text-center z-10">
+                    <p className="text-xl text-white mb-2">No IGG ID Selected</p>
+                    <p className="text-gray-400">Please select an IGG ID to configure heroes settings</p>
+                </div>
+            </div>
         )
     }
 
@@ -455,14 +439,11 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
                                                         value={attackAllStages}
                                                         onChange={(e) => {
                                                             setAttackAllStages(e.target.value)
-                                                            // Extract stage point from selection
                                                             if (e.target.value === 'Attack All Stages in this Chapter') {
                                                                 setStagePoint(0)
-
                                                             } else {
                                                                 const stageNum = parseInt(e.target.value.split('-')[1] || '0')
                                                                 setStagePoint(stageNum)
-
                                                             }
                                                         }}
                                                         className="px-3 py-1.5 bg-background-tertiary border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50"
@@ -480,29 +461,29 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
                                                 </div>
                                             </div>
                                         </div>
-
-                                        {/* Stage Options */}
-                                        <div className="flex flex-wrap gap-3">
-                                            {[
-                                                { label: 'Sweep Stage', value: sweepStage, setter: setSweepStage, key: 'QuickFightStage', path: 'heroStageSettings.selectedChapter' },
-                                                { label: '10x Sweep?', value: tenxSweep, setter: setTenxSweep, key: 'useVipSweep', path: 'heroStageSettings.selectedChapter' },
-                                                { label: 'Use Priority Mode', value: usePriorityMode, setter: setUsePriorityMode, key: 'priorityMode', path: 'heroStageSettings' },
-                                            ].map((option) => (
-                                                <label key={option.key} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={option.value}
-                                                        onChange={(e) => {
-                                                            option.setter(e.target.checked)
-
-                                                        }}
-                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                    />
-                                                    <span className="text-sm text-white">{option.label}</span>
-                                                </label>
-                                            ))}
-                                        </div>
                                     </div>
+
+                                    {/* Stage Options */}
+                                    <div className="flex flex-wrap gap-3">
+                                        {[
+                                            { label: 'Sweep Stage', value: sweepStage, setter: setSweepStage, key: 'QuickFightStage', path: 'heroStageSettings.selectedChapter' },
+                                            { label: '10x Sweep?', value: tenxSweep, setter: setTenxSweep, key: 'useVipSweep', path: 'heroStageSettings.selectedChapter' },
+                                            { label: 'Use Priority Mode', value: usePriorityMode, setter: setUsePriorityMode, key: 'priorityMode', path: 'heroStageSettings' },
+                                        ].map((option) => (
+                                            <label key={option.key} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={option.value}
+                                                    onChange={(e) => {
+                                                        option.setter(e.target.checked)
+                                                    }}
+                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
+                                                />
+                                                <span className="text-sm text-white">{option.label}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+
 
                                     {/* Colosseum Settings */}
                                     <div className="space-y-4 pt-6 border-t border-white/10">
@@ -520,7 +501,6 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
                                                         checked={option.value}
                                                         onChange={(e) => {
                                                             option.setter(e.target.checked)
-
                                                         }}
                                                         className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
                                                     />
@@ -538,7 +518,6 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
                                                         checked={buyExtraAttempts}
                                                         onChange={(e) => {
                                                             setBuyExtraAttempts(e.target.checked)
-
                                                         }}
                                                         className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
                                                     />
@@ -552,7 +531,10 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
                                                     min={0}
                                                     max={100}
                                                     value={attemptsToBuy}
-                                                    onChange={(e) => setAttemptsToBuy(Math.max(0, Math.min(100, Number(e.target.value))))}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value === '' ? 0 : Number(e.target.value)
+                                                        setAttemptsToBuy(Math.max(0, Math.min(100, val)))
+                                                    }}
                                                     className="w-24 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                 />
                                             </div>
@@ -569,7 +551,10 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
                                                         min={0}
                                                         max={99}
                                                         value={winChanceMin}
-                                                        onChange={(e) => setWinChanceMin(Math.max(0, Math.min(99, Number(e.target.value))))}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value === '' ? 0 : Number(e.target.value)
+                                                            setWinChanceMin(Math.max(0, Math.min(99, val)))
+                                                        }}
                                                         className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                     />
                                                 </div>
@@ -580,7 +565,10 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
                                                         min={0}
                                                         max={100}
                                                         value={winChanceMax}
-                                                        onChange={(e) => setWinChanceMax(Math.max(0, Math.min(100, Number(e.target.value))))}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value === '' ? 0 : Number(e.target.value)
+                                                            setWinChanceMax(Math.max(0, Math.min(100, val)))
+                                                        }}
                                                         className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                     />
                                                 </div>

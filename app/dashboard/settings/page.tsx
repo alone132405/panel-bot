@@ -81,7 +81,11 @@ export default function SettingsPage() {
     const [applying, setApplying] = useState(false)
     const [queuePosition, setQueuePosition] = useState(0)
     const [cooldown, setCooldown] = useState(0)
-    const { queueStatus, automationStatus } = useSocket(selectedIggId || undefined)
+    const { queueStatus, automationStatus, isConnected } = useSocket(selectedIggId || undefined)
+
+    useEffect(() => {
+        console.log('SettingsPage: mounted/updated. IGG ID:', selectedIggId, 'Socket Connected:', isConnected)
+    }, [selectedIggId, isConnected])
 
     // Load cooldown from local storage
     useEffect(() => {
@@ -173,11 +177,17 @@ export default function SettingsPage() {
 
     // Handle completion via socket event to clear state if needed
     useEffect(() => {
+        console.log('SettingsPage: automationStatus updated:', automationStatus)
         if (automationStatus?.status === 'completed' || automationStatus?.status === 'error') {
+            console.log('SettingsPage: Automation finished with status:', automationStatus.status)
             setApplying(false)
             setQueuePosition(0)
             if (automationStatus.status === 'completed') {
-                // ensure cooldown is set if missed (redundant but safe)
+                console.log('SettingsPage: Triggering success toast')
+                toast.success('Changes applied successfully!', { duration: 5000 })
+            } else {
+                console.log('SettingsPage: Triggering error toast')
+                toast.error(automationStatus.message || 'Automation failed')
             }
         }
     }, [automationStatus])

@@ -390,11 +390,14 @@ export default function MilitaryModal({ isOpen, onClose, iggId }: MilitaryModalP
                                                             <td className="py-3 px-4 text-center">
                                                                 <input
                                                                     type="number"
+                                                                    value={troop.amount ?? ''}
                                                                     min={0}
                                                                     max={999999999999999999}
-                                                                    value={troop.amount}
-                                                                    onChange={(e) => updateTroopAmount(index, Number(e.target.value))}
-                                                                    className="w-24 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                                    onChange={(e) => {
+                                                                        const val = e.target.value === '' ? 0 : Number(e.target.value)
+                                                                        updateTroopAmount(index, val)
+                                                                    }}
+                                                                    className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
                                                                 />
                                                             </td>
                                                         </tr>

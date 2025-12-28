@@ -278,14 +278,12 @@ export default function SettingsModal({ isOpen, onClose, categoryName, iggId }: 
                                                             {setting.type === 'number' && (
                                                                 <input
                                                                     type="number"
-                                                                    value={setting.value || 0}
+                                                                    value={setting.value ?? ''}
                                                                     min={setting.min}
                                                                     max={setting.max}
                                                                     disabled={isDisabled}
                                                                     onChange={(e) => {
-                                                                        let val = Number(e.target.value)
-                                                                        if (setting.min !== undefined) val = Math.max(setting.min, val)
-                                                                        if (setting.max !== undefined) val = Math.min(setting.max, val)
+                                                                        const val = e.target.value === '' ? 0 : Number(e.target.value)
                                                                         handleSettingChange(setting.path, val)
                                                                     }}
                                                                     className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"

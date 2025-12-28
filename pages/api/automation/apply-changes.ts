@@ -78,7 +78,8 @@ async function processQueue(io: any) {
             const item = queue[0]
             io.to(`igg-${item.iggId}`).emit('automation_status', {
                 status: 'waiting',
-                message: 'Waiting for RDP to disconnect (Headless Mode)...'
+                message: 'Waiting for RDP to disconnect (Headless Mode)...',
+                timestamp: Date.now()
             })
         }
         setTimeout(() => processQueue(io), 5000) // Check again in 5 seconds
@@ -93,7 +94,11 @@ async function processQueue(io: any) {
 
     // Notify specific channel for this IGG ID that it's starting
     if (io) {
-        io.to(`igg-${item.iggId}`).emit('automation_status', { status: 'processing', message: 'Applying changes...' })
+        io.to(`igg-${item.iggId}`).emit('automation_status', {
+            status: 'processing',
+            message: 'Applying changes...',
+            timestamp: Date.now()
+        })
     }
 
     try {
@@ -103,14 +108,22 @@ async function processQueue(io: any) {
         queue.shift()
 
         if (io) {
-            io.to(`igg-${item.iggId}`).emit('automation_status', { status: 'completed', message: 'Changes applied successfully' })
+            io.to(`igg-${item.iggId}`).emit('automation_status', {
+                status: 'completed',
+                message: 'Changes applied successfully',
+                timestamp: Date.now()
+            })
         }
     } catch (error: any) {
         // Remove from queue after error
         queue.shift()
 
         if (io) {
-            io.to(`igg-${item.iggId}`).emit('automation_status', { status: 'error', message: error.message || 'Automation failed' })
+            io.to(`igg-${item.iggId}`).emit('automation_status', {
+                status: 'error',
+                message: error.message || 'Automation failed',
+                timestamp: Date.now()
+            })
         }
     } finally {
         isRunning = false

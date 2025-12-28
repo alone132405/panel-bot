@@ -100,11 +100,23 @@ export default function IggIdSelector({ onSelect, selectedIggId }: IggIdSelector
                                             <p className="text-gray-400 text-sm">{igg.displayName}</p>
                                         )}
                                     </div>
+                                    {igg.subscription?.expiresAt && new Date(igg.subscription.expiresAt) < new Date() && (
+                                        <span className="text-xs text-red-400 bg-red-500/10 px-2 py-1 rounded">Expired</span>
+                                    )}
                                 </div>
                             </button>
                         ))}
                     </div>
                 </>
+            )}
+
+            {currentIggId?.subscription?.expiresAt && new Date(currentIggId.subscription.expiresAt) < new Date() && (
+                <div className="mt-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-red-500" />
+                    <p className="text-sm text-red-200">
+                        Subscription expired on {new Date(currentIggId.subscription.expiresAt).toLocaleDateString()}
+                    </p>
+                </div>
             )}
         </div>
     )

@@ -332,19 +332,7 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                                     <input
                                                         type="checkbox"
                                                         checked={option.value}
-                                                        onChange={(e) => {
-                                                            option.setter(e.target.checked)
-                                                            // Map UI field names to rallySettings field names
-                                                            const fieldMap: Record<string, string> = {
-                                                                'dontJoinIfLabFull': 'checkLab',
-                                                                'dontFillRally': 'dontFillRally',
-                                                                'dontSendSiege': 'noSiege',
-                                                                'dontSendT5': 'noT5',
-                                                                'sendOneType': 'oneType',
-                                                                'addBuffers': 'addBuffers'
-                                                            }
-
-                                                        }}
+                                                        onChange={(e) => option.setter(e.target.checked)}
                                                         className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
                                                     />
                                                 </label>

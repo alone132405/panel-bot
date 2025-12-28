@@ -207,12 +207,14 @@ export default function GearsModal({ isOpen, onClose, iggId }: GearsModalProps) 
                                             <label className="text-sm text-gray-300">Idle Gear Time:</label>
                                             <input
                                                 type="number"
+                                                value={idleGearTime ?? ''}
                                                 min={10}
                                                 max={3600}
-                                                placeholder="Travel Speed"
-                                                value={idleGearTime}
-                                                onChange={(e) => setIdleGearTime(Math.min(3600, Math.max(10, Number(e.target.value))))}
-                                                className="w-32 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 placeholder-gray-500"
+                                                onChange={(e) => {
+                                                    const val = e.target.value === '' ? 0 : Number(e.target.value)
+                                                    setIdleGearTime(Math.min(3600, Math.max(10, val)))
+                                                }}
+                                                className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
                                             />
                                         </div>
 

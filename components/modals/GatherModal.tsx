@@ -304,11 +304,15 @@ export default function GatherModal({ isOpen, onClose, iggId }: GatherModalProps
                                                     <label className="block text-xs text-gray-400 mb-1">Amount:</label>
                                                     <input
                                                         type="number"
-                                                        min="1"
-                                                        max="7"
-                                                        value={spareArmyAmount}
-                                                        onChange={(e) => setSpareArmyAmount(Math.min(7, Math.max(1, Number(e.target.value))))}
-                                                        className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                        value={spareArmyAmount ?? ''}
+                                                        min={1}
+                                                        max={7}
+                                                        disabled={false} // Assuming isDisabled is false for this specific input
+                                                        onChange={(e) => {
+                                                            const val = e.target.value === '' ? 0 : Number(e.target.value)
+                                                            setSpareArmyAmount(Math.min(7, Math.max(1, val))) // Re-integrating original min/max logic
+                                                        }}
+                                                        className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
                                                     />
                                                 </div>
                                             )}

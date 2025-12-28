@@ -50,22 +50,25 @@ export const useSocket = (iggId?: string) => {
                 if (mounted) setQueueStatus(data)
             }
 
-            const onAutomationStatus = (data: any) => {
-                if (mounted) setAutomationStatus(data)
-            }
-
             socket.on('connect', onConnect)
             socket.on('disconnect', onDisconnect)
             socket.on('queue_update', onQueueUpdate)
+
+            const onAutomationStatus = (data: any) => {
+                console.log('useSocket: received automation_status:', data)
+                if (mounted) setAutomationStatus(data)
+            }
             socket.on('automation_status', onAutomationStatus)
 
             // Clean up listeners on unmount/re-run
             return () => {
+                console.log('useSocket: cleaning up for iggId:', iggId)
                 socket.off('connect', onConnect)
                 socket.off('disconnect', onDisconnect)
                 socket.off('queue_update', onQueueUpdate)
                 socket.off('automation_status', onAutomationStatus)
                 if (iggId) {
+                    console.log('useSocket: unsubscribing from:', iggId)
                     socket.emit('unsubscribe', iggId)
                 }
             }

@@ -227,7 +227,7 @@ export default function PetsModal({ isOpen, onClose, iggId }: PetsModalProps) {
         })
     }
 
-    const updateFamiliar = (petId: number, field: keyof FamiliarData, value: boolean) => {
+    const updateFamiliar = (petId: number, field: keyof FamiliarData, value: boolean | number) => {
         setFamiliarData(prev =>
             prev.map(pet =>
                 pet.petId === petId ? { ...pet, [field]: value } : pet
@@ -416,13 +416,23 @@ export default function PetsModal({ isOpen, onClose, iggId }: PetsModalProps) {
                                                                         <span className="inline-block min-w-[2rem]">{pet.Level}</span>
                                                                     </td>
                                                                     <td className="px-4 py-3 text-center text-sm text-gray-300 border-r border-white/10 bg-black/10">
-                                                                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${pet.Rarity >= 5 ? 'bg-yellow-500/20 text-yellow-400' :
-                                                                            pet.Rarity >= 4 ? 'bg-purple-500/20 text-purple-400' :
-                                                                                pet.Rarity >= 3 ? 'bg-blue-500/20 text-blue-400' :
-                                                                                    'bg-gray-500/20 text-gray-400'
-                                                                            }`}>
-                                                                            {pet.Rarity}
-                                                                        </span>
+                                                                        <div className="flex justify-center">
+                                                                            <input
+                                                                                type="number"
+                                                                                value={pet.Rarity ?? ''}
+                                                                                min={1} // Assuming rarity starts from 1
+                                                                                max={8} // Assuming max rarity is 8, adjust if needed
+                                                                                onChange={(e) => {
+                                                                                    const val = e.target.value === '' ? 0 : Number(e.target.value);
+                                                                                    updateFamiliar(pet.petId, 'Rarity', val);
+                                                                                }}
+                                                                                className={`w-16 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-xs text-white text-center focus:outline-none focus:ring-1 focus:ring-primary-500/50 disabled:opacity-50 ${pet.Rarity >= 5 ? 'text-yellow-400' :
+                                                                                    pet.Rarity >= 4 ? 'text-purple-400' :
+                                                                                        pet.Rarity >= 3 ? 'text-blue-400' :
+                                                                                            'text-gray-400'
+                                                                                    }`}
+                                                                            />
+                                                                        </div>
                                                                     </td>
                                                                     <td className="px-4 py-3 text-center">
                                                                         <div className="flex justify-center">

@@ -273,15 +273,15 @@ export default function ScheduleModal({ isOpen, onClose, iggId }: ScheduleModalP
                                                 <span className="text-xs md:text-sm text-gray-300">Random Max (Minutes):</span>
                                                 <input
                                                     type="number"
+                                                    value={randomMaxMinutes ?? ''}
                                                     min={0}
-                                                    max={3600}
-                                                    value={randomMaxMinutes}
+                                                    max={60}
                                                     onChange={(e) => {
-                                                        const val = Math.min(3600, Math.max(0, parseInt(e.target.value) || 0))
+                                                        const val = e.target.value === '' ? 0 : Number(e.target.value)
                                                         setRandomMaxMinutes(val)
                                                         updateSettingsObject('scheduleSettings.randMax', val)
                                                     }}
-                                                    className="w-16 md:w-20 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded-lg text-white text-xs md:text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                    className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
                                                 />
                                             </div>
                                         </div>

@@ -265,11 +265,15 @@ export default function CargoShipModal({ isOpen, onClose, iggId }: CargoShipModa
                                             <label className="block text-xs sm:text-sm text-gray-300 mb-2">Minimum Item Stars:</label>
                                             <input
                                                 type="number"
+                                                value={minimumItemStars ?? ''}
                                                 min={1}
                                                 max={3}
-                                                value={minimumItemStars}
-                                                onChange={(e) => setMinimumItemStars(Math.min(3, Math.max(1, Number(e.target.value))))}
-                                                className="w-32 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                disabled={false} // Assuming isDisabled is not defined, setting to false
+                                                onChange={(e) => {
+                                                    const val = e.target.value === '' ? 0 : Number(e.target.value)
+                                                    setMinimumItemStars(Math.min(3, Math.max(1, val))) // Re-using existing logic for min/max
+                                                }}
+                                                className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
                                             />
                                         </div>
                                     </div>

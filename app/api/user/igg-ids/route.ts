@@ -23,6 +23,12 @@ export async function GET(req: Request) {
                         isActive: true,
                         status: true,
                         lastSync: true,
+                        subscription: {
+                            select: {
+                                status: true,
+                                expiresAt: true
+                            }
+                        }
                     },
                 },
             },

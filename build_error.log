@@ -1,0 +1,33 @@
+
+> bot-management-dashboard@1.0.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+  - Environments: .env
+
+   Creating an optimized production build ...
+Failed to compile.
+
+./components/modals/HeroesModal.tsx
+Error: 
+  [31mx[0m Unexpected token `AnimatePresence`. Expected jsx identifier
+     ,-[[36;1;4mE:\temp4\components\modals\HeroesModal.tsx[0m:265:1]
+ [2m265[0m |     }
+ [2m266[0m | 
+ [2m267[0m |     return (
+ [2m268[0m |         <AnimatePresence>
+     : [31;1m         ^^^^^^^^^^^^^^^[0m
+ [2m269[0m |             {isOpen && (
+ [2m270[0m |                 <>
+ [2m270[0m |                     <motion.div
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/modals/HeroesModal.tsx
+./app/dashboard/settings/page.tsx
+
+
+> Build failed because of webpack errors

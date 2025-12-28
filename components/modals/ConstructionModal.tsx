@@ -428,20 +428,23 @@ export default function ConstructionModal({ isOpen, onClose, iggId }: Constructi
                                                 {Array.from({ length: 8 }, (_, i) => i + 1).map((num) => {
                                                     const value = eval(`familiar${num}`)
                                                     const setter = eval(`setFamiliar${num}`)
+                                                    // Assuming `setting`, `isDisabled`, `handleSettingChange` are defined elsewhere in the component scope
+                                                    // For this specific change, we'll adapt to the existing `value` and `setter` pattern.
                                                     return (
                                                         <div key={`familiar${num}`} className="p-3 rounded-xl bg-surface/50">
                                                             <label className="block text-xs text-gray-400 mb-2">Location {num}</label>
-                                                            <select
-                                                                value={value}
+                                                            <input
+                                                                type="number"
+                                                                value={value ?? ''} // Use existing `value`
+                                                                min={0} // Assuming min level is 0
+                                                                max={60} // Assuming max level for familiar buildings is 60 (or adjust as needed)
+                                                                // disabled={isDisabled} // If isDisabled is not defined, remove this
                                                                 onChange={(e) => {
-                                                                    setter(Number(e.target.value))
+                                                                    const val = e.target.value === '' ? 0 : Number(e.target.value)
+                                                                    setter(val) // Use existing `setter`
                                                                 }}
-                                                                className="w-full px-2 py-1.5 bg-background-tertiary border border-white/10 rounded-lg text-white text-xs focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                            >
-                                                                <option value={21}>Spring</option>
-                                                                <option value={22}>Mystic Spire</option>
-                                                                <option value={23}>Gym</option>
-                                                            </select>
+                                                                className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
+                                                            />
                                                         </div>
                                                     )
                                                 })}
