@@ -257,6 +257,11 @@ export default function ReportsPage() {
             }
 
             return true
+        }).sort((a, b) => {
+            // Sort by modifiedAt, newest first
+            const dateA = new Date(a.modifiedAt).getTime()
+            const dateB = new Date(b.modifiedAt).getTime()
+            return dateB - dateA
         })
     }, [files, searchTerm, dateFrom, dateTo])
 
