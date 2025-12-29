@@ -132,6 +132,18 @@ public class Win32 {
     [DllImport("user32.dll")]
     public static extern IntPtr GetForegroundWindow();
 
+    [DllImport("user32.dll")]
+    public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+    [DllImport("user32.dll")]
+    public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+    [DllImport("user32.dll")]
+    public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+
+    [DllImport("kernel32.dll")]
+    public static extern uint GetCurrentThreadId();
+
     [StructLayout(LayoutKind.Sequential)]
     public struct RECT {
         public int Left;
@@ -143,6 +155,13 @@ public class Win32 {
     public const int MOUSEEVENTF_LEFTDOWN = 0x02;
     public const int MOUSEEVENTF_LEFTUP = 0x04;
     public const int SW_RESTORE = 9;
+    public const int SW_SHOW = 5;
+
+    public static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+    public static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
+    public const uint SWP_NOMOVE = 0x0002;
+    public const uint SWP_NOSIZE = 0x0001;
+    public const uint SWP_SHOWWINDOW = 0x0040;
 }
 "@
 
@@ -159,6 +178,33 @@ function DoubleClick($x, $y) {
     Click $x $y
     Start-Sleep -Milliseconds 50
     Click $x $y
+}
+
+# Force window to foreground - works even when another app is active
+function ForceForeground($targetHwnd) {
+    $currentHwnd = [Win32]::GetForegroundWindow()
+    
+    if ($currentHwnd -ne $targetHwnd) {
+        # Get thread IDs
+        $currentThreadId = [Win32]::GetCurrentThreadId()
+        $targetProcId = 0
+        $targetThreadId = [Win32]::GetWindowThreadProcessId($targetHwnd, [ref]$targetProcId)
+        $fgProcId = 0
+        $fgThreadId = [Win32]::GetWindowThreadProcessId($currentHwnd, [ref]$fgProcId)
+        
+        # Attach to foreground thread
+        [Win32]::AttachThreadInput($currentThreadId, $fgThreadId, $true) | Out-Null
+        
+        # Make window topmost, then not topmost (forces it to front)
+        [Win32]::SetWindowPos($targetHwnd, [Win32]::HWND_TOPMOST, 0, 0, 0, 0, [Win32]::SWP_NOMOVE -bor [Win32]::SWP_NOSIZE) | Out-Null
+        [Win32]::SetWindowPos($targetHwnd, [Win32]::HWND_NOTOPMOST, 0, 0, 0, 0, [Win32]::SWP_NOMOVE -bor [Win32]::SWP_NOSIZE -bor [Win32]::SWP_SHOWWINDOW) | Out-Null
+        
+        [Win32]::ShowWindow($targetHwnd, [Win32]::SW_SHOW) | Out-Null
+        [Win32]::SetForegroundWindow($targetHwnd) | Out-Null
+        
+        # Detach
+        [Win32]::AttachThreadInput($currentThreadId, $fgThreadId, $false) | Out-Null
+    }
 }
 
 Write-Output "=== AUTOMATION START ==="
@@ -184,8 +230,19 @@ Write-Output "Resizing window to 1024x768 at (0,0)..."
 [Win32]::MoveWindow($mainHwnd, 0, 0, 1024, 768, $true)
 Start-Sleep -Milliseconds 500
 
-[Win32]::SetForegroundWindow($mainHwnd)
+Write-Output "Forcing window to foreground..."
+ForceForeground $mainHwnd
 Start-Sleep -Seconds 1
+
+# Verify it worked
+$fgNow = [Win32]::GetForegroundWindow()
+if ($fgNow -eq $mainHwnd) {
+    Write-Output "SUCCESS: Window is now in foreground"
+} else {
+    Write-Output "WARNING: Window may not be in foreground. Trying again..."
+    ForceForeground $mainHwnd
+    Start-Sleep -Seconds 1
+}
 
 $mainRect = New-Object Win32+RECT
 [Win32]::GetWindowRect($mainHwnd, [ref]$mainRect) | Out-Null
