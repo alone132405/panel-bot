@@ -92,7 +92,7 @@ export default function SettingsPage() {
         if (!selectedIggId) return
 
         const checkCooldown = () => {
-            const savedExpiry = localStorage.getItem(`automation_cooldown_${selectedIggId}`)
+            const savedExpiry = localStorage.getItem(`automation_cooldown_settings_${selectedIggId}`)
             if (savedExpiry) {
                 const expiryTime = parseInt(savedExpiry)
                 const now = Date.now()
@@ -101,7 +101,7 @@ export default function SettingsPage() {
                 if (remaining > 0) {
                     setCooldown(remaining)
                 } else {
-                    localStorage.removeItem(`automation_cooldown_${selectedIggId}`)
+                    localStorage.removeItem(`automation_cooldown_settings_${selectedIggId}`)
                     setCooldown(0)
                 }
             } else {
@@ -218,7 +218,7 @@ export default function SettingsPage() {
                 toast.success('Request sent to queue!')
                 // Set cooldown
                 const expiry = Date.now() + 5 * 60 * 1000 // 5 minutes
-                localStorage.setItem(`automation_cooldown_${selectedIggId}`, expiry.toString())
+                localStorage.setItem(`automation_cooldown_settings_${selectedIggId}`, expiry.toString())
                 setCooldown(300)
             } else {
                 toast.error(data.error || 'Failed to apply changes')

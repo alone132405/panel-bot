@@ -176,7 +176,7 @@ export default function BankSettingsPage() {
         if (!selectedIggId) return
 
         const checkCooldown = () => {
-            const savedExpiry = localStorage.getItem(`automation_cooldown_${selectedIggId}`)
+            const savedExpiry = localStorage.getItem(`automation_cooldown_bank_${selectedIggId}`)
             if (savedExpiry) {
                 const expiryTime = parseInt(savedExpiry)
                 const now = Date.now()
@@ -185,7 +185,7 @@ export default function BankSettingsPage() {
                 if (remaining > 0) {
                     setCooldown(remaining)
                 } else {
-                    localStorage.removeItem(`automation_cooldown_${selectedIggId}`)
+                    localStorage.removeItem(`automation_cooldown_bank_${selectedIggId}`)
                     setCooldown(0)
                 }
             } else {
@@ -298,7 +298,7 @@ export default function BankSettingsPage() {
             toast.success('Request sent to queue!')
             // Set cooldown
             const expiry = Date.now() + 5 * 60 * 1000 // 5 minutes
-            localStorage.setItem(`automation_cooldown_${selectedIggId}`, expiry.toString())
+            localStorage.setItem(`automation_cooldown_bank_${selectedIggId}`, expiry.toString())
             setCooldown(300)
 
         } catch (error) {

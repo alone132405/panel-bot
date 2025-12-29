@@ -29,9 +29,9 @@ class AutomationQueue {
     }
 
     public async enqueue(iggId: string, io: any) {
-        // Check if already in queue
+        // If already waiting in queue, skip (the waiting run will pick up all current changes)
         if (this.queue.some(item => item.iggId === iggId)) {
-            console.log(`IGG ID ${iggId} is already in the queue.`)
+            console.log(`IGG ID ${iggId} is already waiting in the queue.`)
             return
         }
 
