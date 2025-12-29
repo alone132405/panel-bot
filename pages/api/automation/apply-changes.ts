@@ -25,6 +25,53 @@ const broadcastQueueStatus = (io: any) => {
     })
 }
 
+// Check if RDP is connected (returns true if console/headless, false if RDP)
+async function isConsoleSession(): Promise<boolean> {
+    try {
+        const { stdout } = await execAsync('quser')
+        const lines = stdout.split('\n')
+        const currentSessionLine = lines.find(line => line.trim().startsWith('>'))
+
+        if (!currentSessionLine) return true
+
+        const parts = currentSessionLine.trim().split(/\s+/)
+        const sessionName = parts[1]?.toLowerCase() || ''
+
+        // RDP sessions have 'rdp' or 'tcp' in the session name
+        if (sessionName.includes('rdp') || sessionName.includes('tcp')) {
+            return false // RDP connected
+        }
+
+        return true // Console session (headless)
+    } catch (error) {
+        console.error('Error checking session:', error)
+        return true // Assume safe if check fails
+    }
+}
+
+// Wait for console session (RDP disconnect)
+async function waitForConsoleSession(io: any, iggId: string): Promise<void> {
+    let isConsole = await isConsoleSession()
+
+    while (!isConsole) {
+        console.log('RDP detected. Waiting for disconnect...')
+
+        if (io) {
+            io.to(`igg-${iggId}`).emit('automation_status', {
+                status: 'waiting',
+                message: 'RDP connected. Waiting for disconnect (use disconnect_headless.bat)...',
+                timestamp: Date.now()
+            })
+        }
+
+        // Wait 5 seconds before checking again
+        await new Promise(resolve => setTimeout(resolve, 5000))
+        isConsole = await isConsoleSession()
+    }
+
+    console.log('Console session detected. Proceeding with automation...')
+}
+
 async function processQueue(io: any) {
     if (isRunning || queue.length === 0) return
 
@@ -36,6 +83,9 @@ async function processQueue(io: any) {
     }
 
     broadcastQueueStatus(io)
+
+    // Wait for RDP to disconnect before proceeding
+    await waitForConsoleSession(io, item.iggId)
 
     if (io) {
         io.to(`igg-${item.iggId}`).emit('automation_status', {
@@ -180,29 +230,24 @@ function DoubleClick($x, $y) {
     Click $x $y
 }
 
-# Force window to foreground - works even when another app is active
 function ForceForeground($targetHwnd) {
     $currentHwnd = [Win32]::GetForegroundWindow()
     
     if ($currentHwnd -ne $targetHwnd) {
-        # Get thread IDs
         $currentThreadId = [Win32]::GetCurrentThreadId()
         $targetProcId = 0
         $targetThreadId = [Win32]::GetWindowThreadProcessId($targetHwnd, [ref]$targetProcId)
         $fgProcId = 0
         $fgThreadId = [Win32]::GetWindowThreadProcessId($currentHwnd, [ref]$fgProcId)
         
-        # Attach to foreground thread
         [Win32]::AttachThreadInput($currentThreadId, $fgThreadId, $true) | Out-Null
         
-        # Make window topmost, then not topmost (forces it to front)
         [Win32]::SetWindowPos($targetHwnd, [Win32]::HWND_TOPMOST, 0, 0, 0, 0, [Win32]::SWP_NOMOVE -bor [Win32]::SWP_NOSIZE) | Out-Null
         [Win32]::SetWindowPos($targetHwnd, [Win32]::HWND_NOTOPMOST, 0, 0, 0, 0, [Win32]::SWP_NOMOVE -bor [Win32]::SWP_NOSIZE -bor [Win32]::SWP_SHOWWINDOW) | Out-Null
         
         [Win32]::ShowWindow($targetHwnd, [Win32]::SW_SHOW) | Out-Null
         [Win32]::SetForegroundWindow($targetHwnd) | Out-Null
         
-        # Detach
         [Win32]::AttachThreadInput($currentThreadId, $fgThreadId, $false) | Out-Null
     }
 }
@@ -234,7 +279,6 @@ Write-Output "Forcing window to foreground..."
 ForceForeground $mainHwnd
 Start-Sleep -Seconds 1
 
-# Verify it worked
 $fgNow = [Win32]::GetForegroundWindow()
 if ($fgNow -eq $mainHwnd) {
     Write-Output "SUCCESS: Window is now in foreground"
@@ -287,14 +331,14 @@ $popupRect = New-Object Win32+RECT
 
 Write-Output "Popup detected at: ($($popupRect.Left), $($popupRect.Top))"
 
-# Click Functions tab (relative to popup)
+# Functions tab (relative to popup)
 $funcX = $popupRect.Left + ${POPUP_FUNCTIONS_X}
 $funcY = $popupRect.Top + ${POPUP_FUNCTIONS_Y}
 Write-Output "Step 5: Click Functions at ($funcX, $funcY)"
 Click $funcX $funcY
 Start-Sleep -Seconds 1
 
-# Click Reload Settings (relative to popup)
+# Reload Settings (relative to popup)
 $reloadX = $popupRect.Left + ${POPUP_RELOAD_X}
 $reloadY = $popupRect.Top + ${POPUP_RELOAD_Y}
 Write-Output "Step 6: Click Reload Settings at ($reloadX, $reloadY)"
