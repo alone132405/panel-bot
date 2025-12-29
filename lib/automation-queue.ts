@@ -10,6 +10,10 @@ interface QueueItem {
     io: any
 }
 
+declare global {
+    var automationQueueInstance: AutomationQueue | undefined
+}
+
 class AutomationQueue {
     private static instance: AutomationQueue
     private queue: QueueItem[] = []
@@ -401,4 +405,9 @@ Write-Output "=== AUTOMATION COMPLETE ==="
     }
 }
 
-export const automationQueue = AutomationQueue.getInstance()
+// Ensure singleton persists across HMR in development
+export const automationQueue = global.automationQueueInstance || AutomationQueue.getInstance()
+
+if (process.env.NODE_ENV !== 'production') {
+    global.automationQueueInstance = automationQueue
+}
