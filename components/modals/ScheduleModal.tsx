@@ -275,9 +275,9 @@ export default function ScheduleModal({ isOpen, onClose, iggId }: ScheduleModalP
                                                     type="number"
                                                     value={randomMaxMinutes ?? ''}
                                                     min={0}
-                                                    max={60}
+                                                    max={9999}
                                                     onChange={(e) => {
-                                                        const val = e.target.value === '' ? 0 : Number(e.target.value)
+                                                        const val = e.target.value === '' ? 0 : Math.max(0, Math.min(9999, Number(e.target.value)))
                                                         setRandomMaxMinutes(val)
                                                         updateSettingsObject('scheduleSettings.randMax', val)
                                                     }}
