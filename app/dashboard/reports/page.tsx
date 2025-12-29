@@ -209,10 +209,10 @@ export default function ReportsPage() {
     const downloadFile = async (filename: string) => {
         if (!selectedIggId) return
         try {
-            const res = await fetch(`/api/reports/${selectedIggId}/${encodeURIComponent(filename)}`)
+            // Add download=true query param to skip JSON parsing on server
+            const res = await fetch(`/api/reports/${selectedIggId}/${encodeURIComponent(filename)}?download=true`)
             if (res.ok) {
-                const data = await res.json()
-                const blob = new Blob([data.content], { type: 'text/plain' })
+                const blob = await res.blob()
                 const url = URL.createObjectURL(blob)
                 const a = document.createElement('a')
                 a.href = url
@@ -222,9 +222,11 @@ export default function ReportsPage() {
                 document.body.removeChild(a)
                 URL.revokeObjectURL(url)
             } else {
-                toast.error('Failed to download file')
+                const data = await res.json().catch(() => ({}))
+                toast.error(data.error || 'Failed to download file')
             }
         } catch (error) {
+            console.error('Download error:', error)
             toast.error('Failed to download file')
         }
     }

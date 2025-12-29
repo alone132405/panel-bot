@@ -14,6 +14,9 @@ export async function GET(
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { searchParams } = new URL(req.url)
+    const isDownload = searchParams.get('download') === 'true'
+
     try {
         let basePath: string
 
@@ -39,9 +42,19 @@ export async function GET(
         const filePath = path.join(basePath, params.filename)
 
         // Security check - ensure path doesn't escape the directory
-        const normalizedPath = path.normalize(filePath)
-        const exportedDir = path.join(process.cwd(), 'config', params.iggId, 'stats', 'exported')
-        if (!normalizedPath.startsWith(exportedDir)) {
+        const resolvedBase = path.resolve(basePath)
+        const resolvedPath = path.resolve(filePath)
+        const baseWithTrailing = resolvedBase.endsWith(path.sep) ? resolvedBase : resolvedBase + path.sep
+
+        const isSafe = process.platform === 'win32'
+            ? resolvedPath.toLowerCase().startsWith(baseWithTrailing.toLowerCase())
+            : resolvedPath.startsWith(baseWithTrailing)
+
+        if (!isSafe) {
+            console.error('Security violation: Path traversal attempt or invalid path', {
+                resolvedPath,
+                baseWithTrailing
+            })
             return NextResponse.json({ error: 'Invalid file path' }, { status: 400 })
         }
 
@@ -55,7 +68,26 @@ export async function GET(
         const stats = await fs.stat(filePath)
         const extension = path.extname(params.filename).toLowerCase()
 
-        // Handle Excel files
+        // Handle raw download
+        if (isDownload) {
+            const buffer = await fs.readFile(filePath)
+
+            let contentType = 'application/octet-stream'
+            if (extension === '.xlsx') contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            else if (extension === '.xls') contentType = 'application/vnd.ms-excel'
+            else if (extension === '.txt') contentType = 'text/plain'
+            else if (extension === '.json') contentType = 'application/json'
+
+            return new Response(buffer, {
+                headers: {
+                    'Content-Type': contentType,
+                    'Content-Disposition': `attachment; filename="${params.filename}"`,
+                    'Content-Length': stats.size.toString(),
+                }
+            })
+        }
+
+        // Handle Excel files (Preview)
         if (extension === '.xlsx' || extension === '.xls') {
             const buffer = await fs.readFile(filePath)
             const workbook = XLSX.read(buffer, { type: 'buffer' })
