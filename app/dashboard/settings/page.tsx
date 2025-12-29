@@ -509,7 +509,7 @@ export default function SettingsPage() {
                     disabled={applying || !selectedIggId || cooldown > 0}
                     className="btn-primary px-12 py-4 text-lg flex items-center gap-3 shadow-glow hover:shadow-glow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {applying ? (
+                    {(applying || queuePosition > 0) ? (
                         <>
                             <Loader2 className="w-6 h-6 animate-spin" />
                             {automationStatus?.status === 'waiting'
