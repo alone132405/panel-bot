@@ -94,10 +94,10 @@ async function runAutomation(iggId: string): Promise<{ success: boolean; message
     // ============================================
     // POPUP WINDOW COORDINATES (relative to popup window position!)
     // ============================================
-    const POPUP_FUNCTIONS_X = 159  // Relative to popup left
-    const POPUP_FUNCTIONS_Y = 60   // Relative to popup top
-    const POPUP_RELOAD_X = 178     // Relative to popup left
-    const POPUP_RELOAD_Y = 60     // Relative to popup top
+    const POPUP_FUNCTIONS_X = 159
+    const POPUP_FUNCTIONS_Y = 60
+    const POPUP_RELOAD_X = 178
+    const POPUP_RELOAD_Y = 60
     // ============================================
 
     const scriptContent = `
@@ -106,7 +106,6 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type @"
 using System;
 using System.Runtime.InteropServices;
-using System.Collections.Generic;
 
 public class Win32 {
     [DllImport("user32.dll")]
@@ -131,21 +130,7 @@ public class Win32 {
     public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
     [DllImport("user32.dll")]
-    public static extern bool IsWindowVisible(IntPtr hWnd);
-
-    [DllImport("user32.dll")]
-    public static extern int GetWindowTextLength(IntPtr hWnd);
-
-    [DllImport("user32.dll")]
-    public static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder text, int count);
-
-    public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
-
-    [DllImport("user32.dll")]
-    public static extern bool EnumWindows(EnumWindowsProc enumProc, IntPtr lParam);
-
-    [DllImport("user32.dll")]
-    public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+    public static extern IntPtr GetForegroundWindow();
 
     [StructLayout(LayoutKind.Sequential)]
     public struct RECT {
@@ -176,30 +161,6 @@ function DoubleClick($x, $y) {
     Click $x $y
 }
 
-function Get-WindowTitle($hwnd) {
-    $length = [Win32]::GetWindowTextLength($hwnd)
-    if ($length -eq 0) { return "" }
-    $sb = New-Object System.Text.StringBuilder ($length + 1)
-    [Win32]::GetWindowText($hwnd, $sb, $sb.Capacity) | Out-Null
-    return $sb.ToString()
-}
-
-function Get-AllWindowsForProcess($processId) {
-    $windows = @()
-    $callback = {
-        param($hwnd, $lParam)
-        $pid = 0
-        [Win32]::GetWindowThreadProcessId($hwnd, [ref]$pid) | Out-Null
-        if ($pid -eq $processId -and [Win32]::IsWindowVisible($hwnd)) {
-            $script:foundWindows += $hwnd
-        }
-        return $true
-    }
-    $script:foundWindows = @()
-    [Win32]::EnumWindows($callback, [IntPtr]::Zero) | Out-Null
-    return $script:foundWindows
-}
-
 Write-Output "=== AUTOMATION START ==="
 Write-Output "Searching for Lords Mobile Bot..."
 
@@ -210,33 +171,28 @@ if (-not $botProcess) {
     exit 1
 }
 
-Write-Output "Found: $($botProcess.MainWindowTitle) (PID: $($botProcess.Id))"
-$hwnd = $botProcess.MainWindowHandle
-$processId = $botProcess.Id
+Write-Output "Found: $($botProcess.MainWindowTitle)"
+$mainHwnd = $botProcess.MainWindowHandle
 
-if ([Win32]::IsIconic($hwnd)) {
+if ([Win32]::IsIconic($mainHwnd)) {
     Write-Output "Restoring minimized window..."
-    [Win32]::ShowWindow($hwnd, [Win32]::SW_RESTORE)
+    [Win32]::ShowWindow($mainHwnd, [Win32]::SW_RESTORE)
     Start-Sleep -Seconds 1
 }
 
 Write-Output "Resizing window to 1024x768 at (0,0)..."
-[Win32]::MoveWindow($hwnd, 0, 0, 1024, 768, $true)
+[Win32]::MoveWindow($mainHwnd, 0, 0, 1024, 768, $true)
 Start-Sleep -Milliseconds 500
 
-[Win32]::SetForegroundWindow($hwnd)
+[Win32]::SetForegroundWindow($mainHwnd)
 Start-Sleep -Seconds 1
 
 $mainRect = New-Object Win32+RECT
-[Win32]::GetWindowRect($hwnd, [ref]$mainRect) | Out-Null
+[Win32]::GetWindowRect($mainHwnd, [ref]$mainRect) | Out-Null
 Write-Output "Main Window at: ($($mainRect.Left), $($mainRect.Top))"
 
 $baseX = $mainRect.Left
 $baseY = $mainRect.Top
-
-# Get list of windows BEFORE double-click
-$windowsBefore = Get-AllWindowsForProcess $processId
-Write-Output "Windows before click: $($windowsBefore.Count)"
 
 # Step 1: Click search box
 $searchX = $baseX + ${SEARCH_BOX_X}
@@ -266,65 +222,39 @@ Write-Output "Step 3: Double-click Account at ($accX, $accY)"
 DoubleClick $accX $accY
 Start-Sleep -Seconds 3
 
-# Find popup window (should be a NEW window that appeared)
-Write-Output "Searching for popup window..."
-$windowsAfter = Get-AllWindowsForProcess $processId
-Write-Output "Windows after click: $($windowsAfter.Count)"
+# Step 4: Detect popup by checking foreground window
+Write-Output "Step 4: Detecting popup window..."
+$popupHwnd = [Win32]::GetForegroundWindow()
+$popupRect = New-Object Win32+RECT
+[Win32]::GetWindowRect($popupHwnd, [ref]$popupRect) | Out-Null
 
-$popupHwnd = $null
-$popupRect = $null
+Write-Output "Popup detected at: ($($popupRect.Left), $($popupRect.Top))"
 
-foreach ($wnd in $windowsAfter) {
-    if ($wnd -ne $hwnd) {
-        $rect = New-Object Win32+RECT
-        [Win32]::GetWindowRect($wnd, [ref]$rect) | Out-Null
-        $title = Get-WindowTitle $wnd
-        
-        # Popup should have non-zero position or be different from main window
-        if ($rect.Left -ne $mainRect.Left -or $rect.Top -ne $mainRect.Top) {
-            Write-Output "Found popup: '$title' at ($($rect.Left), $($rect.Top))"
-            $popupHwnd = $wnd
-            $popupRect = $rect
-            break
-        }
-    }
-}
-
-if (-not $popupHwnd) {
-    Write-Output "WARNING: No popup found! Trying foreground window..."
-    # Fallback: just use the main window + offset
-    $popupRect = New-Object Win32+RECT
-    $popupRect.Left = $baseX + 400
-    $popupRect.Top = $baseY + 200
-}
-
-Write-Output "Popup position: ($($popupRect.Left), $($popupRect.Top))"
-
-# Step 4: Click Functions tab (RELATIVE to popup)
+# Click Functions tab (relative to popup)
 $funcX = $popupRect.Left + ${POPUP_FUNCTIONS_X}
 $funcY = $popupRect.Top + ${POPUP_FUNCTIONS_Y}
-Write-Output "Step 4: Click Functions at ($funcX, $funcY)"
+Write-Output "Step 5: Click Functions at ($funcX, $funcY)"
 Click $funcX $funcY
 Start-Sleep -Seconds 1
 
-# Step 5: Click Reload Settings (RELATIVE to popup)
+# Click Reload Settings (relative to popup)
 $reloadX = $popupRect.Left + ${POPUP_RELOAD_X}
 $reloadY = $popupRect.Top + ${POPUP_RELOAD_Y}
-Write-Output "Step 5: Click Reload Settings at ($reloadX, $reloadY)"
+Write-Output "Step 6: Click Reload Settings at ($reloadX, $reloadY)"
 Click $reloadX $reloadY
 Start-Sleep -Seconds 2
 
-# Step 6: Close popup
+# Close popup
 $closeX = $baseX + ${CLOSE_X}
 $closeY = $baseY + ${CLOSE_Y}
-Write-Output "Step 6: Click to close at ($closeX, $closeY)"
+Write-Output "Step 7: Click to close at ($closeX, $closeY)"
 Click $closeX $closeY
 Start-Sleep -Seconds 1
 
-# Step 7: Final cleanup
+# Final cleanup
 $finalX = $baseX + ${FINAL_X}
 $finalY = $baseY + ${FINAL_Y}
-Write-Output "Step 7: Final click at ($finalX, $finalY)"
+Write-Output "Step 8: Final click at ($finalX, $finalY)"
 Click $finalX $finalY
 Start-Sleep -Seconds 1
 
