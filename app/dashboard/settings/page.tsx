@@ -512,7 +512,11 @@ export default function SettingsPage() {
                     {applying ? (
                         <>
                             <Loader2 className="w-6 h-6 animate-spin" />
-                            {queuePosition > 0 ? `Waiting in Queue (#${queuePosition})...` : 'Applying...'}
+                            {automationStatus?.status === 'waiting'
+                                ? 'Waiting for RDP disconnect...'
+                                : queuePosition > 0
+                                    ? `Queue #${queuePosition}`
+                                    : 'Applying Changes...'}
                         </>
                     ) : cooldown > 0 ? (
                         <>
