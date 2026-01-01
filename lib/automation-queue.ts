@@ -173,8 +173,8 @@ class AutomationQueue {
 
         const POPUP_FUNCTIONS_X = 159
         const POPUP_FUNCTIONS_Y = 60
-        const POPUP_RELOAD_X = 258
-        const POPUP_RELOAD_Y = 169
+        const POPUP_RELOAD_X = 345
+        const POPUP_RELOAD_Y = 288
 
         const scriptContent = `
 Add-Type -AssemblyName System.Windows.Forms
