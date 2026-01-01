@@ -73,8 +73,8 @@ class AutomationQueue {
         try {
             this.broadcastQueueStatus(io)
 
-            // 1. Wait for RDP disconnect
-            await this.waitForConsoleSession(io, item.iggId)
+            // 1. Wait for RDP disconnect (Disabled for tracing)
+            // await this.waitForConsoleSession(io, item.iggId)
 
             // 2. Processing status
             if (io) {
@@ -216,6 +216,9 @@ public class Win32 {
 
     [DllImport("user32.dll")]
     public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    public static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder lpString, int nMaxCount);
 
     [DllImport("kernel32.dll")]
     public static extern uint GetCurrentThreadId();
@@ -365,7 +368,11 @@ while ($true) {
     }
     
     if ((New-TimeSpan -Start $startTime -End (Get-Date)).TotalSeconds -gt 10) {
-        Write-Output "WARNING: Timeout waiting for separate popup window. Falling back to main window."
+        Write-Output "WARNING: Timeout waiting for separate popup window."
+        $fgTitle = New-Object System.Text.StringBuilder 256
+        [Win32]::GetWindowText($currentFg, $fgTitle, $fgTitle.Capacity) | Out-Null
+        Write-Output "DEBUG: Current foreground window title: $($fgTitle.ToString())"
+        Write-Output "Falling back to main window."
         $popupHwnd = $mainHwnd
         break
     }
@@ -385,9 +392,9 @@ Write-Output "Step 5: Click Functions at ($funcX, $funcY)"
 Click $funcX $funcY
 Start-Sleep -Seconds 1
 
-# Reload Settings (relative to main)
-$reloadX = $baseX + ${POPUP_RELOAD_X}
-$reloadY = $baseY + ${POPUP_RELOAD_Y}
+# Reload Settings (relative to popup)
+$reloadX = $popupRect.Left + ${POPUP_RELOAD_X}
+$reloadY = $popupRect.Top + ${POPUP_RELOAD_Y}
 Write-Output "Step 6: Click Reload Settings at ($reloadX, $reloadY)"
 Click $reloadX $reloadY
 Start-Sleep -Seconds 2
