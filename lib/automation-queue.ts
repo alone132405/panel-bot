@@ -285,6 +285,8 @@ $botProcess = Get-Process | Where-Object { $_.MainWindowTitle -like "*Lords Mobi
 
 if (-not $botProcess) {
     Write-Output "ERROR: Lords Mobile Bot not found!"
+    Write-Output "--- DEBUG: Current Window Titles ---"
+    Get-Process | Where-Object { $_.MainWindowTitle } | Select-Object -ExpandProperty MainWindowTitle -First 5 | ForEach-Object { Write-Output "Found Window: $_" }
     exit 1
 }
 
