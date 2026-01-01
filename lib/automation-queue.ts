@@ -252,7 +252,7 @@ function Click($x, $y) {
 
 function DoubleClick($x, $y) {
     Click $x $y
-    Start-Sleep -Milliseconds 50
+    Start-Sleep -Milliseconds 100
     Click $x $y
 }
 
@@ -349,13 +349,32 @@ Write-Output "Step 3: Double-click Account at ($accX, $accY)"
 DoubleClick $accX $accY
 Start-Sleep -Seconds 3
 
-# Step 4: Detect popup by checking foreground window
-Write-Output "Step 4: Detecting popup window..."
-$popupHwnd = [Win32]::GetForegroundWindow()
+# Step 4: Detect popup by waiting for foreground window to change from main
+Write-Output "Step 4: Detecting account popup..."
+$popupHwnd = [IntPtr]::Zero
+$startTime = Get-Date
+while ($true) {
+    $currentFg = [Win32]::GetForegroundWindow()
+    # If the foreground window changed and is NOT the main window, it's our popup
+    if ($currentFg -ne $mainHwnd -and $currentFg -ne [IntPtr]::Zero) {
+        $popupHwnd = $currentFg
+        Write-Output "SUCCESS: Account popup detected. Handle: $popupHwnd"
+        break
+    }
+    
+    if ((New-TimeSpan -Start $startTime -End (Get-Date)).TotalSeconds -gt 10) {
+        Write-Output "WARNING: Timeout waiting for separate popup window. Falling back to main window."
+        $popupHwnd = $mainHwnd
+        break
+    }
+    Start-Sleep -Milliseconds 500
+}
+
 $popupRect = New-Object Win32+RECT
 [Win32]::GetWindowRect($popupHwnd, [ref]$popupRect) | Out-Null
 
-Write-Output "Popup detected at: ($($popupRect.Left), $($popupRect.Top))"
+Write-Output "Popup Window Rect: Left=$($popupRect.Left), Top=$($popupRect.Top), Right=$($popupRect.Right), Bottom=$($popupRect.Bottom)"
+Write-Output "Clicking relative to popup at ($($popupRect.Left), $($popupRect.Top))"
 
 # Functions tab (relative to popup)
 $funcX = $popupRect.Left + ${POPUP_FUNCTIONS_X}
