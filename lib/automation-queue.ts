@@ -73,8 +73,8 @@ class AutomationQueue {
         try {
             this.broadcastQueueStatus(io)
 
-            // 1. Wait for RDP disconnect
-            await this.waitForConsoleSession(io, item.iggId)
+            // 1. Wait for RDP disconnect (Disabled for tracing)
+            // await this.waitForConsoleSession(io, item.iggId)
 
             // 2. Processing status
             if (io) {
