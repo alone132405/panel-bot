@@ -383,9 +383,9 @@ Write-Output "Step 5: Click Functions at ($funcX, $funcY)"
 Click $funcX $funcY
 Start-Sleep -Seconds 1
 
-# Reload Settings (relative to popup)
-$reloadX = $popupRect.Left + ${POPUP_RELOAD_X}
-$reloadY = $popupRect.Top + ${POPUP_RELOAD_Y}
+# Reload Settings (relative to main)
+$reloadX = $baseX + ${POPUP_RELOAD_X}
+$reloadY = $baseY + ${POPUP_RELOAD_Y}
 Write-Output "Step 6: Click Reload Settings at ($reloadX, $reloadY)"
 Click $reloadX $reloadY
 Start-Sleep -Seconds 2
