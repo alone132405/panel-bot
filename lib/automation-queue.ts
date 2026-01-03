@@ -389,7 +389,7 @@ Write-Output "Clicking relative to popup at ($($popupRect.Left), $($popupRect.To
 $funcX = $popupRect.Left + ${POPUP_FUNCTIONS_X}
 $funcY = $popupRect.Top + ${POPUP_FUNCTIONS_Y}
 Write-Output "Step 5: Click Functions at ($funcX, $funcY)"
-Click $funcX $funcY
+DoubleClick $funcX $funcY
 Start-Sleep -Seconds 1
 
 # Reload Settings (relative to popup)
