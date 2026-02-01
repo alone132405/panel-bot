@@ -173,6 +173,7 @@ export default function SettingsPage() {
                 }
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [queueStatus, selectedIggId])
 
     // Handle completion via socket event to clear state if needed

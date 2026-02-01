@@ -167,6 +167,7 @@ export default function ReportsPage() {
         if (selectedIggId) {
             loadFiles()
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedIggId])
 
     const loadFiles = async () => {

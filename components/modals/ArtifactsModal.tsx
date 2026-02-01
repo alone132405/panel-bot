@@ -30,6 +30,7 @@ export default function ArtifactsModal({ isOpen, onClose, iggId }: ArtifactsModa
         if (isOpen && iggId) {
             loadSettings()
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, iggId])
 
     const loadSettings = async () => {

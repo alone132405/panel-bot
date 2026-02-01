@@ -15,9 +15,18 @@ interface GuildFestModalProps {
 interface Mission {
     id: number
     name: string
+    // Guild tab fields
+    enabled: boolean
     minPoints: number
     maxPoints: number
-    enabled: boolean
+    // Personal tab fields
+    automated: 'Yes' | 'No' | 'Partially'
+    solo120Enabled: boolean
+    solo120MinPoints: number
+    solo120MaxPoints: number
+    solo200Enabled: boolean
+    solo200MinPoints: number
+    solo200MaxPoints: number
 }
 
 // Mission ID to name mapping
@@ -68,18 +77,40 @@ const MISSION_MAP: { [key: number]: string } = {
     86: 'Spend Artifact Coins',
 }
 
+// Map IsAutomated value to display string
+const automatedValueToString = (val: number): 'Yes' | 'No' | 'Partially' => {
+    if (val === 2) return 'Yes'
+    if (val === 1) return 'Partially'
+    return 'No'
+}
+
+// Map display string to IsAutomated value
+const automatedStringToValue = (str: 'Yes' | 'No' | 'Partially'): number => {
+    if (str === 'Yes') return 2
+    if (str === 'Partially') return 1
+    return 0
+}
+
 // Default missions with their IDs
 const DEFAULT_MISSIONS: Mission[] = Object.entries(MISSION_MAP).map(([id, name]) => ({
     id: parseInt(id),
     name,
+    enabled: false,
     minPoints: 175,
     maxPoints: 355,
-    enabled: false,
+    automated: 'No' as const,
+    solo120Enabled: false,
+    solo120MinPoints: 0,
+    solo120MaxPoints: 356,
+    solo200Enabled: false,
+    solo200MinPoints: 0,
+    solo200MaxPoints: 356,
 }))
 
 export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModalProps) {
     const [settings, setSettings] = useState<any>(null)
     const [loading, setLoading] = useState(true)
+    const [activeTab, setActiveTab] = useState<'guild' | 'personal'>('guild')
 
     // Prevent background scroll when modal is open
     useBodyScrollLock(isOpen)
@@ -99,6 +130,7 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
         if (isOpen && iggId) {
             loadSettings()
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, iggId])
 
     const loadSettings = async () => {
@@ -136,11 +168,19 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                             const updatedMissions = DEFAULT_MISSIONS.map((mission) => {
                                 const missionKey = mission.id.toString()
                                 if (missionData[missionKey]) {
+                                    const m = missionData[missionKey]
                                     return {
                                         ...mission,
-                                        enabled: missionData[missionKey].ToComplete ?? false,
-                                        minPoints: missionData[missionKey].TakeIfHigherThanPoints ?? 175,
-                                        maxPoints: missionData[missionKey].MaxPoints ?? 355,
+                                        enabled: m.ToComplete ?? false,
+                                        minPoints: m.TakeIfHigherThanPoints ?? 175,
+                                        maxPoints: m.MaxPoints ?? 355,
+                                        automated: automatedValueToString(m.IsAutomated ?? 0),
+                                        solo120Enabled: m.ToCompleteSolo120 ?? false,
+                                        solo120MinPoints: m.TakeIfHigherThanPointsSolo120 ?? 0,
+                                        solo120MaxPoints: m.MaxPointsSolo120 ?? 356,
+                                        solo200Enabled: m.ToCompleteSolo200 ?? false,
+                                        solo200MinPoints: m.TakeIfHigherThanPointsSolo200 ?? 0,
+                                        solo200MaxPoints: m.MaxPointsSolo200 ?? 356,
                                     }
                                 }
                                 return mission
@@ -171,6 +211,13 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                     ToComplete: mission.enabled,
                     TakeIfHigherThanPoints: mission.minPoints,
                     MaxPoints: mission.maxPoints,
+                    IsAutomated: automatedStringToValue(mission.automated),
+                    ToCompleteSolo120: mission.solo120Enabled,
+                    TakeIfHigherThanPointsSolo120: mission.solo120MinPoints,
+                    MaxPointsSolo120: mission.solo120MaxPoints,
+                    ToCompleteSolo200: mission.solo200Enabled,
+                    TakeIfHigherThanPointsSolo200: mission.solo200MinPoints,
+                    MaxPointsSolo200: mission.solo200MaxPoints,
                 }
             })
 
@@ -218,10 +265,13 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
         }
     }
 
-    const updateMission = (index: number, field: 'enabled' | 'minPoints' | 'maxPoints', value: any) => {
+    const updateMission = (index: number, field: keyof Mission, value: any) => {
         const updatedMissions = [...missions]
-        if (field === 'minPoints' || field === 'maxPoints') {
+        if (['minPoints', 'maxPoints'].includes(field)) {
             value = Math.min(355, Math.max(0, value))
+        }
+        if (['solo120MinPoints', 'solo120MaxPoints', 'solo200MinPoints', 'solo200MaxPoints'].includes(field)) {
+            value = Math.min(356, Math.max(0, value))
         }
         updatedMissions[index] = { ...updatedMissions[index], [field]: value }
         setMissions(updatedMissions)
@@ -294,6 +344,28 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                             </button>
                         </div>
 
+                        {/* Tabs */}
+                        <div className="flex border-b border-white/10 bg-background-tertiary/30">
+                            <button
+                                onClick={() => setActiveTab('guild')}
+                                className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'guild'
+                                    ? 'text-primary-400 border-b-2 border-primary-400'
+                                    : 'text-gray-400 hover:text-gray-300'
+                                    }`}
+                            >
+                                Guild
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('personal')}
+                                className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'personal'
+                                    ? 'text-primary-400 border-b-2 border-primary-400'
+                                    : 'text-gray-400 hover:text-gray-300'
+                                    }`}
+                            >
+                                Personal
+                            </button>
+                        </div>
+
                         {/* Content */}
                         <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-6 scrollbar-thin">
                             {loading ? (
@@ -302,160 +374,317 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                                 </div>
                             ) : (
                                 <div className="max-w-7xl space-y-6">
-                                    {/* Settings Section */}
-                                    <div className="space-y-4">
-                                        <h3 className="text-base sm:text-lg font-bold text-white">Settings</h3>
+                                    {activeTab === 'guild' && (
+                                        <>
+                                            {/* Settings Section */}
+                                            <div className="space-y-4">
+                                                <h3 className="text-base sm:text-lg font-bold text-white">Settings</h3>
 
-                                        <div className="space-y-3">
-                                            {/* Row 1: Collect Rewards */}
-                                            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer w-fit">
-                                                <label className="flex items-center gap-2 cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={collectRewards}
-                                                        onChange={(e) => setCollectRewards(e.target.checked)}
-                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                    />
-                                                    <span className="text-sm text-white">Collect Rewards (Randomly Selected)</span>
-                                                </label>
-                                            </div>
-
-                                            {/* Row 2: Complete Missions and Send Mail */}
-                                            <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] items-center gap-3 md:gap-4">
-                                                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                    <label className="flex items-center gap-2 cursor-pointer">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={completeMissions}
-                                                            onChange={(e) => setCompleteMissions(e.target.checked)}
-                                                            className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                        />
-                                                        <span className="text-sm text-white">Complete Missions?</span>
-                                                    </label>
-                                                </div>
-
-                                                <div className="flex flex-col md:flex-row md:items-center gap-2">
-                                                    <label className="text-sm text-gray-300 whitespace-nowrap">Send Mail to Player:</label>
-                                                    <input
-                                                        type="text"
-                                                        value={sendMailToPlayer}
-                                                        onChange={(e) => setSendMailToPlayer(e.target.value)}
-                                                        className="w-full md:flex-1 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                        placeholder="Player name"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            {/* Row 3: Buy Extra Mission */}
-                                            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer w-fit">
-                                                <label className="flex items-center gap-2 cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={buyExtraMission}
-                                                        onChange={(e) => setBuyExtraMission(e.target.checked)}
-                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                    />
-                                                    <span className="text-sm text-white">Buy Extra Mission?</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Missions Table */}
-                                    <div className="space-y-4">
-                                        <h3 className="text-base sm:text-lg font-bold text-white">Missions</h3>
-                                        <div className="hidden md:block overflow-x-auto rounded-xl border border-white/10">
-                                            <table className="w-full">
-                                                <thead className="bg-surface/50">
-                                                    <tr>
-                                                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-300 w-12"></th>
-                                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Mission Name</th>
-                                                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-300">Min Points</th>
-                                                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-300">Max Points</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-white/10">
-                                                    {missions.map((mission, index) => (
-                                                        <tr key={index} className="hover:bg-surface/30 transition-colors">
-                                                            <td className="px-4 py-3 text-center">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={mission.enabled}
-                                                                    onChange={(e) => updateMission(index, 'enabled', e.target.checked)}
-                                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                                />
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm text-white">{mission.name}</td>
-                                                            <td className="px-4 py-3 text-center">
-                                                                <input
-                                                                    type="number"
-                                                                    value={mission.minPoints}
-                                                                    min={0}
-                                                                    max={355}
-                                                                    onChange={(e) => updateMission(index, 'minPoints', parseInt(e.target.value) || 0)}
-                                                                    className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
-                                                                />
-                                                            </td>
-                                                            <td className="px-4 py-3 text-center">
-                                                                <input
-                                                                    type="number"
-                                                                    min={0}
-                                                                    max={355}
-                                                                    value={mission.maxPoints}
-                                                                    onChange={(e) => updateMission(index, 'maxPoints', parseInt(e.target.value) || 0)}
-                                                                    className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                                />
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-
-                                        {/* Mobile Card View */}
-                                        <div className="md:hidden space-y-4">
-                                            {missions.map((mission, index) => (
-                                                <div key={index} className="glass-card p-4 space-y-4">
-                                                    <div className="flex items-start gap-3">
-                                                        <label className="flex items-center gap-2 cursor-pointer pt-1">
+                                                <div className="space-y-3">
+                                                    {/* Row 1: Collect Rewards */}
+                                                    <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer w-fit">
+                                                        <label className="flex items-center gap-2 cursor-pointer">
                                                             <input
                                                                 type="checkbox"
-                                                                checked={mission.enabled}
-                                                                onChange={(e) => updateMission(index, 'enabled', e.target.checked)}
+                                                                checked={collectRewards}
+                                                                onChange={(e) => setCollectRewards(e.target.checked)}
                                                                 className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
                                                             />
+                                                            <span className="text-sm text-white">Collect Rewards (Randomly Selected)</span>
                                                         </label>
-                                                        <span className="text-sm text-white font-medium flex-1">{mission.name}</span>
                                                     </div>
 
-                                                    <div className="grid grid-cols-2 gap-3">
-                                                        <div className="space-y-1">
-                                                            <label className="text-xs text-gray-400">Min Points</label>
-                                                            <input
-                                                                type="number"
-                                                                min={0}
-                                                                max={355}
-                                                                value={mission.minPoints}
-                                                                onChange={(e) => updateMission(index, 'minPoints', parseInt(e.target.value) || 0)}
-                                                                className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                            />
+                                                    {/* Row 2: Complete Missions and Send Mail */}
+                                                    <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] items-center gap-3 md:gap-4">
+                                                        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
+                                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={completeMissions}
+                                                                    onChange={(e) => setCompleteMissions(e.target.checked)}
+                                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
+                                                                />
+                                                                <span className="text-sm text-white">Complete Missions?</span>
+                                                            </label>
                                                         </div>
-                                                        <div className="space-y-1">
-                                                            <label className="text-xs text-gray-400">Max Points</label>
+
+                                                        <div className="flex flex-col md:flex-row md:items-center gap-2">
+                                                            <label className="text-sm text-gray-300 whitespace-nowrap">Send Mail to Player:</label>
                                                             <input
-                                                                type="number"
-                                                                min={0}
-                                                                max={355}
-                                                                value={mission.maxPoints}
-                                                                onChange={(e) => updateMission(index, 'maxPoints', parseInt(e.target.value) || 0)}
-                                                                className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                                type="text"
+                                                                value={sendMailToPlayer}
+                                                                onChange={(e) => setSendMailToPlayer(e.target.value)}
+                                                                className="w-full md:flex-1 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                                placeholder="Player name"
                                                             />
                                                         </div>
                                                     </div>
+
+                                                    {/* Row 3: Buy Extra Mission */}
+                                                    <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer w-fit">
+                                                        <label className="flex items-center gap-2 cursor-pointer">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={buyExtraMission}
+                                                                onChange={(e) => setBuyExtraMission(e.target.checked)}
+                                                                className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
+                                                            />
+                                                            <span className="text-sm text-white">Buy Extra Mission?</span>
+                                                        </label>
+                                                    </div>
                                                 </div>
-                                            ))}
+                                            </div>
+
+                                            {/* Guild Missions Table */}
+                                            <div className="space-y-4">
+                                                <h3 className="text-base sm:text-lg font-bold text-white">Guild Missions</h3>
+                                                <div className="hidden md:block overflow-x-auto rounded-xl border border-white/10">
+                                                    <table className="w-full">
+                                                        <thead className="bg-surface/50">
+                                                            <tr>
+                                                                <th className="px-4 py-3 text-center text-sm font-medium text-gray-300 w-12"></th>
+                                                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Mission Name</th>
+                                                                <th className="px-4 py-3 text-center text-sm font-medium text-gray-300">Min Points</th>
+                                                                <th className="px-4 py-3 text-center text-sm font-medium text-gray-300">Max Points</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="divide-y divide-white/10">
+                                                            {missions.map((mission, index) => (
+                                                                <tr key={index} className="hover:bg-surface/30 transition-colors">
+                                                                    <td className="px-4 py-3 text-center">
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={mission.enabled}
+                                                                            onChange={(e) => updateMission(index, 'enabled', e.target.checked)}
+                                                                            className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
+                                                                        />
+                                                                    </td>
+                                                                    <td className="px-4 py-3 text-sm text-white">{mission.name}</td>
+                                                                    <td className="px-4 py-3 text-center">
+                                                                        <input
+                                                                            type="number"
+                                                                            value={mission.minPoints}
+                                                                            min={0}
+                                                                            max={355}
+                                                                            onChange={(e) => updateMission(index, 'minPoints', parseInt(e.target.value) || 0)}
+                                                                            className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
+                                                                        />
+                                                                    </td>
+                                                                    <td className="px-4 py-3 text-center">
+                                                                        <input
+                                                                            type="number"
+                                                                            min={0}
+                                                                            max={355}
+                                                                            value={mission.maxPoints}
+                                                                            onChange={(e) => updateMission(index, 'maxPoints', parseInt(e.target.value) || 0)}
+                                                                            className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                                        />
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                {/* Mobile Card View for Guild */}
+                                                <div className="md:hidden space-y-4">
+                                                    {missions.map((mission, index) => (
+                                                        <div key={index} className="glass-card p-4 space-y-4">
+                                                            <div className="flex items-start gap-3">
+                                                                <label className="flex items-center gap-2 cursor-pointer pt-1">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={mission.enabled}
+                                                                        onChange={(e) => updateMission(index, 'enabled', e.target.checked)}
+                                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
+                                                                    />
+                                                                </label>
+                                                                <span className="text-sm text-white font-medium flex-1">{mission.name}</span>
+                                                            </div>
+
+                                                            <div className="grid grid-cols-2 gap-3">
+                                                                <div className="space-y-1">
+                                                                    <label className="text-xs text-gray-400">Min Points</label>
+                                                                    <input
+                                                                        type="number"
+                                                                        min={0}
+                                                                        max={355}
+                                                                        value={mission.minPoints}
+                                                                        onChange={(e) => updateMission(index, 'minPoints', parseInt(e.target.value) || 0)}
+                                                                        className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                                    />
+                                                                </div>
+                                                                <div className="space-y-1">
+                                                                    <label className="text-xs text-gray-400">Max Points</label>
+                                                                    <input
+                                                                        type="number"
+                                                                        min={0}
+                                                                        max={355}
+                                                                        value={mission.maxPoints}
+                                                                        onChange={(e) => updateMission(index, 'maxPoints', parseInt(e.target.value) || 0)}
+                                                                        className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {activeTab === 'personal' && (
+                                        <div className="space-y-4">
+                                            <h3 className="text-base sm:text-lg font-bold text-white">Personal (Solo) Missions</h3>
+                                            <div className="overflow-x-auto rounded-xl border border-white/10">
+                                                <table className="w-full min-w-[800px]">
+                                                    <thead className="bg-surface/50">
+                                                        <tr>
+                                                            <th className="px-3 py-3 text-left text-sm font-medium text-gray-300">Mission Name</th>
+                                                            <th className="px-3 py-3 text-center text-sm font-medium text-gray-300">120%</th>
+                                                            <th className="px-3 py-3 text-center text-sm font-medium text-gray-300">120% Min Points</th>
+                                                            <th className="px-3 py-3 text-center text-sm font-medium text-gray-300">120% Max Points</th>
+                                                            <th className="px-3 py-3 text-center text-sm font-medium text-gray-300">200%</th>
+                                                            <th className="px-3 py-3 text-center text-sm font-medium text-gray-300">200% Min Points</th>
+                                                            <th className="px-3 py-3 text-center text-sm font-medium text-gray-300">200% Max Points</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-white/10">
+                                                        {missions.map((mission, index) => (
+                                                            <tr key={index} className="hover:bg-surface/30 transition-colors">
+                                                                <td className="px-3 py-3 text-sm text-white">{mission.name}</td>
+                                                                <td className="px-3 py-3 text-center">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={mission.solo120Enabled}
+                                                                        onChange={(e) => updateMission(index, 'solo120Enabled', e.target.checked)}
+                                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
+                                                                    />
+                                                                </td>
+                                                                <td className="px-3 py-3 text-center">
+                                                                    <input
+                                                                        type="number"
+                                                                        value={mission.solo120MinPoints}
+                                                                        min={0}
+                                                                        max={356}
+                                                                        onChange={(e) => updateMission(index, 'solo120MinPoints', parseInt(e.target.value) || 0)}
+                                                                        className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                                    />
+                                                                </td>
+                                                                <td className="px-3 py-3 text-center">
+                                                                    <input
+                                                                        type="number"
+                                                                        value={mission.solo120MaxPoints}
+                                                                        min={0}
+                                                                        max={356}
+                                                                        onChange={(e) => updateMission(index, 'solo120MaxPoints', parseInt(e.target.value) || 0)}
+                                                                        className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                                    />
+                                                                </td>
+                                                                <td className="px-3 py-3 text-center">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={mission.solo200Enabled}
+                                                                        onChange={(e) => updateMission(index, 'solo200Enabled', e.target.checked)}
+                                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
+                                                                    />
+                                                                </td>
+                                                                <td className="px-3 py-3 text-center">
+                                                                    <input
+                                                                        type="number"
+                                                                        value={mission.solo200MinPoints}
+                                                                        min={0}
+                                                                        max={356}
+                                                                        onChange={(e) => updateMission(index, 'solo200MinPoints', parseInt(e.target.value) || 0)}
+                                                                        className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                                    />
+                                                                </td>
+                                                                <td className="px-3 py-3 text-center">
+                                                                    <input
+                                                                        type="number"
+                                                                        value={mission.solo200MaxPoints}
+                                                                        min={0}
+                                                                        max={356}
+                                                                        onChange={(e) => updateMission(index, 'solo200MaxPoints', parseInt(e.target.value) || 0)}
+                                                                        className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                                    />
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            {/* Mobile Card View for Personal */}
+                                            <div className="md:hidden space-y-4">
+                                                {missions.map((mission, index) => (
+                                                    <div key={index} className="glass-card p-4 space-y-4">
+                                                        <div className="flex items-start gap-3">
+                                                            <span className="text-sm text-white font-medium flex-1">{mission.name}</span>
+                                                        </div>
+
+                                                        {/* Solo 120 */}
+                                                        <div className="space-y-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={mission.solo120Enabled}
+                                                                    onChange={(e) => updateMission(index, 'solo120Enabled', e.target.checked)}
+                                                                    className="w-4 h-4 rounded bg-background-tertiary border-white/10 text-primary-500"
+                                                                />
+                                                                <span className="text-xs text-gray-400">Solo 120%</span>
+                                                            </div>
+                                                            <div className="grid grid-cols-2 gap-2">
+                                                                <input
+                                                                    type="number"
+                                                                    value={mission.solo120MinPoints}
+                                                                    onChange={(e) => updateMission(index, 'solo120MinPoints', parseInt(e.target.value) || 0)}
+                                                                    placeholder="Min"
+                                                                    className="w-full px-2 py-1 bg-background-tertiary border border-white/10 rounded text-xs text-white"
+                                                                />
+                                                                <input
+                                                                    type="number"
+                                                                    value={mission.solo120MaxPoints}
+                                                                    onChange={(e) => updateMission(index, 'solo120MaxPoints', parseInt(e.target.value) || 0)}
+                                                                    placeholder="Max"
+                                                                    className="w-full px-2 py-1 bg-background-tertiary border border-white/10 rounded text-xs text-white"
+                                                                />
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Solo 200 */}
+                                                        <div className="space-y-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={mission.solo200Enabled}
+                                                                    onChange={(e) => updateMission(index, 'solo200Enabled', e.target.checked)}
+                                                                    className="w-4 h-4 rounded bg-background-tertiary border-white/10 text-primary-500"
+                                                                />
+                                                                <span className="text-xs text-gray-400">Solo 200%</span>
+                                                            </div>
+                                                            <div className="grid grid-cols-2 gap-2">
+                                                                <input
+                                                                    type="number"
+                                                                    value={mission.solo200MinPoints}
+                                                                    onChange={(e) => updateMission(index, 'solo200MinPoints', parseInt(e.target.value) || 0)}
+                                                                    placeholder="Min"
+                                                                    className="w-full px-2 py-1 bg-background-tertiary border border-white/10 rounded text-xs text-white"
+                                                                />
+                                                                <input
+                                                                    type="number"
+                                                                    value={mission.solo200MaxPoints}
+                                                                    onChange={(e) => updateMission(index, 'solo200MaxPoints', parseInt(e.target.value) || 0)}
+                                                                    placeholder="Max"
+                                                                    className="w-full px-2 py-1 bg-background-tertiary border border-white/10 rounded text-xs text-white"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
                             )}
                         </div>

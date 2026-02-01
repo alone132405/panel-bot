@@ -122,6 +122,7 @@ export default function PetsModal({ isOpen, onClose, iggId }: PetsModalProps) {
             loadSettings()
             setSearchQuery('')
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, iggId])
 
     const loadSettings = async () => {

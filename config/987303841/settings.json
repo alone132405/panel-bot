@@ -1,51 +1,3542 @@
 {
-  "reportsPath": "C:\\Users\\Administrator\\Downloads\\LordsBot-Release\\config\\987303841\\stats\\exported",
   "connectionSettings": {
+    "savedProxy": "92.113.231.78:7163:njtlvaaz:tl95ndc8b94l",
+    "isTaiwan": false,
+    "resetConnection": false,
     "reconnectTime": 5,
-    "otherLoginTime": 30
+    "otherLoginTime": 300,
+    "workerSpeed": 100,
+    "cmdInterval": 2000,
+    "resetTime": 60,
+    "resetTimeBegin": 50,
+    "saveLogToFile": false,
+    "dontClearLog": false,
+    "refreshKey": false,
+    "logResetTime": 2,
+    "postToWebhook": false,
+    "postKeyExpiry": false,
+    "postStatusChange": false,
+    "postScheduleChange": false,
+    "postOtherLogin": false,
+    "postRSSLimit": false
   },
   "miscSettings": {
-    "useVipPoints": true,
-    "useExpItems": true
+    "troveTime": 3,
+    "useVipPoints": false,
+    "useExpItems": false,
+    "autoOpenChests": false,
+    "autoAttackSkirmish": false,
+    "autoAttackFireTrial": false,
+    "recallTroopsForSkirmish": false,
+    "autoClaimKingdomGifts": false,
+    "skirmishTroopPercent": 90,
+    "useResourceFromBag": false,
+    "autoTreasureTrove": false,
+    "useStarScrolls": false,
+    "skirmishChapter": 8,
+    "assignedWebhook": 0,
+    "giftResetTime": "1.00:00:00",
+    "dayGiftResetTime": "00:00:00",
+    "giftResetType": 0,
+    "giftResetDay": 1,
+    "saveGuildStats": false,
+    "saveFestStats": false,
+    "saveGuildList": false,
+    "hourReset": 0,
+    "giftExpMode": 1,
+    "giftUpload": false,
+    "scheduleBuildSpam": false,
+    "scheduleBuildSpamHours": 6,
+    "scheduleBuildSpamAmount": 20,
+    "scheduleBuildSpamDelay": 7
   },
-  "questSettings": {
-    "dailyLoginGift": true
+  "statSettings": {
+    "pointGoalHunt": [
+      0,
+      1,
+      3,
+      9,
+      18
+    ],
+    "pointGoalPurchase": [
+      1,
+      2,
+      4,
+      8,
+      16
+    ],
+    "finalPointGoalHunt": 50,
+    "finalPointGoalPurchase": 50
+  },
+  "mailSettings": {
+    "autoMarkRead": false,
+    "autoDeleteGameMail": false,
+    "autoDeleteGuildMail": false,
+    "autoDeleteSystemMail": false,
+    "autoDeleteCombatMail": false
   },
   "guildSettings": {
-    "sendGuildHelp": true,
-    "requestGuildHelp": true
+    "sendGuildHelp": false,
+    "requestGuildHelp": false,
+    "autoGuildGifts": false,
+    "autoFortunePackets": false,
+    "joinShowdown": false,
+    "autoSlowHelpSpeed": false,
+    "guildCheckDelay": 300,
+    "helpCheckDelay": 30
+  },
+  "questSettings": {
+    "dailyLoginGift": false,
+    "autoVIPQuest": false,
+    "autoTurfQuest": false,
+    "autoChapterQuest": false,
+    "autoAdminQuest": false,
+    "autoGuildQuest": false,
+    "adventureLog": false,
+    "autoMysteryBox": false,
+    "autoBogo": false,
+    "collectDailyQuests": false,
+    "sendEmoji": false,
+    "attackLabQuest": false,
+    "attackTycoonQuest": false,
+    "shelterQuest": false,
+    "openAllGuildQuest": false,
+    "openAllAdminQuest": false,
+    "questReserve": 10
+  },
+  "speedUpSettings": {
+    "useSpeedUps": false,
+    "waitForHelp": false,
+    "waitHelpValue": 30,
+    "ignoreHomeKingdomRule": false,
+    "generalForBuildOnly": false,
+    "autoBuildingSpeedUp": false,
+    "autoResearchSpeedUp": false,
+    "autoTrainingSpeedUp": false,
+    "autoHealingSpeedUp": false,
+    "autoMergingSpeedUp": false,
+    "autoTrapSpeedUp": false,
+    "autoTrapRepairSpeedUp": false,
+    "autoLunarGearSpeedUp": false,
+    "autoGearSpeedUp": false,
+    "autoWallSpeedUp": false,
+    "boostingMode": false,
+    "maxSpeedUpExcess": "00:05:00"
+  },
+  "turfQuests": {
+    "attackLabyrinth": false,
+    "attackKingdomTycoon": false,
+    "useHolyStars": false,
+    "useLuckTokens": false,
+    "labOnlyFree": false,
+    "ktOnlyFree": false,
+    "labyrinthMode": 1
+  },
+  "otherTurfEvents": {
+    "attackLabyrinthOther": false,
+    "collectLabWeeklyChallenge": false,
+    "attackKTOther": false,
+    "collectKTWeeklyChallenge": false,
+    "KTMode": 1,
+    "LabOnlyFree": false,
+    "KTOnlyFree": false,
+    "LabModeOther": 1,
+    "PlayLottery": false,
+    "LotteryOnlyFree": false,
+    "PlayFC": false,
+    "CollectFCRewards": false,
+    "PlayRace": false,
+    "PlayPinball": false,
+    "CollectPinballRewards": false,
+    "CollectRaceRewards": false,
+    "PlayLimitPass": false
+  },
+  "kingdomBoosts": {
+    "useFoodBoost": false,
+    "useStoneBoost": false,
+    "useWoodBoost": false,
+    "useOreBoost": false,
+    "useGoldBoost": false,
+    "useGatherBoost": false,
+    "useReducedUpkeep": false,
+    "useReduceUpkeep25": false
+  },
+  "cargoShipSettings": {
+    "allowTrading": false,
+    "tradeFood": false,
+    "tradeStone": false,
+    "tradeWood": false,
+    "tradeOre": false,
+    "tradeGold": false,
+    "ignoreFood": false,
+    "ignoreStone": false,
+    "ignoreWood": false,
+    "ignoreOre": false,
+    "ignoreGold": false,
+    "ignoreAnima": false,
+    "ignoreLunite": false,
+    "ignoreSpeedUp": false,
+    "exchangeRssItemOnly": false,
+    "useRssFromBagIfNeeded": false,
+    "exchangeMinQuality": 1
   },
   "rallySettings": {
     "joinRallies": false,
-    "rallyLimit": 5,
-    "maxWalkTime": 30,
-    "levelToAttack": [
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true
-    ],
-    "checkLab": false,
-    "dontFillRally": true,
+    "craftEssences": false,
+    "dontFillRally": false,
     "noSiege": false,
     "noT5": false,
-    "oneType": true,
+    "oneType": false,
     "addBuffers": false,
-    "maxRallyTime": null,
+    "minEssenceLevel": 28,
     "extraSpace": 5,
+    "rallyLimit": 5,
+    "maxWalkTime": 30,
     "rejoinWaitTime": 10,
     "rallyTroopType": 0,
-    "craftEssences": false,
-    "keepEssSlotFree": true,
-    "minEssenceLevel": 28
+    "maxRallyTime": 2,
+    "keepEssSlotFree": false,
+    "checkLab": false,
+    "levelToAttack": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "protectionSettings": {
+    "alwaysOpenShield": false,
+    "openShieldWhenUnderAttack": false,
+    "openShieldWhenScouted": false,
+    "openShieldWhenRallied": false,
+    "biggerSheildsFirst": false,
+    "alwaysAntiScout": false,
+    "useLongerAnti": false,
+    "antiScoutWhenScout": false,
+    "recallGatherTroopsWhenUnderAttack": false,
+    "recallGatherTroopsWhenScouted": false,
+    "recallGatherTroopsOnConflict": false,
+    "sendTroopsToRegather": false,
+    "dontShelterSiege": false,
+    "regatherWaitTime": 30,
+    "shieldRandomTime": 5,
+    "ShelterType": 2,
+    "AttackShelterType": 1,
+    "shieldRedeployTime": 120,
+    "antiRedeployTime": 5,
+    "recallShelterTroopsAfterAttack": false,
+    "preferredShield": 1
+  },
+  "supplySettings": {
+    "sendResources": false,
+    "useBagResource": false,
+    "randomizeSpeed": false,
+    "speedGear": false,
+    "supplySpeed": 0.1,
+    "maxTravelTime": 600,
+    "playerToSend": "konoha vault",
+    "reservedRss": [
+      500000,
+      500000,
+      500000,
+      500000,
+      500000
+    ],
+    "supplyMin": [
+      1000000,
+      1000000,
+      1000000,
+      1000000,
+      1000000
+    ],
+    "reservedBagRss": [
+      100,
+      100,
+      100,
+      100,
+      100
+    ],
+    "typesToSend": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "bagTypesToSend": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "gatherSettings": {
+    "gatherResources": false,
+    "gatherLowestResources": false,
+    "ignoreLevelForGems": false,
+    "clearTiles": false,
+    "targetHigherLevel": false,
+    "leaveSpareArmy": false,
+    "spareArmyAmount": 2,
+    "recallCamps": false,
+    "useGatherGear": false,
+    "useGatherSchedule": false,
+    "ignoreLevel3GF": false,
+    "gatherStartTime": "12:00:00",
+    "gatherEndTime": "20:00:00",
+    "maxArmysToSend": 0,
+    "maxSearchArea": 2,
+    "maxWalkTime": 20,
+    "tileMinimum": 100000,
+    "sendingDelay": 2,
+    "levelToGather": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "typesToGather": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "realmGatherSettings": {
+    "autoGathering": false,
+    "leaveSpareArmy": false,
+    "spareArmyAmount": 1,
+    "maxArmysToSend": 0,
+    "highTier": false,
+    "typesToGather": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "monsterSettings": {
+    "autoHunting": false,
+    "sendMonstersToChat": false,
+    "useBoots": false,
+    "useEnergyItems": false,
+    "oneKillHunt": false,
+    "comboPrediction": false,
+    "allowSaberfang": false,
+    "huntSearchArea": 1,
+    "huntSendDelay": 500,
+    "maxWalkTime": 160,
+    "avoidConflict": false,
+    "avoidGuildConflict": false,
+    "energyPercentage": 90,
+    "huntMode": 0,
+    "stealPercentage": 50,
+    "stealCombo": 2,
+    "heroType": 0,
+    "huntLevels": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "monsterTypes": [
+      false,
+      false,
+      false
+    ],
+    "selectedHerosMP": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "selectedHerosM": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "HuntAnyMonster": false,
+    "monstersToHunt_": {
+      "0": false,
+      "1": false,
+      "2": false,
+      "3": false,
+      "4": false,
+      "5": false,
+      "6": false,
+      "7": false,
+      "8": false,
+      "9": false,
+      "10": false,
+      "11": false,
+      "12": false,
+      "13": false,
+      "14": false,
+      "15": false,
+      "16": false,
+      "17": false,
+      "18": false,
+      "19": false,
+      "20": false,
+      "21": false,
+      "22": false,
+      "23": false,
+      "24": false,
+      "25": false,
+      "26": false,
+      "27": false,
+      "28": false,
+      "29": false,
+      "30": false,
+      "31": false,
+      "32": false,
+      "33": false,
+      "34": false,
+      "35": false,
+      "36": false,
+      "37": false,
+      "38": false,
+      "39": false,
+      "40": false,
+      "42": false,
+      "45": false,
+      "46": false,
+      "47": false,
+      "48": false,
+      "49": false,
+      "50": false,
+      "51": false,
+      "52": false,
+      "53": false,
+      "54": false,
+      "55": false,
+      "56": false,
+      "57": false,
+      "58": false,
+      "59": false,
+      "60": false,
+      "61": false,
+      "62": false,
+      "63": false,
+      "64": false,
+      "65": false,
+      "66": false,
+      "67": false,
+      "68": false,
+      "69": false,
+      "70": false,
+      "71": false,
+      "72": false
+    }
+  },
+  "realmMonsterSettings": {
+    "autoHunting": false,
+    "useEnergyItems": false,
+    "autoHuntCount": 1,
+    "lastAutoTime": 0,
+    "autoDelayTime": 86400
+  },
+  "spendingSettings": {
+    "spendGems": false,
+    "spendGC": false,
+    "gemSettings": {
+      "buyShield": false,
+      "shieldToBuy": 1,
+      "buyWithdrawSquad": false,
+      "buyWarTome": false,
+      "buyCrystalPickAxe": false,
+      "buyGoldHammer": false,
+      "buyArchaicTome": false,
+      "buySoulCrystal": false,
+      "buySteelCuffs": false,
+      "buyReducedUpKeep": false,
+      "buyVIP_Points": 0
+    },
+    "gcSettings": {
+      "buyShield": false,
+      "buyWithdrawSquad": false,
+      "buyFoodBoost": false,
+      "buyStoneBoost": false,
+      "buyWoodBoost": false,
+      "buyOreBoost": false,
+      "buyGoldBoost": false,
+      "buyGatheringBoost": false,
+      "coinReserve": 0,
+      "buyVIP_Points": 0
+    }
+  },
+  "researchSettings": {
+    "autoResearch": false,
+    "useTargetTable": false,
+    "useTechnolabes": false,
+    "minTechnoMight": 1000000,
+    "researchPriority": null,
+    "researchEnabled": null,
+    "researchPriority_": [
+      {
+        "Key": 5,
+        "Enabled": false
+      },
+      {
+        "Key": 1,
+        "Enabled": false
+      },
+      {
+        "Key": 3,
+        "Enabled": false
+      },
+      {
+        "Key": 2,
+        "Enabled": false
+      },
+      {
+        "Key": 7,
+        "Enabled": false
+      },
+      {
+        "Key": 8,
+        "Enabled": false
+      },
+      {
+        "Key": 9,
+        "Enabled": false
+      },
+      {
+        "Key": 10,
+        "Enabled": false
+      },
+      {
+        "Key": 11,
+        "Enabled": false
+      },
+      {
+        "Key": 12,
+        "Enabled": false
+      },
+      {
+        "Key": 13,
+        "Enabled": false
+      },
+      {
+        "Key": 14,
+        "Enabled": false
+      },
+      {
+        "Key": 15,
+        "Enabled": false
+      },
+      {
+        "Key": 16,
+        "Enabled": false
+      },
+      {
+        "Key": 17,
+        "Enabled": false
+      }
+    ],
+    "techTarget": [
+      {
+        "TechID": 1,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 2,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 3,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 4,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 5,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 6,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 7,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 8,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 9,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 73,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 74,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 75,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 76,
+        "TechLevel": 1
+      },
+      {
+        "TechID": 77,
+        "TechLevel": 1
+      },
+      {
+        "TechID": 78,
+        "TechLevel": 1
+      },
+      {
+        "TechID": 79,
+        "TechLevel": 1
+      },
+      {
+        "TechID": 80,
+        "TechLevel": 1
+      },
+      {
+        "TechID": 81,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 82,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 83,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 84,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 85,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 86,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 87,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 88,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 89,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 90,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 91,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 92,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 93,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 94,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 26,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 27,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 28,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 29,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 30,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 31,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 32,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 33,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 34,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 35,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 36,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 37,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 38,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 39,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 40,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 41,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 42,
+        "TechLevel": 1
+      },
+      {
+        "TechID": 43,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 44,
+        "TechLevel": 1
+      },
+      {
+        "TechID": 45,
+        "TechLevel": 1
+      },
+      {
+        "TechID": 46,
+        "TechLevel": 1
+      },
+      {
+        "TechID": 47,
+        "TechLevel": 1
+      },
+      {
+        "TechID": 48,
+        "TechLevel": 1
+      },
+      {
+        "TechID": 49,
+        "TechLevel": 1
+      },
+      {
+        "TechID": 50,
+        "TechLevel": 1
+      },
+      {
+        "TechID": 51,
+        "TechLevel": 1
+      },
+      {
+        "TechID": 52,
+        "TechLevel": 1
+      },
+      {
+        "TechID": 53,
+        "TechLevel": 1
+      },
+      {
+        "TechID": 54,
+        "TechLevel": 1
+      },
+      {
+        "TechID": 55,
+        "TechLevel": 1
+      },
+      {
+        "TechID": 318,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 319,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 320,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 321,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 322,
+        "TechLevel": 10
+      },
+      {
+        "TechID": 323,
+        "TechLevel": 10
+      }
+    ]
+  },
+  "buildSettingsNew": {
+    "autoBuild": false,
+    "autoUpgrade": false,
+    "ignoreSpamTarget": false,
+    "buildByLowestLevel": false,
+    "autoBuySecondQueue": false,
+    "secondQueueSpamOnly": false,
+    "strictPriority": false,
+    "buildPriority": 0,
+    "newSpamTarget": 0,
+    "maxBuildLevel": 25,
+    "BuildingTarget": [
+      0,
+      4,
+      4,
+      4,
+      4,
+      4,
+      1,
+      1,
+      1,
+      1,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      3,
+      3,
+      3,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      7,
+      7,
+      7,
+      7,
+      7,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      21,
+      21,
+      21,
+      22,
+      22,
+      22,
+      23,
+      23
+    ]
+  },
+  "talentSettings": {
+    "autoTalents": false,
+    "pointsLeft": 235,
+    "TalentTarget": [
+      2,
+      2,
+      2,
+      2,
+      0,
+      10,
+      0,
+      0,
+      5,
+      5,
+      0,
+      5,
+      0,
+      20,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "heroData": [
+    {
+      "HeroID": 1,
+      "Level": 53,
+      "Exp": 53684,
+      "Rank": 5,
+      "Enhanced": 2,
+      "Medals": 0
+    },
+    {
+      "HeroID": 3,
+      "Level": 46,
+      "Exp": 17248,
+      "Rank": 5,
+      "Enhanced": 1,
+      "Medals": 6
+    },
+    {
+      "HeroID": 4,
+      "Level": 44,
+      "Exp": 20596,
+      "Rank": 5,
+      "Enhanced": 1,
+      "Medals": 0
+    },
+    {
+      "HeroID": 5,
+      "Level": 36,
+      "Exp": 5433,
+      "Rank": 5,
+      "Enhanced": 1,
+      "Medals": 8
+    },
+    {
+      "HeroID": 7,
+      "Level": 51,
+      "Exp": 39369,
+      "Rank": 5,
+      "Enhanced": 2,
+      "Medals": 0
+    },
+    {
+      "HeroID": 9,
+      "Level": 49,
+      "Exp": 17749,
+      "Rank": 5,
+      "Enhanced": 1,
+      "Medals": 0
+    },
+    {
+      "HeroID": 13,
+      "Level": 38,
+      "Exp": 8653,
+      "Rank": 5,
+      "Enhanced": 1,
+      "Medals": 0
+    },
+    {
+      "HeroID": 16,
+      "Level": 39,
+      "Exp": 17995,
+      "Rank": 5,
+      "Enhanced": 1,
+      "Medals": 0
+    },
+    {
+      "HeroID": 17,
+      "Level": 32,
+      "Exp": 6169,
+      "Rank": 4,
+      "Enhanced": 1,
+      "Medals": 0
+    }
+  ],
+  "heroSettings": {
+    "autoHireHeros": false,
+    "autoUpgradeHeros": false,
+    "autoEnhanceHeros": false,
+    "useLevelUpItems": false,
+    "reviveDeadLeader": false,
+    "useBraveheartItems": false,
+    "heroPriority": [
+      21,
+      20,
+      7,
+      18,
+      15,
+      23,
+      2,
+      13,
+      1,
+      19,
+      3,
+      4,
+      16,
+      6,
+      17,
+      5,
+      8,
+      10,
+      9,
+      29
+    ]
+  },
+  "arenaSettings": {
+    "attackArena": false,
+    "collectGems": false,
+    "buyExtraAttempts": false,
+    "attackGuildmates": false,
+    "attemptsToBuy": 1,
+    "minWinChance": 60,
+    "maxWinChance": 100,
+    "arenaHeroType": 2,
+    "arenaDefenderType": 1,
+    "selectedHeros": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "heroStageSettings": {
+    "AutoAttackHeroStages": false,
+    "priorityMode": false,
+    "attackStageType": 0,
+    "seqAttackStageType": 0,
+    "heroSelection": 2,
+    "AutoHeroChance": 40,
+    "AutoHeroMaxTries": 50,
+    "selectedChapter": {
+      "selectedChapterStageType": 0,
+      "StageChapter": 1,
+      "StagePoint": 0,
+      "comboIndex": 0,
+      "QuickFightStage": false,
+      "useVipSweep": false
+    },
+    "campaignPoint": 71,
+    "campaignPointElite": 1,
+    "selectedHeros": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "specialStageSettings": {
+    "AutoAttackStages": false,
+    "WinChance": 10,
+    "MaxTries": 100
+  },
+  "pactSettings": {
+    "spreadTrainingHeroes": false,
+    "openPacts": false,
+    "mergePacts": false,
+    "mergeStatus": 2,
+    "dailyFragment": 64,
+    "dailyRunes": 0,
+    "currentPactIndex": 0,
+    "pactsToMerge": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "manaSettings": {
+    "RefineManaCore": false
+  },
+  "familiarData": [
+    {
+      "petId": 8,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 1,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 10,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 1,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 11,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 3,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 12,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 2,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 13,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 2,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 17,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 1,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 18,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 1,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 19,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 1,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 24,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 1,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 25,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 3,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 26,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 1,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 27,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 1,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 28,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 3,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 29,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 2,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 30,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 2,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 31,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 3,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 32,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 2,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 33,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 2,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 35,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 5,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 36,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 5,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 38,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 4,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 39,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 5,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 40,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 4,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 41,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 4,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 43,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 5,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 44,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 3,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 45,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 5,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 46,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 4,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 47,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 5,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 48,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 5,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 49,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 5,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 50,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 5,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 51,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 5,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 52,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 3,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 53,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 2,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 54,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 2,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 55,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 2,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 56,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 2,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 57,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 5,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 58,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 4,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 59,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 3,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    },
+    {
+      "petId": 60,
+      "petUnlocked": false,
+      "Level": 0,
+      "Exp": 0,
+      "Rarity": 3,
+      "Enhanced": 0,
+      "allowTraining": false,
+      "allowSkillTraining": false,
+      "allowEnhance": false,
+      "upgradeSkills": false,
+      "useExpItems": false,
+      "useSkills": false,
+      "shatterRunes": false
+    }
+  ],
+  "skillBlacklist": [],
+  "eventSettings": {
+    "guildFest": {
+      "collectRewards": false,
+      "lastExportHash": 0,
+      "gfMissionComplete": {
+        "missionsToComplete_": {
+          "0": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": true,
+            "TakeIfHigherThanPointsSolo120": 9,
+            "MaxPointsSolo120": 346,
+            "ToCompleteSolo200": true,
+            "TakeIfHigherThanPointsSolo200": 5,
+            "MaxPointsSolo200": 351
+          },
+          "1": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 2,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "2": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 2,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "4": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 2,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "5": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "6": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "7": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "9": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "10": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 2,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "11": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 2,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "12": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "13": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "14": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "15": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "18": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "19": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "21": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "22": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "29": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 2,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "30": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "37": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "41": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "60": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 1,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "61": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "62": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "64": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 1,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "68": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "69": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "70": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "71": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "72": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "74": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 1,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "78": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "79": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "80": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "81": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "82": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "83": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "84": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "85": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "86": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "98": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "99": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 2,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 0,
+            "MaxPointsSolo120": 356,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 0,
+            "MaxPointsSolo200": 356
+          },
+          "100": {
+            "ToComplete": false,
+            "TakeIfHigherThanPoints": 100,
+            "MaxPoints": 355,
+            "IsAutomated": 0,
+            "ToCompleteSolo120": false,
+            "TakeIfHigherThanPointsSolo120": 3,
+            "MaxPointsSolo120": 351,
+            "ToCompleteSolo200": false,
+            "TakeIfHigherThanPointsSolo200": 2,
+            "MaxPointsSolo200": 355
+          }
+        },
+        "completeMissions": false,
+        "buyExtraMission": false,
+        "itemToBuy": 1051,
+        "mToMailPlayer": false,
+        "mNonAutoOnly": false,
+        "mMailPlayerName": ""
+      },
+      "gfMissionRemove": {
+        "removeMissions": false,
+        "removeDuplicates": false,
+        "removeDelay": 30,
+        "missionsToRemove_": {
+          "0": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "1": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "2": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "3": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "4": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "5": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "6": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "7": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "8": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "9": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "10": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "11": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "12": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "13": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "14": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "15": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "18": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "19": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "21": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "22": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "24": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "25": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "26": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "27": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "28": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "29": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "30": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "31": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "32": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "33": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "34": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "35": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "36": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "37": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "38": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "41": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "42": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "43": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "44": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "45": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "46": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "52": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "57": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "60": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "61": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "62": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "63": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "64": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "65": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "66": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "67": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "68": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "69": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "70": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "71": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "72": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "73": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "74": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "75": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "76": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "77": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "78": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "79": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "80": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "81": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "82": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "83": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "84": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "85": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "86": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "98": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "99": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          },
+          "100": {
+            "ToRemove": false,
+            "ToRemoveSolo120": false,
+            "ToRemoveSolo200": false,
+            "RemoveIfLowerThanPoints": 100,
+            "RemoveIfLowerThanPointsSolo120": 0,
+            "RemoveIfLowerThanPointsSolo200": 0,
+            "MaxPoints": 355,
+            "MaxPointsSolo120": 0,
+            "MaxPointsSolo200": 0
+          }
+        }
+      },
+      "soloFirst": false
+    },
+    "Exchange": {
+      "Enable": false,
+      "AutoItemSelect": false,
+      "FilterMissions": false,
+      "MissionFilter": {
+        "1379": {
+          "Remove": false,
+          "MinPoints": 254,
+          "MaxPoints": 255
+        },
+        "1391": {
+          "Remove": false,
+          "MinPoints": 254,
+          "MaxPoints": 255
+        },
+        "1392": {
+          "Remove": false,
+          "MinPoints": 254,
+          "MaxPoints": 255
+        },
+        "1412": {
+          "Remove": false,
+          "MinPoints": 254,
+          "MaxPoints": 255
+        },
+        "1426": {
+          "Remove": false,
+          "MinPoints": 255,
+          "MaxPoints": 255
+        },
+        "1427": {
+          "Remove": false,
+          "MinPoints": 254,
+          "MaxPoints": 255
+        },
+        "1441": {
+          "Remove": false,
+          "MinPoints": 254,
+          "MaxPoints": 255
+        },
+        "3705": {
+          "Remove": false,
+          "MinPoints": 254,
+          "MaxPoints": 255
+        },
+        "17145": {
+          "Remove": false,
+          "MinPoints": 254,
+          "MaxPoints": 255
+        },
+        "17146": {
+          "Remove": false,
+          "MinPoints": 254,
+          "MaxPoints": 255
+        },
+        "17229": {
+          "Remove": false,
+          "MinPoints": 255,
+          "MaxPoints": 255
+        },
+        "17405": {
+          "Remove": false,
+          "MinPoints": 254,
+          "MaxPoints": 255
+        },
+        "17406": {
+          "Remove": false,
+          "MinPoints": 254,
+          "MaxPoints": 255
+        },
+        "17580": {
+          "Remove": false,
+          "MinPoints": 254,
+          "MaxPoints": 255
+        },
+        "17582": {
+          "Remove": false,
+          "MinPoints": 254,
+          "MaxPoints": 255
+        },
+        "17682": {
+          "Remove": false,
+          "MinPoints": 1,
+          "MaxPoints": 255
+        },
+        "17683": {
+          "Remove": false,
+          "MinPoints": 1,
+          "MaxPoints": 255
+        },
+        "19180": {
+          "Remove": false,
+          "MinPoints": 254,
+          "MaxPoints": 255
+        },
+        "19181": {
+          "Remove": false,
+          "MinPoints": 255,
+          "MaxPoints": 255
+        }
+      }
+    },
+    "Chaos": {
+      "AutoJoinArena": false,
+      "AutoCompleteMissions": false,
+      "AutoMission": {
+        "GatherLV3Above": false,
+        "GatherLv4Above": false,
+        "GatherLV5Above": false
+      }
+    }
+  },
+  "troopSettings": {
+    "autoTrainTroops": false,
+    "autoHealTroops": false,
+    "autoHealSanctuary": false,
+    "autoCraftLunar": false,
+    "lunarAmount": -1,
+    "barrackTrainingLimit": 0,
+    "nowTroopIndex": 0,
+    "rotateTraining": false,
+    "troopData": [
+      [
+        9999,
+        9999,
+        9999,
+        0,
+        999999,
+        999999,
+        999999,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        300,
+        80,
+        80,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1000,
+        500,
+        500,
+        500,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        15000,
+        15000,
+        3000,
+        3000,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        30000,
+        30000,
+        8000,
+        8000,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        60000,
+        60000,
+        16000,
+        16000,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        120000,
+        120000,
+        32000,
+        32000,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "troopData_T5": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "trapSettings": {
+    "autoConstructTraps": false,
+    "autoRepairTraps": false,
+    "trapData": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "gearSettings": {
+    "autoSwitchGear": false,
+    "needFixHash": false,
+    "autoUpgradeGear": false,
+    "autoCraftGear": false,
+    "useCabinetExpander": false,
+    "idleGearTime": 300,
+    "idleGearSet": 0,
+    "_upgradeList": [
+      {
+        "ItemID": 4464,
+        "maxUpgrade": 4
+      },
+      {
+        "ItemID": 4462,
+        "maxUpgrade": 4
+      },
+      {
+        "ItemID": 4714,
+        "maxUpgrade": 4
+      },
+      {
+        "ItemID": 4715,
+        "maxUpgrade": 4
+      },
+      {
+        "ItemID": 4746,
+        "maxUpgrade": 4
+      },
+      {
+        "ItemID": 4747,
+        "maxUpgrade": 4
+      }
+    ],
+    "_craftList": [
+      {
+        "Quantity": 3,
+        "ItemID": 4464
+      },
+      {
+        "Quantity": 3,
+        "ItemID": 4462
+      },
+      {
+        "Quantity": 1,
+        "ItemID": 4714
+      },
+      {
+        "Quantity": 1,
+        "ItemID": 4715
+      },
+      {
+        "Quantity": 1,
+        "ItemID": 4746
+      },
+      {
+        "Quantity": 1,
+        "ItemID": 4747
+      }
+    ],
+    "_gearSet": []
   },
   "scheduleSettings": {
-    "enableSchedule": true
+    "enableSchedule": false,
+    "recallTroops": false,
+    "checkShield": false,
+    "checkAnti": false,
+    "checkShelter": false,
+    "randomizeSchedule": false,
+    "randMax": 10,
+    "offlineTime": "22:00:00",
+    "onlineTime": "08:00:00",
+    "offlineTime1": "01:00:00",
+    "onlineTime1": "00:05:00",
+    "scheduleType": 1
+  },
+  "prisonSettings": {
+    "dontShieldWithPrisoner": false,
+    "autoExecute": false
+  },
+  "artifactSettings": {
+    "collectChest": false,
+    "collectFreeChest": false,
+    "collectWeeklyChallenge": false,
+    "appraiseArtifacts": false
+  },
+  "warSettings": {
+    "warKey": "",
+    "enableWarMode": false,
+    "speedReins": false,
+    "sendReins": false,
+    "noReinOnFullInfirm": false,
+    "healTroops": false,
+    "useSpeedUp": false,
+    "sendMixRss": false,
+    "speedItem1": 2,
+    "speedItem2": 0,
+    "designatedSlot1": 1,
+    "designatedSlot2": 0,
+    "designatedSlot3": 0,
+    "sendMinimum": 100000,
+    "healMinimum": 100000,
+    "allowT5": false,
+    "T4Percentage": 60,
+    "T5Percentage": 40,
+    "troopFormation": [
+      1,
+      1,
+      1
+    ]
+  },
+  "templateSettings": {
+    "isIndividual": false,
+    "General": false,
+    "Protection": false,
+    "Realm": false,
+    "Supply": false,
+    "Gathering": false,
+    "Rallies": false,
+    "Buildings": false,
+    "Research": false,
+    "heroStages": false,
+    "Equipment": false,
+    "Spending": false,
+    "cargoShip": false,
+    "Army": false,
+    "Talents": false,
+    "Familiars": false,
+    "Monsters": false,
+    "Artifacts": false,
+    "Exchange": false,
+    "ChaosArena": false,
+    "guildFest": false,
+    "Arena": false,
+    "Schedule": false
   }
 }

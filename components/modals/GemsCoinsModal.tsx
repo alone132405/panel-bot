@@ -51,6 +51,7 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
         if (isOpen && iggId) {
             loadSettings()
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, iggId])
 
     const loadSettings = async () => {

@@ -31,6 +31,7 @@ export async function GET(req: Request) {
                                 plan: true,
                                 status: true,
                                 expiresAt: true,
+                                createdAt: true,
                             },
                         },
                     },

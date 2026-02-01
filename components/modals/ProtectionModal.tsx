@@ -28,6 +28,7 @@ export default function ProtectionModal({ isOpen, onClose, iggId }: ProtectionMo
         if (isOpen && iggId) {
             loadSettings()
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, iggId])
 
     // WebSocket for real-time updates (disabled for now)

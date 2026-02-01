@@ -18,6 +18,7 @@ export default function IggIdSelector({ onSelect, selectedIggId }: IggIdSelector
 
     useEffect(() => {
         fetchUserIggIds()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session])
 
     const fetchUserIggIds = async () => {

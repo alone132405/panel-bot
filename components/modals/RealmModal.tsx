@@ -45,6 +45,7 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
         if (isOpen && iggId) {
             loadSettings()
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, iggId])
 
     const loadSettings = async () => {

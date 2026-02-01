@@ -45,6 +45,7 @@ export default function ChaosArenaModal({ isOpen, onClose, iggId }: ChaosArenaMo
         if (isOpen && iggId) {
             loadSettings()
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, iggId])
 
     const loadSettings = async () => {

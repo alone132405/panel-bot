@@ -25,6 +25,7 @@ interface User {
         lastSync: string
         subscription: {
             expiresAt: string
+            createdAt: string
             status: string
         } | null
     }[]
@@ -414,7 +415,6 @@ export default function AdminPage() {
                         <thead className="bg-background-tertiary/50 border-b border-white/5">
                             <tr>
                                 <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">User</th>
-                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Status</th>
                                 <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Contact</th>
                                 <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">IGG IDs</th>
                                 <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Subscription</th>
@@ -424,7 +424,7 @@ export default function AdminPage() {
                         <tbody className="divide-y divide-white/5">
                             {filteredUsers.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
+                                    <td colSpan={5} className="px-6 py-12 text-center text-gray-400">
                                         No users found
                                     </td>
                                 </tr>
@@ -446,18 +446,6 @@ export default function AdminPage() {
                                                     {new Date(user.createdAt).toLocaleDateString()}
                                                 </p>
                                             </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span
-                                                className={`px-3 py-1 rounded-full text-xs font-medium ${user.accountStatus === 'PENDING'
-                                                    ? 'bg-yellow-500/10 text-yellow-400'
-                                                    : user.accountStatus === 'APPROVED'
-                                                        ? 'bg-accent-emerald/10 text-accent-emerald'
-                                                        : 'bg-red-500/10 text-red-400'
-                                                    }`}
-                                            >
-                                                {user.accountStatus}
-                                            </span>
                                         </td>
                                         <td className="px-6 py-4">
                                             {user.contactType && user.contactValue ? (
@@ -482,7 +470,7 @@ export default function AdminPage() {
                                                             key={igg.id}
                                                             className="flex items-center gap-2 px-3 py-1 bg-accent-emerald/10 text-accent-emerald rounded-lg text-sm"
                                                         >
-                                                            <span>{igg.displayName || igg.iggId}</span>
+                                                            <span>{igg.iggId}</span>
                                                             <button
                                                                 onClick={() => handleRevokeIggId(user.id, igg.iggId)}
                                                                 className="hover:text-red-400 transition-colors"
@@ -497,12 +485,16 @@ export default function AdminPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            {user.subscription ? (
-                                                <div>
-                                                    <span className="text-white text-sm">{user.subscription.plan}</span>
-                                                    <p className="text-gray-500 text-xs">
-                                                        Expires: {new Date(user.subscription.expiresAt).toLocaleDateString()}
-                                                    </p>
+                                            {user.iggIds.some(igg => igg.subscription) ? (
+                                                <div className="space-y-1">
+                                                    {user.iggIds.filter(igg => igg.subscription).map((igg) => (
+                                                        <div key={igg.id} className="flex items-center gap-2">
+                                                            <span className="text-gray-400 text-xs font-mono">{igg.iggId}:</span>
+                                                            <span className="text-white text-xs">
+                                                                {new Date(igg.subscription!.expiresAt).toLocaleDateString()}
+                                                            </span>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             ) : (
                                                 <span className="text-gray-500 text-sm">None</span>

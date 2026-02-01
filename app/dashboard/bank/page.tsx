@@ -229,6 +229,7 @@ export default function BankSettingsPage() {
                 }
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [queueStatus, selectedIggId])
 
     // Listen for automation completion to hide button
@@ -314,6 +315,7 @@ export default function BankSettingsPage() {
             loadPendingRequests()
             setShowApplyButton(false)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedIggId])
 
     const loadPendingRequests = async () => {
