@@ -268,10 +268,13 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
     const updateMission = (index: number, field: keyof Mission, value: any) => {
         const updatedMissions = [...missions]
         if (['minPoints', 'maxPoints'].includes(field)) {
-            value = Math.min(355, Math.max(0, value))
+            value = Math.min(355, Math.max(0, isNaN(value) ? 0 : value))
         }
-        if (['solo120MinPoints', 'solo120MaxPoints', 'solo200MinPoints', 'solo200MaxPoints'].includes(field)) {
-            value = Math.min(356, Math.max(0, value))
+        if (['solo120MinPoints', 'solo120MaxPoints'].includes(field)) {
+            value = Math.min(400, Math.max(0, isNaN(value) ? 0 : value))
+        }
+        if (['solo200MinPoints', 'solo200MaxPoints'].includes(field)) {
+            value = Math.min(650, Math.max(0, isNaN(value) ? 0 : value))
         }
         updatedMissions[index] = { ...updatedMissions[index], [field]: value }
         setMissions(updatedMissions)
@@ -564,20 +567,22 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                                                                 <td className="px-3 py-3 text-center">
                                                                     <input
                                                                         type="number"
-                                                                        value={mission.solo120MinPoints}
+                                                                        value={mission.solo120MinPoints === 0 ? '' : mission.solo120MinPoints}
                                                                         min={0}
-                                                                        max={356}
-                                                                        onChange={(e) => updateMission(index, 'solo120MinPoints', parseInt(e.target.value) || 0)}
+                                                                        max={400}
+                                                                        placeholder="0"
+                                                                        onChange={(e) => updateMission(index, 'solo120MinPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
                                                                         className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                                     />
                                                                 </td>
                                                                 <td className="px-3 py-3 text-center">
                                                                     <input
                                                                         type="number"
-                                                                        value={mission.solo120MaxPoints}
+                                                                        value={mission.solo120MaxPoints === 0 ? '' : mission.solo120MaxPoints}
                                                                         min={0}
-                                                                        max={356}
-                                                                        onChange={(e) => updateMission(index, 'solo120MaxPoints', parseInt(e.target.value) || 0)}
+                                                                        max={400}
+                                                                        placeholder="0"
+                                                                        onChange={(e) => updateMission(index, 'solo120MaxPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
                                                                         className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                                     />
                                                                 </td>
@@ -592,20 +597,22 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                                                                 <td className="px-3 py-3 text-center">
                                                                     <input
                                                                         type="number"
-                                                                        value={mission.solo200MinPoints}
+                                                                        value={mission.solo200MinPoints === 0 ? '' : mission.solo200MinPoints}
                                                                         min={0}
-                                                                        max={356}
-                                                                        onChange={(e) => updateMission(index, 'solo200MinPoints', parseInt(e.target.value) || 0)}
+                                                                        max={650}
+                                                                        placeholder="0"
+                                                                        onChange={(e) => updateMission(index, 'solo200MinPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
                                                                         className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                                     />
                                                                 </td>
                                                                 <td className="px-3 py-3 text-center">
                                                                     <input
                                                                         type="number"
-                                                                        value={mission.solo200MaxPoints}
+                                                                        value={mission.solo200MaxPoints === 0 ? '' : mission.solo200MaxPoints}
                                                                         min={0}
-                                                                        max={356}
-                                                                        onChange={(e) => updateMission(index, 'solo200MaxPoints', parseInt(e.target.value) || 0)}
+                                                                        max={650}
+                                                                        placeholder="0"
+                                                                        onChange={(e) => updateMission(index, 'solo200MaxPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
                                                                         className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                                     />
                                                                 </td>
@@ -637,15 +644,15 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                                                             <div className="grid grid-cols-2 gap-2">
                                                                 <input
                                                                     type="number"
-                                                                    value={mission.solo120MinPoints}
-                                                                    onChange={(e) => updateMission(index, 'solo120MinPoints', parseInt(e.target.value) || 0)}
+                                                                    value={mission.solo120MinPoints === 0 ? '' : mission.solo120MinPoints}
+                                                                    onChange={(e) => updateMission(index, 'solo120MinPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
                                                                     placeholder="Min"
                                                                     className="w-full px-2 py-1 bg-background-tertiary border border-white/10 rounded text-xs text-white"
                                                                 />
                                                                 <input
                                                                     type="number"
-                                                                    value={mission.solo120MaxPoints}
-                                                                    onChange={(e) => updateMission(index, 'solo120MaxPoints', parseInt(e.target.value) || 0)}
+                                                                    value={mission.solo120MaxPoints === 0 ? '' : mission.solo120MaxPoints}
+                                                                    onChange={(e) => updateMission(index, 'solo120MaxPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
                                                                     placeholder="Max"
                                                                     className="w-full px-2 py-1 bg-background-tertiary border border-white/10 rounded text-xs text-white"
                                                                 />
@@ -666,15 +673,15 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                                                             <div className="grid grid-cols-2 gap-2">
                                                                 <input
                                                                     type="number"
-                                                                    value={mission.solo200MinPoints}
-                                                                    onChange={(e) => updateMission(index, 'solo200MinPoints', parseInt(e.target.value) || 0)}
+                                                                    value={mission.solo200MinPoints === 0 ? '' : mission.solo200MinPoints}
+                                                                    onChange={(e) => updateMission(index, 'solo200MinPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
                                                                     placeholder="Min"
                                                                     className="w-full px-2 py-1 bg-background-tertiary border border-white/10 rounded text-xs text-white"
                                                                 />
                                                                 <input
                                                                     type="number"
-                                                                    value={mission.solo200MaxPoints}
-                                                                    onChange={(e) => updateMission(index, 'solo200MaxPoints', parseInt(e.target.value) || 0)}
+                                                                    value={mission.solo200MaxPoints === 0 ? '' : mission.solo200MaxPoints}
+                                                                    onChange={(e) => updateMission(index, 'solo200MaxPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
                                                                     placeholder="Max"
                                                                     className="w-full px-2 py-1 bg-background-tertiary border border-white/10 rounded text-xs text-white"
                                                                 />
