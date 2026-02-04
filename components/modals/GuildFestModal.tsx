@@ -539,7 +539,7 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                                     {activeTab === 'personal' && (
                                         <div className="space-y-4">
                                             <h3 className="text-base sm:text-lg font-bold text-white">Personal (Solo) Missions</h3>
-                                            <div className="overflow-x-auto rounded-xl border border-white/10">
+                                            <div className="hidden md:block overflow-x-auto rounded-xl border border-white/10">
                                                 <table className="w-full min-w-[800px]">
                                                     <thead className="bg-surface/50">
                                                         <tr>
