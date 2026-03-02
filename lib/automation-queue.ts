@@ -118,8 +118,25 @@ class AutomationQueue {
     }
 
     private async isConsoleSession(): Promise<boolean> {
-        // RDP check bypassed as per user request
-        return true
+        try {
+            const { stdout } = await execAsync('quser')
+            const lines = stdout.split('\n')
+            const currentSessionLine = lines.find(line => line.trim().startsWith('>'))
+
+            if (!currentSessionLine) return true
+
+            const parts = currentSessionLine.trim().split(/\s+/)
+            const sessionName = parts[1]?.toLowerCase() || ''
+
+            if (sessionName.includes('rdp') || sessionName.includes('tcp')) {
+                return false
+            }
+
+            return true
+        } catch (error) {
+            console.error('Error checking session:', error)
+            return true
+        }
     }
 
     private async waitForConsoleSession(io: any, iggId: string): Promise<void> {

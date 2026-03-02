@@ -168,8 +168,35 @@ export default function BankSettingsPage() {
     const [applying, setApplying] = useState(false)
     const { queueStatus, automationStatus } = useSocket(selectedIggId || undefined)
     const [queuePosition, setQueuePosition] = useState(0)
+    const [cooldown, setCooldown] = useState(0)
     const [showApplyButton, setShowApplyButton] = useState(false)
 
+    // Load cooldown from local storage
+    useEffect(() => {
+        if (!selectedIggId) return
+
+        const checkCooldown = () => {
+            const savedExpiry = localStorage.getItem(`automation_cooldown_bank_${selectedIggId}`)
+            if (savedExpiry) {
+                const expiryTime = parseInt(savedExpiry)
+                const now = Date.now()
+                const remaining = Math.ceil((expiryTime - now) / 1000)
+
+                if (remaining > 0) {
+                    setCooldown(remaining)
+                } else {
+                    localStorage.removeItem(`automation_cooldown_bank_${selectedIggId}`)
+                    setCooldown(0)
+                }
+            } else {
+                setCooldown(0)
+            }
+        }
+
+        checkCooldown()
+        const interval = setInterval(checkCooldown, 1000)
+        return () => clearInterval(interval)
+    }, [selectedIggId])
 
     // Update queue status from socket
     // Update queue position and status from socket
@@ -193,9 +220,13 @@ export default function BankSettingsPage() {
                 }
             }
         } else {
-            if (queueStatus.queuedIggIds.length > 0) {
+            if (cooldown > 0) {
                 setApplying(false)
-                setQueuePosition(0)
+            } else {
+                if (queueStatus.queuedIggIds.length > 0) {
+                    setApplying(false)
+                    setQueuePosition(0)
+                }
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -243,6 +274,11 @@ export default function BankSettingsPage() {
     const handleApplyChanges = async () => {
         if (!selectedIggId) return
 
+        if (cooldown > 0) {
+            toast.warning(`Please wait ${Math.ceil(cooldown / 60)} minutes before applying changes again.`)
+            return
+        }
+
         setApplying(true)
 
         try {
@@ -261,6 +297,10 @@ export default function BankSettingsPage() {
             }
 
             toast.success('Request sent to queue!')
+            // Set cooldown
+            const expiry = Date.now() + 5 * 60 * 1000 // 5 minutes
+            localStorage.setItem(`automation_cooldown_bank_${selectedIggId}`, expiry.toString())
+            setCooldown(300)
 
         } catch (error) {
             toast.error('Failed to connect to automation server')
@@ -1063,7 +1103,7 @@ export default function BankSettingsPage() {
                     </AnimatePresence>
 
                     {/* Save Button - Only show when NOT applying/waiting */}
-                    {!(showApplyButton || applying || queuePosition > 0) && (
+                    {!(showApplyButton || applying || cooldown > 0 || queuePosition > 0) && (
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -1081,7 +1121,7 @@ export default function BankSettingsPage() {
                     )}
 
                     {/* Apply Changes Button - Only shown after saving or if active */}
-                    {(showApplyButton || applying || queuePosition > 0) && (
+                    {(showApplyButton || applying || cooldown > 0 || queuePosition > 0) && (
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -1089,17 +1129,26 @@ export default function BankSettingsPage() {
                         >
                             <button
                                 onClick={handleApplyChanges}
-                                disabled={applying || !selectedIggId}
+                                disabled={applying || !selectedIggId || cooldown > 0}
                                 className="btn-primary px-12 py-4 text-lg flex items-center gap-3 shadow-glow hover:shadow-glow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {(applying || queuePosition > 0) ? (
                                     <>
                                         <Loader2 className="w-6 h-6 animate-spin" />
                                         {automationStatus?.status === 'waiting'
-                                            ? 'Waiting for automation...'
+                                            ? 'Waiting for RDP disconnect...'
                                             : queuePosition > 0
                                                 ? `Queue #${queuePosition}`
                                                 : 'Applying Changes...'}
+                                    </>
+                                ) : cooldown > 0 ? (
+                                    <>
+                                        <Clock className="w-6 h-6" />
+                                        {(() => {
+                                            const m = Math.floor(cooldown / 60)
+                                            const s = cooldown % 60
+                                            return `Wait ${m}:${s.toString().padStart(2, '0')}`
+                                        })()}
                                     </>
                                 ) : (
                                     <>
