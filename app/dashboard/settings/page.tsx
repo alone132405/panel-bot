@@ -80,39 +80,11 @@ export default function SettingsPage() {
     const [selectedIggId, setSelectedIggId] = useState<string | null>(null)
     const [applying, setApplying] = useState(false)
     const [queuePosition, setQueuePosition] = useState(0)
-    const [cooldown, setCooldown] = useState(0)
     const { queueStatus, automationStatus, isConnected } = useSocket(selectedIggId || undefined)
 
     useEffect(() => {
         console.log('SettingsPage: mounted/updated. IGG ID:', selectedIggId, 'Socket Connected:', isConnected)
     }, [selectedIggId, isConnected])
-
-    // Load cooldown from local storage
-    useEffect(() => {
-        if (!selectedIggId) return
-
-        const checkCooldown = () => {
-            const savedExpiry = localStorage.getItem(`automation_cooldown_settings_${selectedIggId}`)
-            if (savedExpiry) {
-                const expiryTime = parseInt(savedExpiry)
-                const now = Date.now()
-                const remaining = Math.ceil((expiryTime - now) / 1000)
-
-                if (remaining > 0) {
-                    setCooldown(remaining)
-                } else {
-                    localStorage.removeItem(`automation_cooldown_settings_${selectedIggId}`)
-                    setCooldown(0)
-                }
-            } else {
-                setCooldown(0)
-            }
-        }
-
-        checkCooldown()
-        const interval = setInterval(checkCooldown, 1000)
-        return () => clearInterval(interval)
-    }, [selectedIggId])
 
     // Update queue position and status from socket
     useEffect(() => {
@@ -159,18 +131,10 @@ export default function SettingsPage() {
             }
         } else {
             // Not in queue
-            if (cooldown > 0) {
+            if (queueStatus.queuedIggIds.length > 0) {
+                // We are not in queue, but queue exists? We are just idle.
                 setApplying(false)
-            } else {
-                // Only turn off applying if we think we are done (handled by automationStatus or local timeout? 
-                // Actually fire-and-forget means we stop "applying" immediately after API return?
-                // No, implementation plan said: "User 2 clicks apply... User 2 should automtically update to Applying..."
-                // So we should let socket state drive "applying" variable essentially.
-                if (queueStatus.queuedIggIds.length > 0) {
-                    // We are not in queue, but queue exists? We are just idle.
-                    setApplying(false)
-                    setQueuePosition(0)
-                }
+                setQueuePosition(0)
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -199,11 +163,6 @@ export default function SettingsPage() {
             return
         }
 
-        if (cooldown > 0) {
-            toast.warning(`Please wait ${Math.ceil(cooldown / 60)} minutes before applying changes again.`)
-            return
-        }
-
         setApplying(true)
 
         try {
@@ -217,10 +176,6 @@ export default function SettingsPage() {
 
             if (data.success) {
                 toast.success('Request sent to queue!')
-                // Set cooldown
-                const expiry = Date.now() + 5 * 60 * 1000 // 5 minutes
-                localStorage.setItem(`automation_cooldown_settings_${selectedIggId}`, expiry.toString())
-                setCooldown(300)
             } else {
                 toast.error(data.error || 'Failed to apply changes')
                 setApplying(false)
@@ -507,22 +462,17 @@ export default function SettingsPage() {
             >
                 <button
                     onClick={handleApplyChanges}
-                    disabled={applying || !selectedIggId || cooldown > 0}
+                    disabled={applying || !selectedIggId}
                     className="btn-primary px-12 py-4 text-lg flex items-center gap-3 shadow-glow hover:shadow-glow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {(applying || queuePosition > 0) ? (
                         <>
                             <Loader2 className="w-6 h-6 animate-spin" />
                             {automationStatus?.status === 'waiting'
-                                ? 'Waiting for RDP disconnect...'
+                                ? 'Waiting for automation...'
                                 : queuePosition > 0
                                     ? `Queue #${queuePosition}`
                                     : 'Applying Changes...'}
-                        </>
-                    ) : cooldown > 0 ? (
-                        <>
-                            <Clock className="w-6 h-6" />
-                            Wait {formatCooldown(cooldown)}
                         </>
                     ) : (
                         <>
