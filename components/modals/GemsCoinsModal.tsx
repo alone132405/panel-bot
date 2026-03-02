@@ -314,9 +314,13 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
                                                 type="number"
                                                 min={0}
                                                 max={9999999}
+                                                step="1"
                                                 value={gemsBuyVIPLevel}
                                                 onChange={(e) => {
-                                                    const val = Math.max(0, Math.min(9999999, Number(e.target.value)))
+                                                    setGemsBuyVIPLevel(Number(e.target.value))
+                                                }}
+                                                onBlur={(e) => {
+                                                    const val = Math.max(0, Math.min(9999999, Math.floor(Number(e.target.value))))
                                                     setGemsBuyVIPLevel(val)
                                                     updateSettingsObject('spendingSettings.gemSettings.buyVIP_Points', val)
                                                 }}
@@ -380,9 +384,13 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
                                                     type="number"
                                                     min={0}
                                                     max={9999999}
+                                                    step="1"
                                                     value={guildCoinsBuyVIPLevel}
                                                     onChange={(e) => {
-                                                        const val = Math.max(0, Math.min(9999999, Number(e.target.value)))
+                                                        setGuildCoinsBuyVIPLevel(Number(e.target.value))
+                                                    }}
+                                                    onBlur={(e) => {
+                                                        const val = Math.max(0, Math.min(9999999, Math.floor(Number(e.target.value))))
                                                         setGuildCoinsBuyVIPLevel(val)
                                                         updateSettingsObject('spendingSettings.gcSettings.buyVIP_Points', val)
                                                     }}
@@ -396,9 +404,13 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
                                                     type="number"
                                                     min={0}
                                                     max={99999999}
+                                                    step="1"
                                                     value={reserveGuildCoins}
                                                     onChange={(e) => {
-                                                        const val = Math.max(0, Math.min(99999999, Number(e.target.value)))
+                                                        setReserveGuildCoins(Number(e.target.value))
+                                                    }}
+                                                    onBlur={(e) => {
+                                                        const val = Math.max(0, Math.min(99999999, Math.floor(Number(e.target.value))))
                                                         setReserveGuildCoins(val)
                                                         updateSettingsObject('spendingSettings.gcSettings.coinReserve', val)
                                                     }}

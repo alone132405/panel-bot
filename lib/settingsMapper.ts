@@ -9,8 +9,8 @@ export interface FieldMapping {
     type: 'boolean' | 'number' | 'string' | 'time'
     category: string
     subcategory?: string
-    min?: number
-    max?: number
+    min?: number | string
+    max?: number | string
 }
 
 export const SETTINGS_FIELD_MAP: FieldMapping[] = [
@@ -63,8 +63,8 @@ export const SETTINGS_FIELD_MAP: FieldMapping[] = [
         type: 'number',
         category: 'general',
         subcategory: 'basic',
-        min: 0,
-        max: 72000,
+        min: 1,
+        max: 7200,
     },
 
     // General Settings - Quests Tab
@@ -137,6 +137,8 @@ export const SETTINGS_FIELD_MAP: FieldMapping[] = [
         type: 'number',
         category: 'general',
         subcategory: 'quests',
+        min: 0,
+        max: 1000,
     },
 
     // General Settings - Speed-ups Tab
@@ -167,6 +169,8 @@ export const SETTINGS_FIELD_MAP: FieldMapping[] = [
         type: 'time',
         category: 'general',
         subcategory: 'speedups',
+        min: '00:00:00',
+        max: '23:59:59',
     },
     {
         uiField: 'Building',
@@ -334,6 +338,8 @@ export const SETTINGS_FIELD_MAP: FieldMapping[] = [
         type: 'number',
         category: 'general',
         subcategory: 'guild',
+        min: 1,
+        max: 800,
     },
     {
         uiField: 'Check Gifts Every',
@@ -341,6 +347,8 @@ export const SETTINGS_FIELD_MAP: FieldMapping[] = [
         type: 'number',
         category: 'general',
         subcategory: 'guild',
+        min: 1,
+        max: 800,
     },
 
     // General Settings - Turf Boosts Tab
@@ -445,6 +453,8 @@ export const SETTINGS_FIELD_MAP: FieldMapping[] = [
         type: 'number',
         category: 'protection',
         subcategory: 'shield',
+        min: 5,
+        max: 1440,
     },
     {
         uiField: 'Redeploy shield when time left is around',
@@ -452,6 +462,8 @@ export const SETTINGS_FIELD_MAP: FieldMapping[] = [
         type: 'number',
         category: 'protection',
         subcategory: 'shield',
+        min: 5,
+        max: 1440,
     },
     {
         uiField: 'Use Longer Shields First',
@@ -510,6 +522,8 @@ export const SETTINGS_FIELD_MAP: FieldMapping[] = [
         type: 'number',
         category: 'protection',
         subcategory: 'anti-scout',
+        min: 5,
+        max: 1440,
     },
 
     // Protection Settings - Gathering
@@ -526,6 +540,8 @@ export const SETTINGS_FIELD_MAP: FieldMapping[] = [
         type: 'number',
         category: 'protection',
         subcategory: 'gathering',
+        min: 5,
+        max: 1440,
     },
     {
         uiField: 'Recall Gathering Troops if Scouted',

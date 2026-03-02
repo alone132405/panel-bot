@@ -283,10 +283,11 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                             <label className="block text-xs sm:text-sm text-gray-300 mb-2">Max Travel Time (Minutes):</label>
                                             <input
                                                 type="number"
-                                                min={0}
+                                                min={1}
                                                 max={120}
                                                 value={maxTravelTime}
-                                                onChange={(e) => setMaxTravelTime(Math.max(0, Math.min(120, Number(e.target.value))))}
+                                                onChange={(e) => setMaxTravelTime(Number(e.target.value))}
+                                                onBlur={(e) => setMaxTravelTime(Math.max(1, Math.min(120, Math.floor(Number(e.target.value)))))}
                                                 className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                             />
                                         </div>
@@ -363,8 +364,10 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                                 type="number"
                                                 min={0}
                                                 max={200000}
+                                                step="1"
                                                 value={leaveExtraSpace}
-                                                onChange={(e) => setLeaveExtraSpace(Math.max(0, Math.min(200000, Number(e.target.value))))}
+                                                onChange={(e) => setLeaveExtraSpace(Number(e.target.value))}
+                                                onBlur={(e) => setLeaveExtraSpace(Math.max(0, Math.min(200000, Math.floor(Number(e.target.value)))))}
                                                 className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                             />
                                         </div>
@@ -373,10 +376,11 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                             <label className="block text-xs sm:text-sm text-gray-300 mb-2">Time to wait before rejoining if kicked (In Minutes):</label>
                                             <input
                                                 type="number"
-                                                min={0}
+                                                min={1}
                                                 max={120}
                                                 value={timeToWait}
-                                                onChange={(e) => setTimeToWait(Math.max(0, Math.min(120, Number(e.target.value))))}
+                                                onChange={(e) => setTimeToWait(Number(e.target.value))}
+                                                onBlur={(e) => setTimeToWait(Math.max(1, Math.min(120, Math.floor(Number(e.target.value)))))}
                                                 className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                             />
                                         </div>

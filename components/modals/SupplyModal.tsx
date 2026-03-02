@@ -277,10 +277,11 @@ export default function SupplyModal({ isOpen, onClose, iggId }: SupplyModalProps
                                                 <label className="block text-xs sm:text-sm text-gray-300 mb-2">Max Travel Time (Seconds):</label>
                                                 <input
                                                     type="number"
-                                                    min={0}
-                                                    max={36000}
-                                                    value={maxTravelTime}
-                                                    onChange={(e) => setMaxTravelTime(Math.max(0, Math.min(36000, Number(e.target.value))))}
+                                                    min={1}
+                                                max={36000}
+                                                value={maxTravelTime}
+                                                onChange={(e) => setMaxTravelTime(Number(e.target.value))}
+                                                onBlur={(e) => setMaxTravelTime(Math.max(1, Math.min(36000, Math.floor(Number(e.target.value)))))}
                                                     className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                 />
                                             </div>
@@ -289,11 +290,21 @@ export default function SupplyModal({ isOpen, onClose, iggId }: SupplyModalProps
                                                 <label className="block text-xs sm:text-sm text-gray-300 mb-2">Supply Speed (Seconds):</label>
                                                 <input
                                                     type="number"
-                                                    step="0.1"
-                                                    min={0}
-                                                    max={5}
+                                                    step="0.01"
+                                                    min={0.01}
+                                                    max={0.99}
                                                     value={supplySpeed}
-                                                    onChange={(e) => setSupplySpeed(Math.max(0, Math.min(5, Number(e.target.value))))}
+                                                    onChange={(e) => {
+                                                        let val = e.target.value;
+                                                        if (val.includes('.') && val.split('.')[1].length > 2) {
+                                                            val = val.substring(0, val.indexOf('.') + 3);
+                                                        }
+                                                        setSupplySpeed(Number(val));
+                                                    }}
+                                                    onBlur={(e) => {
+                                                        const clamped = Math.max(0.01, Math.min(0.99, Number(e.target.value)));
+                                                        setSupplySpeed(Number(clamped.toFixed(2)));
+                                                    }}
                                                     className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                 />
                                             </div>
@@ -348,8 +359,14 @@ export default function SupplyModal({ isOpen, onClose, iggId }: SupplyModalProps
                                                         <label className="block text-xs text-gray-400 mb-1">Reserved Amount</label>
                                                         <input
                                                             type="number"
+                                                            min={100000}
+                                                            max={4290000000}
                                                             value={resource.reserved}
                                                             onChange={(e) => handleInventoryChange(index, 'reserved', Number(e.target.value))}
+                                                            onBlur={(e) => {
+                                                                const val = Math.max(100000, Math.min(4290000000, Number(e.target.value)))
+                                                                handleInventoryChange(index, 'reserved', val)
+                                                            }}
                                                             className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                         />
                                                     </div>
@@ -357,8 +374,14 @@ export default function SupplyModal({ isOpen, onClose, iggId }: SupplyModalProps
                                                         <label className="block text-xs text-gray-400 mb-1">Amount needed before supply</label>
                                                         <input
                                                             type="number"
+                                                            min={100000}
+                                                            max={4290000000}
                                                             value={resource.threshold}
                                                             onChange={(e) => handleInventoryChange(index, 'threshold', Number(e.target.value))}
+                                                            onBlur={(e) => {
+                                                                const val = Math.max(100000, Math.min(4290000000, Number(e.target.value)))
+                                                                handleInventoryChange(index, 'threshold', val)
+                                                            }}
                                                             className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                         />
                                                     </div>
@@ -403,8 +426,14 @@ export default function SupplyModal({ isOpen, onClose, iggId }: SupplyModalProps
                                                         <label className="block text-xs text-gray-400 mb-1">Reserved Amount</label>
                                                         <input
                                                             type="number"
+                                                            min={100000}
+                                                            max={4290000000}
                                                             value={resource.reserved}
                                                             onChange={(e) => handleBagChange(index, Number(e.target.value))}
+                                                            onBlur={(e) => {
+                                                                const val = Math.max(100000, Math.min(4290000000, Number(e.target.value)))
+                                                                handleBagChange(index, val)
+                                                            }}
                                                             className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                         />
                                                     </div>

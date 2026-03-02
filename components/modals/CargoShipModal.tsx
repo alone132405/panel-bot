@@ -269,10 +269,15 @@ export default function CargoShipModal({ isOpen, onClose, iggId }: CargoShipModa
                                                 value={minimumItemStars ?? ''}
                                                 min={1}
                                                 max={3}
-                                                disabled={false} // Assuming isDisabled is not defined, setting to false
+                                                step="1"
+                                                disabled={false}
                                                 onChange={(e) => {
-                                                    const val = e.target.value === '' ? 0 : Number(e.target.value)
-                                                    setMinimumItemStars(Math.min(3, Math.max(1, val))) // Re-using existing logic for min/max
+                                                    const val = e.target.value === '' ? '' : Number(e.target.value)
+                                                    setMinimumItemStars(val)
+                                                }}
+                                                onBlur={(e) => {
+                                                    const val = e.target.value === '' ? 1 : Number(e.target.value)
+                                                    setMinimumItemStars(Math.max(1, Math.min(3, Math.floor(val))))
                                                 }}
                                                 className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
                                             />

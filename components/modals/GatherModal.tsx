@@ -284,8 +284,10 @@ export default function GatherModal({ isOpen, onClose, iggId }: GatherModalProps
                                                 type="number"
                                                 min="0"
                                                 max="8"
+                                                step="1"
                                                 value={maxArmies}
-                                                onChange={(e) => setMaxArmies(Math.min(8, Math.max(0, Number(e.target.value))))}
+                                                onChange={(e) => setMaxArmies(Number(e.target.value))}
+                                                onBlur={(e) => setMaxArmies(Math.max(0, Math.min(8, Math.floor(Number(e.target.value)))))}
                                                 className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                             />
                                         </div>
@@ -308,10 +310,15 @@ export default function GatherModal({ isOpen, onClose, iggId }: GatherModalProps
                                                         value={spareArmyAmount ?? ''}
                                                         min={1}
                                                         max={7}
-                                                        disabled={false} // Assuming isDisabled is false for this specific input
+                                                        step="1"
+                                                        disabled={false}
                                                         onChange={(e) => {
-                                                            const val = e.target.value === '' ? 0 : Number(e.target.value)
-                                                            setSpareArmyAmount(Math.min(7, Math.max(1, val))) // Re-integrating original min/max logic
+                                                            const val = e.target.value === '' ? 1 : Number(e.target.value)
+                                                            setSpareArmyAmount(val)
+                                                        }}
+                                                        onBlur={(e) => {
+                                                            const val = e.target.value === '' ? 1 : Number(e.target.value)
+                                                            setSpareArmyAmount(Math.max(1, Math.min(7, Math.floor(val))))
                                                         }}
                                                         className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
                                                     />

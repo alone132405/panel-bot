@@ -909,9 +909,14 @@ export default function BankSettingsPage() {
                                             <input
                                                 type="number"
                                                 value={settings.maxSendDistance || ''}
+                                                step="1"
                                                 onChange={(e) => {
                                                     const val = e.target.value === '' ? 0 : Math.max(0, Math.min(1000, parseFloat(e.target.value)))
                                                     setSettings({ ...settings, maxSendDistance: val })
+                                                }}
+                                                onBlur={(e) => {
+                                                    const val = e.target.value === '' ? 0 : Math.floor(parseFloat(e.target.value))
+                                                    setSettings({ ...settings, maxSendDistance: Math.max(0, Math.min(1000, val)) })
                                                 }}
                                                 min={0}
                                                 max={1000}

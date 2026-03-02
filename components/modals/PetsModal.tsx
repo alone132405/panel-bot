@@ -418,21 +418,13 @@ export default function PetsModal({ isOpen, onClose, iggId }: PetsModalProps) {
                                                                     </td>
                                                                     <td className="px-4 py-3 text-center text-sm text-gray-300 border-r border-white/10 bg-black/10">
                                                                         <div className="flex justify-center">
-                                                                            <input
-                                                                                type="number"
-                                                                                value={pet.Rarity ?? ''}
-                                                                                min={1} // Assuming rarity starts from 1
-                                                                                max={8} // Assuming max rarity is 8, adjust if needed
-                                                                                onChange={(e) => {
-                                                                                    const val = e.target.value === '' ? 0 : Number(e.target.value);
-                                                                                    updateFamiliar(pet.petId, 'Rarity', val);
-                                                                                }}
-                                                                                className={`w-16 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-xs text-white text-center focus:outline-none focus:ring-1 focus:ring-primary-500/50 disabled:opacity-50 ${pet.Rarity >= 5 ? 'text-yellow-400' :
-                                                                                    pet.Rarity >= 4 ? 'text-purple-400' :
-                                                                                        pet.Rarity >= 3 ? 'text-blue-400' :
-                                                                                            'text-gray-400'
-                                                                                    }`}
-                                                                            />
+                                                                            <span className={`text-sm font-medium ${pet.Rarity >= 5 ? 'text-yellow-400' :
+                                                                                pet.Rarity >= 4 ? 'text-purple-400' :
+                                                                                    pet.Rarity >= 3 ? 'text-blue-400' :
+                                                                                        'text-gray-400'
+                                                                                }`}>
+                                                                                {pet.Rarity}
+                                                                            </span>
                                                                         </div>
                                                                     </td>
                                                                     <td className="px-4 py-3 text-center">

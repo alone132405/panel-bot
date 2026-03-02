@@ -277,10 +277,16 @@ export default function ScheduleModal({ isOpen, onClose, iggId }: ScheduleModalP
                                                     value={randomMaxMinutes ?? ''}
                                                     min={0}
                                                     max={9999}
+                                                    step="1"
                                                     onChange={(e) => {
-                                                        const val = e.target.value === '' ? 0 : Math.max(0, Math.min(9999, Number(e.target.value)))
-                                                        setRandomMaxMinutes(val)
-                                                        updateSettingsObject('scheduleSettings.randMax', val)
+                                                        const val = e.target.value === '' ? 0 : Number(e.target.value)
+                                                        setRandomMaxMinutes(Math.max(0, Math.min(9999, val)))
+                                                        updateSettingsObject('scheduleSettings.randMax', Math.max(0, Math.min(9999, val)))
+                                                    }}
+                                                    onBlur={(e) => {
+                                                        const val = e.target.value === '' ? 0 : Math.floor(Number(e.target.value))
+                                                        setRandomMaxMinutes(Math.max(0, Math.min(9999, val)))
+                                                        updateSettingsObject('scheduleSettings.randMax', Math.max(0, Math.min(9999, val)))
                                                     }}
                                                     className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
                                                 />

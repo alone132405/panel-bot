@@ -194,7 +194,7 @@ export default function MilitaryModal({ isOpen, onClose, iggId }: MilitaryModalP
 
     const updateTroopAmount = (index: number, amount: number) => {
         const updatedTroops = [...troops]
-        updatedTroops[index].amount = Math.min(999999999999999999, Math.max(0, amount))
+        updatedTroops[index].amount = Math.min(999999999, Math.max(0, amount))
         setTroops(updatedTroops)
     }
 
@@ -362,7 +362,9 @@ export default function MilitaryModal({ isOpen, onClose, iggId }: MilitaryModalP
                                                     min={0}
                                                     max={100}
                                                     value={attackSkirmishWhenTroopsAt}
-                                                    onChange={(e) => setAttackSkirmishWhenTroopsAt(Math.min(100, Math.max(0, Number(e.target.value))))}
+                                                    step="1"
+                                                    onChange={(e) => setAttackSkirmishWhenTroopsAt(Number(e.target.value))}
+                                                    onBlur={(e) => setAttackSkirmishWhenTroopsAt(Math.min(100, Math.max(0, Math.floor(Number(e.target.value)))))}
                                                     className="w-24 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                 />
                                                 <span className="text-sm text-gray-400">%</span>
@@ -393,9 +395,14 @@ export default function MilitaryModal({ isOpen, onClose, iggId }: MilitaryModalP
                                                                     type="number"
                                                                     value={troop.amount ?? ''}
                                                                     min={0}
-                                                                    max={999999999999999999}
+                                                                    max={999999999}
+                                                                    step="1"
                                                                     onChange={(e) => {
                                                                         const val = e.target.value === '' ? 0 : Number(e.target.value)
+                                                                        updateTroopAmount(index, val)
+                                                                    }}
+                                                                    onBlur={(e) => {
+                                                                        const val = e.target.value === '' ? 0 : Math.min(999999999, Math.floor(Number(e.target.value)))
                                                                         updateTroopAmount(index, val)
                                                                     }}
                                                                     className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"

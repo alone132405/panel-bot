@@ -134,8 +134,20 @@ export default function ResearchModal({ isOpen, onClose, iggId }: ResearchModalP
     }
 
     const handleResetTree = () => {
+        setMaxTree('economy')
+        if (researchPriority.length > 0) {
+            const selectedKey = RESEARCH_TREE_KEYS['economy']
+            const selectedIndex = researchPriority.findIndex(p => p.Key === selectedKey)
+
+            if (selectedIndex > 0) {
+                const newPriority = [...researchPriority]
+                const temp = newPriority[0]
+                newPriority[0] = newPriority[selectedIndex]
+                newPriority[selectedIndex] = temp
+                setResearchPriority(newPriority)
+            }
+        }
         toast.success('Research tree reset!')
-        // In a real implementation, this would call an API endpoint
     }
 
     if (!iggId) {
@@ -309,8 +321,10 @@ export default function ResearchModal({ isOpen, onClose, iggId }: ResearchModalP
                                                 type="number"
                                                 min={10000}
                                                 max={49000000}
+                                                step="1"
                                                 value={minimumResearchMight}
-                                                onChange={(e) => setMinimumResearchMight(Math.min(49000000, Math.max(10000, Number(e.target.value))))}
+                                                onChange={(e) => setMinimumResearchMight(Number(e.target.value))}
+                                                onBlur={(e) => setMinimumResearchMight(Math.min(49000000, Math.max(10000, Math.floor(Number(e.target.value)))))}
                                                 className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                 placeholder="1,000,000"
                                             />

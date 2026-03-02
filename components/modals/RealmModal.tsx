@@ -245,8 +245,10 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                                                     type="number"
                                                     min={0}
                                                     max={8}
+                                                    step="1"
                                                     value={maxArmies}
-                                                    onChange={(e) => setMaxArmies(Math.max(0, Math.min(8, Number(e.target.value))))}
+                                                    onChange={(e) => setMaxArmies(Number(e.target.value))}
+                                                    onBlur={(e) => setMaxArmies(Math.max(0, Math.min(8, Math.floor(Number(e.target.value)))))}
                                                     className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                 />
                                             </div>
@@ -271,8 +273,10 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                                                     type="number"
                                                     min={0}
                                                     max={7}
+                                                    step="1"
                                                     value={spareArmyAmount}
-                                                    onChange={(e) => setSpareArmyAmount(Math.max(0, Math.min(7, Number(e.target.value))))}
+                                                    onChange={(e) => setSpareArmyAmount(Number(e.target.value))}
+                                                    onBlur={(e) => setSpareArmyAmount(Math.max(0, Math.min(7, Math.floor(Number(e.target.value)))))}
                                                     className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                 />
                                             </div>
@@ -362,8 +366,10 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                                                     type="number"
                                                     min={0}
                                                     max={100}
+                                                    step="1"
                                                     value={killsPerDay}
-                                                    onChange={(e) => setKillsPerDay(Math.max(0, Math.min(100, Number(e.target.value))))}
+                                                    onChange={(e) => setKillsPerDay(Number(e.target.value))}
+                                                    onBlur={(e) => setKillsPerDay(Math.max(0, Math.min(100, Math.floor(Number(e.target.value)))))}
                                                     className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                 />
                                             </div>
@@ -374,8 +380,10 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                                                     type="number"
                                                     min={1}
                                                     max={5}
+                                                    step="1"
                                                     value={monsterLevel}
-                                                    onChange={(e) => setMonsterLevel(Math.max(1, Math.min(5, Number(e.target.value))))}
+                                                    onChange={(e) => setMonsterLevel(Number(e.target.value))}
+                                                    onBlur={(e) => setMonsterLevel(Math.max(1, Math.min(5, Math.floor(Number(e.target.value)))))}
                                                     className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                 />
                                             </div>

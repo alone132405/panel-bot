@@ -419,7 +419,29 @@ Write-Output "=== AUTOMATION COMPLETE ==="
         await fs.writeFile(scriptPath, scriptContent, 'utf-8')
 
         try {
-            const { stdout } = await execAsync(`powershell -ExecutionPolicy Bypass -File "${scriptPath}"`)
+            let stdout = '';
+            try {
+                const result = await execAsync(`powershell -ExecutionPolicy Bypass -File "${scriptPath}"`)
+                stdout = result.stdout;
+            } catch (execError: any) {
+                stdout = execError.stdout || '';
+                const stderr = execError.stderr || '';
+                console.log('PowerShell exec error output:', stdout);
+                console.log('PowerShell exec stderr:', stderr);
+
+                if (stdout.includes('ERROR:')) {
+                    const lines = stdout.split('\\n');
+                    const errLine = lines.find((l: string) => l.includes('ERROR:'));
+                    throw new Error(errLine ? errLine.trim() : 'Lords Mobile Bot application not found.');
+                }
+
+                if (stderr) {
+                    throw new Error(`PowerShell Error: ${stderr.trim().split('\\n')[0]}`);
+                }
+
+                throw new Error('Automation script failed to execute (code 1).');
+            }
+
             console.log('PowerShell output:', stdout)
 
             if (stdout.includes('ERROR:')) {

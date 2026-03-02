@@ -531,11 +531,10 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
                                                     type="number"
                                                     min={0}
                                                     max={100}
+                                                    step="1"
                                                     value={attemptsToBuy}
-                                                    onChange={(e) => {
-                                                        const val = e.target.value === '' ? 0 : Number(e.target.value)
-                                                        setAttemptsToBuy(Math.max(0, Math.min(100, val)))
-                                                    }}
+                                                    onChange={(e) => setAttemptsToBuy(Number(e.target.value))}
+                                                    onBlur={(e) => setAttemptsToBuy(Math.max(0, Math.min(100, Math.floor(Number(e.target.value)))))}
                                                     className="w-24 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                 />
                                             </div>
@@ -551,11 +550,10 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
                                                         type="number"
                                                         min={0}
                                                         max={99}
+                                                        step="1"
                                                         value={winChanceMin}
-                                                        onChange={(e) => {
-                                                            const val = e.target.value === '' ? 0 : Number(e.target.value)
-                                                            setWinChanceMin(Math.max(0, Math.min(99, val)))
-                                                        }}
+                                                        onChange={(e) => setWinChanceMin(Number(e.target.value))}
+                                                        onBlur={(e) => setWinChanceMin(Math.max(0, Math.min(99, Math.floor(Number(e.target.value)))))}
                                                         className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                     />
                                                 </div>
@@ -565,11 +563,10 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
                                                         type="number"
                                                         min={0}
                                                         max={100}
+                                                        step="1"
                                                         value={winChanceMax}
-                                                        onChange={(e) => {
-                                                            const val = e.target.value === '' ? 0 : Number(e.target.value)
-                                                            setWinChanceMax(Math.max(0, Math.min(100, val)))
-                                                        }}
+                                                        onChange={(e) => setWinChanceMax(Number(e.target.value))}
+                                                        onBlur={(e) => setWinChanceMax(Math.max(0, Math.min(100, Math.floor(Number(e.target.value)))))}
                                                         className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                     />
                                                 </div>
