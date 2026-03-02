@@ -4,7 +4,7 @@ module.exports = {
     apps: [
         {
             name: 'bot-management-dashboard',
-            script: path.join(__dirname, '.next/standalone/server.js'),
+            script: path.join(__dirname, 'server.js'),
             args: '',
             cwd: __dirname,
             interpreter: 'node',

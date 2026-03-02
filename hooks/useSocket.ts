@@ -13,8 +13,6 @@ export const useSocket = (iggId?: string) => {
         let mounted = true
 
         const socketInitializer = async () => {
-            await fetch('/api/socket')
-
             if (!mounted) return
 
             if (!(global as any).socket) {
