@@ -272,7 +272,7 @@ export default function CargoShipModal({ isOpen, onClose, iggId }: CargoShipModa
                                                 step="1"
                                                 disabled={false}
                                                 onChange={(e) => {
-                                                    const val = e.target.value === '' ? '' : Number(e.target.value)
+                                                    const val = e.target.value === '' ? 0 : Number(e.target.value)
                                                     setMinimumItemStars(val)
                                                 }}
                                                 onBlur={(e) => {
