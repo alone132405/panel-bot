@@ -31,6 +31,9 @@ app.prepare().then(() => {
         },
     })
 
+    // Make io globally available for Next.js API routes (like the automation queue)
+    global.io = io
+
     io.on('connection', (socket) => {
         console.log('Client connected:', socket.id)
 
