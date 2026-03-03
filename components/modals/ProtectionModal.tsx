@@ -107,6 +107,8 @@ export default function ProtectionModal({ isOpen, onClose, iggId }: ProtectionMo
                     type: m.type,
                     value: getNestedValue(settings, m.jsonPath),
                     path: m.jsonPath,
+                    min: m.min,
+                    max: m.max,
                 })),
             antiScout: protectionMappings
                 .filter((m) => m.subcategory === 'anti-scout')
@@ -115,6 +117,8 @@ export default function ProtectionModal({ isOpen, onClose, iggId }: ProtectionMo
                     type: m.type,
                     value: getNestedValue(settings, m.jsonPath),
                     path: m.jsonPath,
+                    min: m.min,
+                    max: m.max,
                 })),
             gathering: protectionMappings
                 .filter((m) => m.subcategory === 'gathering')
@@ -123,6 +127,8 @@ export default function ProtectionModal({ isOpen, onClose, iggId }: ProtectionMo
                     type: m.type,
                     value: getNestedValue(settings, m.jsonPath),
                     path: m.jsonPath,
+                    min: m.min,
+                    max: m.max,
                 })),
             shelter: protectionMappings
                 .filter((m) => m.subcategory === 'shelter')
@@ -131,6 +137,8 @@ export default function ProtectionModal({ isOpen, onClose, iggId }: ProtectionMo
                     type: m.type,
                     value: getNestedValue(settings, m.jsonPath),
                     path: m.jsonPath,
+                    min: m.min,
+                    max: m.max,
                 })),
         }
     }
@@ -155,7 +163,20 @@ export default function ProtectionModal({ isOpen, onClose, iggId }: ProtectionMo
                 <input
                     type="number"
                     value={setting.value || 0}
-                    onChange={(e) => handleSettingChange(setting.path, Number(e.target.value))}
+                    onChange={(e) => handleSettingChange(setting.path, Math.floor(Number(e.target.value)))}
+                    onKeyDown={(e) => {
+                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                            e.preventDefault();
+                        }
+                    }}
+                    onBlur={(e) => {
+                        let val = Math.floor(Number(e.target.value));
+                        if (setting.min !== undefined && val < setting.min) val = setting.min;
+                        if (setting.max !== undefined && val > setting.max) val = setting.max;
+                        handleSettingChange(setting.path, val);
+                    }}
+                    min={setting.min}
+                    max={setting.max}
                     className="w-24 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                 />
             )}

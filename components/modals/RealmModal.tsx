@@ -247,7 +247,12 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                                                     max={8}
                                                     step="1"
                                                     value={maxArmies}
-                                                    onChange={(e) => setMaxArmies(Number(e.target.value))}
+                                                    onChange={(e) => setMaxArmies(Math.floor(Number(e.target.value)))}
+                                                    onKeyDown={(e) => {
+                                                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
                                                     onBlur={(e) => setMaxArmies(Math.max(0, Math.min(8, Math.floor(Number(e.target.value)))))}
                                                     className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                 />
@@ -275,7 +280,12 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                                                     max={7}
                                                     step="1"
                                                     value={spareArmyAmount}
-                                                    onChange={(e) => setSpareArmyAmount(Number(e.target.value))}
+                                                    onChange={(e) => setSpareArmyAmount(Math.floor(Number(e.target.value)))}
+                                                    onKeyDown={(e) => {
+                                                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
                                                     onBlur={(e) => setSpareArmyAmount(Math.max(0, Math.min(7, Math.floor(Number(e.target.value)))))}
                                                     className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                 />
@@ -368,7 +378,12 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                                                     max={100}
                                                     step="1"
                                                     value={killsPerDay}
-                                                    onChange={(e) => setKillsPerDay(Number(e.target.value))}
+                                                    onChange={(e) => setKillsPerDay(Math.floor(Number(e.target.value)))}
+                                                    onKeyDown={(e) => {
+                                                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
                                                     onBlur={(e) => setKillsPerDay(Math.max(0, Math.min(100, Math.floor(Number(e.target.value)))))}
                                                     className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                 />
@@ -382,7 +397,12 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                                                     max={5}
                                                     step="1"
                                                     value={monsterLevel}
-                                                    onChange={(e) => setMonsterLevel(Number(e.target.value))}
+                                                    onChange={(e) => setMonsterLevel(Math.floor(Number(e.target.value)))}
+                                                    onKeyDown={(e) => {
+                                                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
                                                     onBlur={(e) => setMonsterLevel(Math.max(1, Math.min(5, Math.floor(Number(e.target.value)))))}
                                                     className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                 />

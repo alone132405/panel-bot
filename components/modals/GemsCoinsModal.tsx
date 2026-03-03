@@ -317,7 +317,7 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
                                                 step="1"
                                                 value={gemsBuyVIPLevel}
                                                 onChange={(e) => {
-                                                    setGemsBuyVIPLevel(Number(e.target.value))
+                                                    setGemsBuyVIPLevel(Math.floor(Number(e.target.value)))
                                                 }}
                                                 onBlur={(e) => {
                                                     const val = Math.max(0, Math.min(9999999, Math.floor(Number(e.target.value))))
@@ -387,7 +387,7 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
                                                     step="1"
                                                     value={guildCoinsBuyVIPLevel}
                                                     onChange={(e) => {
-                                                        setGuildCoinsBuyVIPLevel(Number(e.target.value))
+                                                        setGuildCoinsBuyVIPLevel(Math.floor(Number(e.target.value)))
                                                     }}
                                                     onBlur={(e) => {
                                                         const val = Math.max(0, Math.min(9999999, Math.floor(Number(e.target.value))))
@@ -407,7 +407,7 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
                                                     step="1"
                                                     value={reserveGuildCoins}
                                                     onChange={(e) => {
-                                                        setReserveGuildCoins(Number(e.target.value))
+                                                        setReserveGuildCoins(Math.floor(Number(e.target.value)))
                                                     }}
                                                     onBlur={(e) => {
                                                         const val = Math.max(0, Math.min(99999999, Math.floor(Number(e.target.value))))

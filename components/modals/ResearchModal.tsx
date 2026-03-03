@@ -323,7 +323,12 @@ export default function ResearchModal({ isOpen, onClose, iggId }: ResearchModalP
                                                 max={49000000}
                                                 step="1"
                                                 value={minimumResearchMight}
-                                                onChange={(e) => setMinimumResearchMight(Number(e.target.value))}
+                                                onChange={(e) => setMinimumResearchMight(Math.floor(Number(e.target.value)))}
+                                                onKeyDown={(e) => {
+                                                    if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
                                                 onBlur={(e) => setMinimumResearchMight(Math.min(49000000, Math.max(10000, Math.floor(Number(e.target.value)))))}
                                                 className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                 placeholder="1,000,000"

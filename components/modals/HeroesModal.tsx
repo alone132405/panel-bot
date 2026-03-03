@@ -533,7 +533,7 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
                                                     max={100}
                                                     step="1"
                                                     value={attemptsToBuy}
-                                                    onChange={(e) => setAttemptsToBuy(Number(e.target.value))}
+                                                    onChange={(e) => setAttemptsToBuy(Math.floor(Number(e.target.value)))}
                                                     onBlur={(e) => setAttemptsToBuy(Math.max(0, Math.min(100, Math.floor(Number(e.target.value)))))}
                                                     className="w-24 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                 />
@@ -552,7 +552,7 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
                                                         max={99}
                                                         step="1"
                                                         value={winChanceMin}
-                                                        onChange={(e) => setWinChanceMin(Number(e.target.value))}
+                                                        onChange={(e) => setWinChanceMin(Math.floor(Number(e.target.value)))}
                                                         onBlur={(e) => setWinChanceMin(Math.max(0, Math.min(99, Math.floor(Number(e.target.value)))))}
                                                         className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                     />
@@ -565,7 +565,7 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
                                                         max={100}
                                                         step="1"
                                                         value={winChanceMax}
-                                                        onChange={(e) => setWinChanceMax(Number(e.target.value))}
+                                                        onChange={(e) => setWinChanceMax(Math.floor(Number(e.target.value)))}
                                                         onBlur={(e) => setWinChanceMax(Math.max(0, Math.min(100, Math.floor(Number(e.target.value)))))}
                                                         className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                     />

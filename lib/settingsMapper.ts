@@ -454,7 +454,7 @@ export const SETTINGS_FIELD_MAP: FieldMapping[] = [
         category: 'protection',
         subcategory: 'shield',
         min: 5,
-        max: 1440,
+        max: 1800,
     },
     {
         uiField: 'Redeploy shield when time left is around',
@@ -463,7 +463,7 @@ export const SETTINGS_FIELD_MAP: FieldMapping[] = [
         category: 'protection',
         subcategory: 'shield',
         min: 5,
-        max: 1440,
+        max: 1800,
     },
     {
         uiField: 'Use Longer Shields First',
@@ -523,7 +523,7 @@ export const SETTINGS_FIELD_MAP: FieldMapping[] = [
         category: 'protection',
         subcategory: 'anti-scout',
         min: 5,
-        max: 1440,
+        max: 1800,
     },
 
     // Protection Settings - Gathering
@@ -541,7 +541,7 @@ export const SETTINGS_FIELD_MAP: FieldMapping[] = [
         category: 'protection',
         subcategory: 'gathering',
         min: 5,
-        max: 1440,
+        max: 1800,
     },
     {
         uiField: 'Recall Gathering Troops if Scouted',

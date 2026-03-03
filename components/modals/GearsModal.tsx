@@ -213,7 +213,7 @@ export default function GearsModal({ isOpen, onClose, iggId }: GearsModalProps) 
                                                 max={3600}
                                                 step="1"
                                                 onChange={(e) => {
-                                                    const val = e.target.value === '' ? 0 : Number(e.target.value)
+                                                    const val = e.target.value === '' ? 0 : Math.floor(Number(e.target.value))
                                                     setIdleGearTime(Math.min(3600, Math.max(10, val)))
                                                 }}
                                                 onBlur={(e) => {

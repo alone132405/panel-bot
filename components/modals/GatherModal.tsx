@@ -286,7 +286,12 @@ export default function GatherModal({ isOpen, onClose, iggId }: GatherModalProps
                                                 max="8"
                                                 step="1"
                                                 value={maxArmies}
-                                                onChange={(e) => setMaxArmies(Number(e.target.value))}
+                                                onChange={(e) => setMaxArmies(Math.floor(Number(e.target.value)))}
+                                                onKeyDown={(e) => {
+                                                    if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
                                                 onBlur={(e) => setMaxArmies(Math.max(0, Math.min(8, Math.floor(Number(e.target.value)))))}
                                                 className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                             />
@@ -313,8 +318,13 @@ export default function GatherModal({ isOpen, onClose, iggId }: GatherModalProps
                                                         step="1"
                                                         disabled={false}
                                                         onChange={(e) => {
-                                                            const val = e.target.value === '' ? 1 : Number(e.target.value)
+                                                            const val = e.target.value === '' ? 1 : Math.floor(Number(e.target.value))
                                                             setSpareArmyAmount(val)
+                                                        }}
+                                                        onKeyDown={(e) => {
+                                                            if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                                e.preventDefault();
+                                                            }
                                                         }}
                                                         onBlur={(e) => {
                                                             const val = e.target.value === '' ? 1 : Number(e.target.value)

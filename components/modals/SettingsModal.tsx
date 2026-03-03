@@ -279,16 +279,22 @@ export default function SettingsModal({ isOpen, onClose, categoryName, iggId }: 
                                                             {setting.type === 'number' && (
                                                                 <input
                                                                     type="number"
+                                                                    step="1"
                                                                     value={setting.value ?? ''}
                                                                     min={setting.min}
                                                                     max={setting.max}
                                                                     disabled={isDisabled}
                                                                     onChange={(e) => {
-                                                                        const val = e.target.value === '' ? 0 : Number(e.target.value)
+                                                                        const val = e.target.value === '' ? 0 : Math.floor(Number(e.target.value))
                                                                         handleSettingChange(setting.path, val)
                                                                     }}
+                                                                    onKeyDown={(e) => {
+                                                                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                                            e.preventDefault();
+                                                                        }
+                                                                    }}
                                                                     onBlur={(e) => {
-                                                                        let val = e.target.value === '' ? 0 : Number(e.target.value)
+                                                                        let val = e.target.value === '' ? 0 : Math.floor(Number(e.target.value))
                                                                         if (setting.min !== undefined && val < Number(setting.min)) val = Number(setting.min)
                                                                         if (setting.max !== undefined && val > Number(setting.max)) val = Number(setting.max)
                                                                         if (val !== setting.value) handleSettingChange(setting.path, val)

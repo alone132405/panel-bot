@@ -363,7 +363,7 @@ export default function MilitaryModal({ isOpen, onClose, iggId }: MilitaryModalP
                                                     max={100}
                                                     value={attackSkirmishWhenTroopsAt}
                                                     step="1"
-                                                    onChange={(e) => setAttackSkirmishWhenTroopsAt(Number(e.target.value))}
+                                                    onChange={(e) => setAttackSkirmishWhenTroopsAt(Math.floor(Number(e.target.value)))}
                                                     onBlur={(e) => setAttackSkirmishWhenTroopsAt(Math.min(100, Math.max(0, Math.floor(Number(e.target.value)))))}
                                                     className="w-24 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                 />
@@ -398,7 +398,7 @@ export default function MilitaryModal({ isOpen, onClose, iggId }: MilitaryModalP
                                                                     max={999999999}
                                                                     step="1"
                                                                     onChange={(e) => {
-                                                                        const val = e.target.value === '' ? 0 : Number(e.target.value)
+                                                                        const val = e.target.value === '' ? 0 : Math.floor(Number(e.target.value))
                                                                         updateTroopAmount(index, val)
                                                                     }}
                                                                     onBlur={(e) => {

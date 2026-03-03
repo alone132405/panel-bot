@@ -357,7 +357,7 @@ export default function ConstructionModal({ isOpen, onClose, iggId }: Constructi
                                                 min={0}
                                                 max={50}
                                                 value={maxBuildingLevel}
-                                                onChange={(e) => setMaxBuildingLevel(Math.min(50, Math.max(0, Number(e.target.value))))}
+                                                onChange={(e) => setMaxBuildingLevel(Math.min(50, Math.max(0, Math.floor(Number(e.target.value)))))}
                                                 className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                             />
                                         </div>

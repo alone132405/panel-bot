@@ -268,13 +268,13 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
     const updateMission = (index: number, field: keyof Mission, value: any) => {
         const updatedMissions = [...missions]
         if (['minPoints', 'maxPoints'].includes(field)) {
-            value = Math.min(355, Math.max(0, isNaN(value) ? 0 : value))
+            value = Math.min(355, Math.max(0, isNaN(value) ? 0 : Math.floor(value)))
         }
         if (['solo120MinPoints', 'solo120MaxPoints'].includes(field)) {
-            value = Math.min(400, Math.max(0, isNaN(value) ? 0 : value))
+            value = Math.min(400, Math.max(0, isNaN(value) ? 0 : Math.floor(value)))
         }
         if (['solo200MinPoints', 'solo200MaxPoints'].includes(field)) {
-            value = Math.min(650, Math.max(0, isNaN(value) ? 0 : value))
+            value = Math.min(650, Math.max(0, isNaN(value) ? 0 : Math.floor(value)))
         }
         updatedMissions[index] = { ...updatedMissions[index], [field]: value }
         setMissions(updatedMissions)
@@ -470,6 +470,11 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                                                                             min={0}
                                                                             max={355}
                                                                             onChange={(e) => updateMission(index, 'minPoints', parseInt(e.target.value) || 0)}
+                                                                            onKeyDown={(e) => {
+                                                                                if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                                                    e.preventDefault();
+                                                                                }
+                                                                            }}
                                                                             className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
                                                                         />
                                                                     </td>
@@ -480,6 +485,11 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                                                                             max={355}
                                                                             value={mission.maxPoints}
                                                                             onChange={(e) => updateMission(index, 'maxPoints', parseInt(e.target.value) || 0)}
+                                                                            onKeyDown={(e) => {
+                                                                                if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                                                    e.preventDefault();
+                                                                                }
+                                                                            }}
                                                                             className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                                         />
                                                                     </td>
@@ -514,6 +524,11 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                                                                         max={355}
                                                                         value={mission.minPoints}
                                                                         onChange={(e) => updateMission(index, 'minPoints', parseInt(e.target.value) || 0)}
+                                                                        onKeyDown={(e) => {
+                                                                            if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                                                e.preventDefault();
+                                                                            }
+                                                                        }}
                                                                         className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                                     />
                                                                 </div>
@@ -525,6 +540,11 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                                                                         max={355}
                                                                         value={mission.maxPoints}
                                                                         onChange={(e) => updateMission(index, 'maxPoints', parseInt(e.target.value) || 0)}
+                                                                        onKeyDown={(e) => {
+                                                                            if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                                                e.preventDefault();
+                                                                            }
+                                                                        }}
                                                                         className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                                     />
                                                                 </div>
@@ -572,6 +592,11 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                                                                         max={400}
                                                                         placeholder="0"
                                                                         onChange={(e) => updateMission(index, 'solo120MinPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
+                                                                        onKeyDown={(e) => {
+                                                                            if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                                                e.preventDefault();
+                                                                            }
+                                                                        }}
                                                                         className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                                     />
                                                                 </td>
@@ -583,6 +608,11 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                                                                         max={400}
                                                                         placeholder="0"
                                                                         onChange={(e) => updateMission(index, 'solo120MaxPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
+                                                                        onKeyDown={(e) => {
+                                                                            if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                                                e.preventDefault();
+                                                                            }
+                                                                        }}
                                                                         className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                                     />
                                                                 </td>
@@ -602,6 +632,11 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                                                                         max={650}
                                                                         placeholder="0"
                                                                         onChange={(e) => updateMission(index, 'solo200MinPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
+                                                                        onKeyDown={(e) => {
+                                                                            if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                                                e.preventDefault();
+                                                                            }
+                                                                        }}
                                                                         className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                                     />
                                                                 </td>
@@ -613,6 +648,11 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                                                                         max={650}
                                                                         placeholder="0"
                                                                         onChange={(e) => updateMission(index, 'solo200MaxPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
+                                                                        onKeyDown={(e) => {
+                                                                            if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                                                e.preventDefault();
+                                                                            }
+                                                                        }}
                                                                         className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                                     />
                                                                 </td>
@@ -646,6 +686,11 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                                                                     type="number"
                                                                     value={mission.solo120MinPoints === 0 ? '' : mission.solo120MinPoints}
                                                                     onChange={(e) => updateMission(index, 'solo120MinPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
+                                                                    onKeyDown={(e) => {
+                                                                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                                            e.preventDefault();
+                                                                        }
+                                                                    }}
                                                                     placeholder="Min"
                                                                     className="w-full px-2 py-1 bg-background-tertiary border border-white/10 rounded text-xs text-white"
                                                                 />
@@ -653,6 +698,11 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                                                                     type="number"
                                                                     value={mission.solo120MaxPoints === 0 ? '' : mission.solo120MaxPoints}
                                                                     onChange={(e) => updateMission(index, 'solo120MaxPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
+                                                                    onKeyDown={(e) => {
+                                                                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                                            e.preventDefault();
+                                                                        }
+                                                                    }}
                                                                     placeholder="Max"
                                                                     className="w-full px-2 py-1 bg-background-tertiary border border-white/10 rounded text-xs text-white"
                                                                 />
@@ -675,6 +725,11 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                                                                     type="number"
                                                                     value={mission.solo200MinPoints === 0 ? '' : mission.solo200MinPoints}
                                                                     onChange={(e) => updateMission(index, 'solo200MinPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
+                                                                    onKeyDown={(e) => {
+                                                                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                                            e.preventDefault();
+                                                                        }
+                                                                    }}
                                                                     placeholder="Min"
                                                                     className="w-full px-2 py-1 bg-background-tertiary border border-white/10 rounded text-xs text-white"
                                                                 />
@@ -682,6 +737,11 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
                                                                     type="number"
                                                                     value={mission.solo200MaxPoints === 0 ? '' : mission.solo200MaxPoints}
                                                                     onChange={(e) => updateMission(index, 'solo200MaxPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
+                                                                    onKeyDown={(e) => {
+                                                                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                                            e.preventDefault();
+                                                                        }
+                                                                    }}
                                                                     placeholder="Max"
                                                                     className="w-full px-2 py-1 bg-background-tertiary border border-white/10 rounded text-xs text-white"
                                                                 />

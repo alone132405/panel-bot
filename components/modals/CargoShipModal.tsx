@@ -271,13 +271,18 @@ export default function CargoShipModal({ isOpen, onClose, iggId }: CargoShipModa
                                                 max={3}
                                                 step="1"
                                                 disabled={false}
+                                                onKeyDown={(e) => {
+                                                    if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
                                                 onChange={(e) => {
-                                                    const val = e.target.value === '' ? 0 : Number(e.target.value)
+                                                    const val = e.target.value === '' ? 0 : Math.floor(Number(e.target.value))
                                                     setMinimumItemStars(val)
                                                 }}
                                                 onBlur={(e) => {
-                                                    const val = e.target.value === '' ? 1 : Number(e.target.value)
-                                                    setMinimumItemStars(Math.max(1, Math.min(3, Math.floor(val))))
+                                                    const val = e.target.value === '' ? 1 : Math.floor(Number(e.target.value))
+                                                    setMinimumItemStars(Math.max(1, Math.min(3, val)))
                                                 }}
                                                 className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
                                             />

@@ -255,10 +255,16 @@ export default function HuntingModal({ isOpen, onClose, iggId }: HuntingModalPro
                                             <label className="block text-xs sm:text-sm text-gray-300 mb-2">Max Travel Time (Seconds):</label>
                                             <input
                                                 type="number"
+                                                step="1"
                                                 min={1}
                                                 max={3600}
                                                 value={maxTravelTime}
-                                                onChange={(e) => setMaxTravelTime(Number(e.target.value))}
+                                                onChange={(e) => setMaxTravelTime(Math.floor(Number(e.target.value)))}
+                                                onKeyDown={(e) => {
+                                                    if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
                                                 onBlur={(e) => setMaxTravelTime(Math.min(3600, Math.max(1, Math.floor(Number(e.target.value)))))}
                                                 className="w-32 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                             />
@@ -268,10 +274,16 @@ export default function HuntingModal({ isOpen, onClose, iggId }: HuntingModalPro
                                             <label className="block text-xs sm:text-sm text-gray-300 mb-2">Sending Delay (MS):</label>
                                             <input
                                                 type="number"
+                                                step="1"
                                                 min={200}
                                                 max={10000}
                                                 value={sendingDelay}
-                                                onChange={(e) => setSendingDelay(Number(e.target.value))}
+                                                onChange={(e) => setSendingDelay(Math.floor(Number(e.target.value)))}
+                                                onKeyDown={(e) => {
+                                                    if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
                                                 onBlur={(e) => setSendingDelay(Math.min(10000, Math.max(200, Math.floor(Number(e.target.value)))))}
                                                 className="w-32 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                             />
@@ -388,7 +400,12 @@ export default function HuntingModal({ isOpen, onClose, iggId }: HuntingModalPro
                                                     max={100}
                                                     value={startHuntWhenEnergy}
                                                     step="1"
-                                                    onChange={(e) => setStartHuntWhenEnergy(Number(e.target.value))}
+                                                    onChange={(e) => setStartHuntWhenEnergy(Math.floor(Number(e.target.value)))}
+                                                    onKeyDown={(e) => {
+                                                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
                                                     onBlur={(e) => setStartHuntWhenEnergy(Math.min(100, Math.max(0, Math.floor(Number(e.target.value)))))}
                                                     className="w-24 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                 />

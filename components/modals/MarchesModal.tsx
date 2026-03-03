@@ -273,8 +273,14 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                                 type="number"
                                                 min="1"
                                                 max="8"
+                                                step="1"
                                                 value={rallyLimit}
-                                                onChange={(e) => setRallyLimit(Math.min(8, Math.max(1, Number(e.target.value))))}
+                                                onChange={(e) => setRallyLimit(Math.floor(Math.min(8, Math.max(1, Number(e.target.value)))))}
+                                                onKeyDown={(e) => {
+                                                    if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
                                                 className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                             />
                                         </div>
@@ -285,8 +291,14 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                                 type="number"
                                                 min={1}
                                                 max={120}
+                                                step="1"
                                                 value={maxTravelTime}
-                                                onChange={(e) => setMaxTravelTime(Number(e.target.value))}
+                                                onChange={(e) => setMaxTravelTime(Math.floor(Number(e.target.value)))}
+                                                onKeyDown={(e) => {
+                                                    if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
                                                 onBlur={(e) => setMaxTravelTime(Math.max(1, Math.min(120, Math.floor(Number(e.target.value)))))}
                                                 className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                             />
@@ -366,7 +378,12 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                                 max={200000}
                                                 step="1"
                                                 value={leaveExtraSpace}
-                                                onChange={(e) => setLeaveExtraSpace(Number(e.target.value))}
+                                                onChange={(e) => setLeaveExtraSpace(Math.floor(Number(e.target.value)))}
+                                                onKeyDown={(e) => {
+                                                    if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
                                                 onBlur={(e) => setLeaveExtraSpace(Math.max(0, Math.min(200000, Math.floor(Number(e.target.value)))))}
                                                 className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                             />
@@ -378,8 +395,14 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                                 type="number"
                                                 min={1}
                                                 max={120}
+                                                step="1"
                                                 value={timeToWait}
-                                                onChange={(e) => setTimeToWait(Number(e.target.value))}
+                                                onChange={(e) => setTimeToWait(Math.floor(Number(e.target.value)))}
+                                                onKeyDown={(e) => {
+                                                    if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
                                                 onBlur={(e) => setTimeToWait(Math.max(1, Math.min(120, Math.floor(Number(e.target.value)))))}
                                                 className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                             />
@@ -449,8 +472,14 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                                     type="number"
                                                     min="0"
                                                     max="28"
+                                                    step="1"
                                                     value={deleteEssencesLowerThan}
-                                                    onChange={(e) => setDeleteEssencesLowerThan(Math.min(28, Number(e.target.value)))}
+                                                    onChange={(e) => setDeleteEssencesLowerThan(Math.floor(Math.min(28, Number(e.target.value))))}
+                                                    onKeyDown={(e) => {
+                                                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
                                                     className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                                 />
                                             </div>

@@ -279,9 +279,14 @@ export default function ScheduleModal({ isOpen, onClose, iggId }: ScheduleModalP
                                                     max={9999}
                                                     step="1"
                                                     onChange={(e) => {
-                                                        const val = e.target.value === '' ? 0 : Number(e.target.value)
+                                                        const val = e.target.value === '' ? 0 : Math.floor(Number(e.target.value))
                                                         setRandomMaxMinutes(Math.max(0, Math.min(9999, val)))
                                                         updateSettingsObject('scheduleSettings.randMax', Math.max(0, Math.min(9999, val)))
+                                                    }}
+                                                    onKeyDown={(e) => {
+                                                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
+                                                            e.preventDefault();
+                                                        }
                                                     }}
                                                     onBlur={(e) => {
                                                         const val = e.target.value === '' ? 0 : Math.floor(Number(e.target.value))
