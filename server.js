@@ -13,6 +13,11 @@ const handle = app.getRequestHandler()
 app.prepare().then(() => {
     const httpServer = createServer((req, res) => {
         try {
+            // Let Socket.IO handle these instead of Next.js returning 404
+            if (req.url && req.url.startsWith('/api/socket/io')) {
+                return
+            }
+
             const parsedUrl = parse(req.url, true)
             handle(req, res, parsedUrl)
         } catch (err) {
