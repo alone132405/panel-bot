@@ -10,6 +10,11 @@ const port = process.env.PORT || 3000
 const app = next({ dev, hostname, port })
 const handle = app.getRequestHandler()
 
+console.log('--- SERVER STARTING ---')
+console.log('NODE_ENV:', process.env.NODE_ENV)
+console.log('Dev Mode:', dev)
+console.log('-----------------------')
+
 app.prepare().then(() => {
     const httpServer = createServer((req, res) => {
         try {
