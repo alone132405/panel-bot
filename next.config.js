@@ -1,7 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    // Use standalone output for production deployment
-    output: 'standalone',
+    // output: 'standalone', // Removed to allow custom server.js wrapper to run
+
+    async rewrites() {
+        return [
+            {
+                source: '/api/socket/io/:path*',
+                destination: '/api/socket/io/:path*', // Ensure Next.js ignores this route
+            },
+        ];
+    },
 
     webpack: (config, { isServer }) => {
         if (!isServer) {
