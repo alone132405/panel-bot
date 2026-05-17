@@ -53,7 +53,7 @@ interface SettingCategory {
     name: string
     description: string
     icon: any
-    gradient: string
+    color: string
 }
 
 export default function SettingsPage() {
@@ -87,7 +87,6 @@ export default function SettingsPage() {
         console.log('SettingsPage: mounted/updated. IGG ID:', selectedIggId, 'Socket Connected:', isConnected)
     }, [selectedIggId, isConnected])
 
-    // Load cooldown from local storage
     useEffect(() => {
         if (!selectedIggId) return
 
@@ -114,69 +113,37 @@ export default function SettingsPage() {
         return () => clearInterval(interval)
     }, [selectedIggId])
 
-    // Update queue position and status from socket
     useEffect(() => {
         if (!selectedIggId || !queueStatus) {
-            if (!applying) setQueuePosition(0) // Only reset if not locally "applying" (keep spinner if just clicked)
+            if (!applying) setQueuePosition(0)
             return
         }
 
         const index = queueStatus.queuedIggIds.indexOf(selectedIggId)
         if (index !== -1) {
-            // User is in queue
-            // If index is 0 and isRunning is true, they are being processed
-            // But we actually want to show "Applying..." in that case, handled by 'applying' state usually,
-            // or we can derive it here.
-
-            // To match User 2 requirement: "waiting in queue" vs "applying changes"
             if (index === 0 && queueStatus.isRunning) {
-                // Currently processing this user
-                setApplying(true) // Force applying state to show spinner
-                setQueuePosition(0) // 0 means "current/processing" in our UI logic usually
+                setApplying(true)
+                setQueuePosition(0)
             } else {
-                // Waiting in queue
-                setApplying(true) // Keep button disabled/showing status
-                setQueuePosition(index + (queueStatus.isRunning ? 0 : 1)) // If running, 0 is active, so index 1 is pos 1? 
-                // Actually: queueStatus.queuedIggIds includes the running one if running?
-                // Let's check api logic: queue includes all.
-                // If running, queue[0] is the running one.
-                // So index 0 = running. Index 1 = waiting #1.
-                // If NOT running, index 0 = waiting #1.
-
-                // Let's simplify:
-                // If index == 0 && queueStatus.isRunning -> Processing
-                // Else -> Position = index (if running) or index + 1 (if not running)?
-                // Actually queue array is just the list. 
-                // broadcastQueueStatus sends entire queue.
-                // processQueue: "item = queue[0]... broadcast... run... shift"
-                // So queue[0] IS the one running if isRunning=true.
-
+                setApplying(true)
                 if (queueStatus.isRunning) {
-                    setQueuePosition(index) // 0 means running
+                    setQueuePosition(index)
                 } else {
                     setQueuePosition(index + 1)
                 }
             }
         } else {
-            // Not in queue
             if (cooldown > 0) {
                 setApplying(false)
             } else {
-                // Only turn off applying if we think we are done (handled by automationStatus or local timeout? 
-                // Actually fire-and-forget means we stop "applying" immediately after API return?
-                // No, implementation plan said: "User 2 clicks apply... User 2 should automtically update to Applying..."
-                // So we should let socket state drive "applying" variable essentially.
                 if (queueStatus.queuedIggIds.length > 0) {
-                    // We are not in queue, but queue exists? We are just idle.
                     setApplying(false)
                     setQueuePosition(0)
                 }
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [queueStatus, selectedIggId])
 
-    // Handle completion via socket event to clear state if needed
     useEffect(() => {
         console.log('SettingsPage: automationStatus updated:', automationStatus)
         if (automationStatus?.status === 'completed' || automationStatus?.status === 'error') {
@@ -217,8 +184,7 @@ export default function SettingsPage() {
 
             if (data.success) {
                 toast.success('Request sent to queue!')
-                // Set cooldown
-                const expiry = Date.now() + 5 * 60 * 1000 // 5 minutes
+                const expiry = Date.now() + 5 * 60 * 1000
                 localStorage.setItem(`automation_cooldown_settings_${selectedIggId}`, expiry.toString())
                 setCooldown(300)
             } else {
@@ -243,133 +209,133 @@ export default function SettingsPage() {
             name: 'General',
             description: 'Basic bot configuration and automation settings',
             icon: Settings,
-            gradient: 'from-primary-600 to-primary-700',
+            color: 'text-accent-1',
         },
         {
             id: 'protection',
             name: 'Protection',
             description: 'Shield management and defense automation',
             icon: Shield,
-            gradient: 'from-blue-600 to-blue-700',
+            color: 'text-accent-2',
         },
         {
             id: 'supply',
             name: 'Supply',
             description: 'Resource supply and distribution settings',
             icon: Package,
-            gradient: 'from-orange-600 to-orange-700',
+            color: 'text-[#FF8C00]',
         },
         {
             id: 'gather',
             name: 'Gather',
             description: 'Auto-gather resources and tile management',
             icon: Wheat,
-            gradient: 'from-accent-emerald to-emerald-700',
+            color: 'text-accent-1',
         },
         {
             id: 'marches',
             name: 'Marches',
             description: 'March formation and troop deployment',
             icon: Users,
-            gradient: 'from-red-600 to-red-700',
+            color: 'text-accent-3',
         },
         {
             id: 'realm',
             name: 'Realm',
             description: 'Kingdom events and realm activities',
             icon: Globe,
-            gradient: 'from-accent-purple to-purple-700',
+            color: 'text-accent-2',
         },
         {
             id: 'heroes',
             name: 'Heroes',
             description: 'Hero management and skill upgrades',
             icon: Crown,
-            gradient: 'from-yellow-600 to-yellow-700',
+            color: 'text-accent-gold',
         },
         {
             id: 'cargo-ship',
             name: 'Cargo Ship',
             description: 'Trading ship and cargo management',
             icon: Ship,
-            gradient: 'from-accent-cyan to-cyan-700',
+            color: 'text-[#00BFFF]',
         },
         {
             id: 'gems-coins',
             name: 'Gems/Coins',
             description: 'Currency management and spending limits',
             icon: Coins,
-            gradient: 'from-amber-600 to-amber-700',
+            color: 'text-accent-gold',
         },
         {
             id: 'construction',
             name: 'Construction',
             description: 'Building upgrades and construction queue',
             icon: Building,
-            gradient: 'from-gray-600 to-gray-700',
+            color: 'text-[#00BFFF]',
         },
         {
             id: 'research',
             name: 'Research',
             description: 'Technology research and academy settings',
             icon: FlaskConical,
-            gradient: 'from-indigo-600 to-indigo-700',
+            color: 'text-accent-2',
         },
         {
             id: 'military',
             name: 'Military',
             description: 'Troop training and military operations',
             icon: Swords,
-            gradient: 'from-rose-600 to-rose-700',
+            color: 'text-accent-3',
         },
         {
             id: 'hunting',
             name: 'Hunting',
             description: 'Monster hunting and rewards collection',
             icon: Target,
-            gradient: 'from-green-600 to-green-700',
+            color: 'text-accent-1',
         },
         {
             id: 'artifacts',
             name: 'Artifacts',
             description: 'Artifact enhancement and management',
             icon: Sparkles,
-            gradient: 'from-pink-600 to-pink-700',
+            color: 'text-accent-2',
         },
         {
             id: 'pets',
             name: 'Pets',
             description: 'Pet care and familiar upgrades',
             icon: PawPrint,
-            gradient: 'from-violet-600 to-violet-700',
+            color: 'text-[#FF8C00]',
         },
         {
             id: 'guild-fest',
             name: 'Guild Fest',
             description: 'Guild festival missions and rewards',
             icon: Trophy,
-            gradient: 'from-yellow-600 to-yellow-700',
+            color: 'text-accent-gold',
         },
         {
             id: 'chaos-arena',
             name: 'Chaos Arena',
             description: 'Arena battles and mission completion',
             icon: Swords,
-            gradient: 'from-red-600 to-red-700',
+            color: 'text-accent-3',
         },
         {
             id: 'gears',
             name: 'Gears',
             description: 'Equipment crafting and gear upgrades',
             icon: ShieldCheck,
-            gradient: 'from-teal-600 to-teal-700',
+            color: 'text-[#00BFFF]',
         },
         {
             id: 'schedule',
             name: 'Schedule',
             description: 'Task scheduling and automation timing',
             icon: Calendar,
-            gradient: 'from-slate-600 to-slate-700',
+            color: 'text-text-primary',
         },
     ]
 
@@ -415,7 +381,6 @@ export default function SettingsPage() {
         } else if (category.id === 'gears') {
             setIsGearsModalOpen(true)
         } else {
-            // Other categories can be implemented later
             console.log('Category clicked:', category.id)
         }
     }
@@ -436,12 +401,12 @@ export default function SettingsPage() {
     }
 
     return (
-        <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
+        <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-[1400px] mx-auto">
             {/* Header with IGG ID Selector */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 mb-8">
                 <div>
-                    <h1 className="text-xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">Bot Settings</h1>
-                    <p className="text-sm sm:text-base text-gray-400">Configure your bot automation and preferences</p>
+                    <h1 className="font-orbitron text-xl sm:text-3xl font-bold text-text-primary mb-1 sm:mb-2 tracking-wide">Protocol Configuration</h1>
+                    <p className="font-sans text-sm sm:text-base text-text-muted">Configure automation parameters and behavioral overrides.</p>
                 </div>
                 <div className="w-full md:w-80">
                     <IggIdSelector
@@ -451,12 +416,27 @@ export default function SettingsPage() {
                 </div>
             </div>
 
+            {/* Info Card */}
+            <div className="bg-accent-1/5 border border-accent-1/20 rounded-[14px] p-6 mb-8">
+                <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-accent-1/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <Settings className="w-5 h-5 text-accent-1" />
+                    </div>
+                    <div>
+                        <h3 className="font-orbitron text-[14px] font-bold text-text-primary mb-2 tracking-wide">SYSTEM TIP</h3>
+                        <p className="font-sans text-text-muted text-[13px] leading-relaxed">
+                            Select a protocol module below to configure its parameters. Modifying these values updates the central automation core in real-time.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             {/* Settings Categories Grid */}
             <motion.div
                 variants={containerVariants}
                 initial="hidden"
                 animate="show"
-                className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
             >
                 {categories.map((category) => {
                     const Icon = category.icon
@@ -465,32 +445,28 @@ export default function SettingsPage() {
                         <motion.div
                             key={category.id}
                             variants={itemVariants}
-                            whileHover={{ y: -4, scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
+                            whileHover={{ y: -4 }}
                             onClick={() => handleCategoryClick(category)}
-                            className="glass-card p-5 cursor-pointer group relative overflow-hidden"
+                            className="bg-bg-surface border border-border rounded-[14px] p-5 cursor-pointer group relative overflow-hidden transition-all duration-250 hover:border-accent-1/40 hover:shadow-glow-mint"
                         >
-                            {/* Gradient Background on Hover */}
-                            <div className={`absolute inset-0 bg-gradient-to-br ${category.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
-
                             <div className="relative">
                                 {/* Icon */}
-                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${category.gradient} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                                    <Icon className="w-6 h-6 text-white" />
+                                <div className="w-[44px] h-[44px] rounded-[10px] bg-bg-elevated flex items-center justify-center mb-4 transition-colors duration-300 group-hover:bg-accent-1/10 border border-border group-hover:border-accent-1/20">
+                                    <Icon className={`w-5 h-5 ${category.color} transition-transform group-hover:scale-110`} />
                                 </div>
 
                                 {/* Content */}
-                                <h3 className="text-lg font-bold text-white mb-2 group-hover:text-gradient transition-all">
+                                <h3 className="font-orbitron text-[14px] font-bold text-text-primary mb-2 transition-all">
                                     {category.name}
                                 </h3>
-                                <p className="text-gray-400 text-sm leading-relaxed mb-3">
+                                <p className="font-sans text-text-muted text-[13px] leading-relaxed mb-4 line-clamp-2">
                                     {category.description}
                                 </p>
 
                                 {/* Arrow */}
-                                <div className="flex items-center gap-1 text-primary-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex items-center gap-1 font-sans text-accent-1 text-[13px] font-bold opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-250">
                                     <span>Configure</span>
-                                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                    <ChevronRight className="w-3 h-3" />
                                 </div>
                             </div>
                         </motion.div>
@@ -503,16 +479,16 @@ export default function SettingsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="flex justify-center"
+                className="flex justify-center mt-12"
             >
                 <button
                     onClick={handleApplyChanges}
                     disabled={applying || !selectedIggId || cooldown > 0}
-                    className="btn-primary px-12 py-4 text-lg flex items-center gap-3 shadow-glow hover:shadow-glow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="group px-8 py-4 rounded-[10px] bg-gradient-to-br from-accent-1 to-accent-2 text-[#07070E] font-sans text-[15px] font-bold flex items-center gap-3 hover:shadow-glow-mint hover:brightness-110 transition-all duration-250 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
                 >
                     {(applying || queuePosition > 0) ? (
                         <>
-                            <Loader2 className="w-6 h-6 animate-spin" />
+                            <Loader2 className="w-5 h-5 animate-spin" />
                             {automationStatus?.status === 'waiting'
                                 ? 'Wait for RDP disconnection'
                                 : queuePosition > 0
@@ -521,34 +497,19 @@ export default function SettingsPage() {
                         </>
                     ) : cooldown > 0 ? (
                         <>
-                            <Clock className="w-6 h-6" />
+                            <Clock className="w-5 h-5" />
                             Wait {formatCooldown(cooldown)}
                         </>
                     ) : (
                         <>
-                            <Settings className="w-6 h-6" />
+                            <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform duration-500" />
                             Apply Changes
                         </>
                     )}
                 </button>
             </motion.div>
 
-            {/* Info Card */}
-            <div className="glass-card p-6 bg-primary-500/5 border-primary-500/20">
-                <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <Settings className="w-6 h-6 text-primary-400" />
-                    </div>
-                    <div>
-                        <h3 className="text-lg font-bold text-white mb-2">Quick Tip</h3>
-                        <p className="text-gray-400 text-sm leading-relaxed">
-                            Click on any category card to configure specific settings. Changes are saved automatically and synced with your bot configuration files in real-time.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Settings Modal */}
+            {/* Modals */}
             {selectedCategory && (
                 <SettingsModal
                     isOpen={isModalOpen}
@@ -557,132 +518,24 @@ export default function SettingsPage() {
                     iggId={selectedIggId}
                 />
             )}
-
-            {/* Protection Modal */}
-            <ProtectionModal
-                isOpen={isProtectionModalOpen}
-                onClose={() => setIsProtectionModalOpen(false)}
-                iggId={selectedIggId}
-            />
-
-            {/* Supply Modal */}
-            <SupplyModal
-                isOpen={isSupplyModalOpen}
-                onClose={() => setIsSupplyModalOpen(false)}
-                iggId={selectedIggId}
-            />
-
-            {/* Gather Modal */}
-            <GatherModal
-                isOpen={isGatherModalOpen}
-                onClose={() => setIsGatherModalOpen(false)}
-                iggId={selectedIggId}
-            />
-
-            {/* Marches Modal */}
-            <MarchesModal
-                isOpen={isMarchesModalOpen}
-                onClose={() => setIsMarchesModalOpen(false)}
-                iggId={selectedIggId}
-            />
-
-            {/* Realm Modal */}
-            <RealmModal
-                isOpen={isRealmModalOpen}
-                onClose={() => setIsRealmModalOpen(false)}
-                iggId={selectedIggId}
-            />
-
-            {/* Heroes Modal */}
-            <HeroesModal
-                isOpen={isHeroesModalOpen}
-                onClose={() => setIsHeroesModalOpen(false)}
-                iggId={selectedIggId}
-            />
-
-            {/* Cargo Ship Modal */}
-            <CargoShipModal
-                isOpen={isCargoShipModalOpen}
-                onClose={() => setIsCargoShipModalOpen(false)}
-                iggId={selectedIggId}
-            />
-
-            {/* Gems/Coins Modal */}
-            <GemsCoinsModal
-                isOpen={isGemsCoinsModalOpen}
-                onClose={() => setIsGemsCoinsModalOpen(false)}
-                iggId={selectedIggId}
-            />
-
-            {/* Construction Modal */}
-            <ConstructionModal
-                isOpen={isConstructionModalOpen}
-                onClose={() => setIsConstructionModalOpen(false)}
-                iggId={selectedIggId}
-            />
-
-            {/* Research Modal */}
-            <ResearchModal
-                isOpen={isResearchModalOpen}
-                onClose={() => setIsResearchModalOpen(false)}
-                iggId={selectedIggId}
-            />
-
-            {/* Military Modal */}
-            <MilitaryModal
-                isOpen={isMilitaryModalOpen}
-                onClose={() => setIsMilitaryModalOpen(false)}
-                iggId={selectedIggId}
-            />
-
-            {/* Hunting Modal */}
-            <HuntingModal
-                isOpen={isHuntingModalOpen}
-                onClose={() => setIsHuntingModalOpen(false)}
-                iggId={selectedIggId}
-            />
-
-            {/* Artifacts Modal */}
-            <ArtifactsModal
-                isOpen={isArtifactsModalOpen}
-                onClose={() => setIsArtifactsModalOpen(false)}
-                iggId={selectedIggId}
-            />
-
-            {/* Pets Modal */}
-            <PetsModal
-                isOpen={isPetsModalOpen}
-                onClose={() => setIsPetsModalOpen(false)}
-                iggId={selectedIggId}
-            />
-
-            {/* Guild Fest Modal */}
-            <GuildFestModal
-                isOpen={isGuildFestModalOpen}
-                onClose={() => setIsGuildFestModalOpen(false)}
-                iggId={selectedIggId}
-            />
-
-            {/* Schedule Modal */}
-            <ScheduleModal
-                isOpen={isScheduleModalOpen}
-                onClose={() => setIsScheduleModalOpen(false)}
-                iggId={selectedIggId}
-            />
-
-            {/* Chaos Arena Modal */}
-            <ChaosArenaModal
-                isOpen={isChaosArenaModalOpen}
-                onClose={() => setIsChaosArenaModalOpen(false)}
-                iggId={selectedIggId}
-            />
-
-            {/* Gears Modal */}
-            <GearsModal
-                isOpen={isGearsModalOpen}
-                onClose={() => setIsGearsModalOpen(false)}
-                iggId={selectedIggId}
-            />
+            <ProtectionModal isOpen={isProtectionModalOpen} onClose={() => setIsProtectionModalOpen(false)} iggId={selectedIggId} />
+            <SupplyModal isOpen={isSupplyModalOpen} onClose={() => setIsSupplyModalOpen(false)} iggId={selectedIggId} />
+            <GatherModal isOpen={isGatherModalOpen} onClose={() => setIsGatherModalOpen(false)} iggId={selectedIggId} />
+            <MarchesModal isOpen={isMarchesModalOpen} onClose={() => setIsMarchesModalOpen(false)} iggId={selectedIggId} />
+            <RealmModal isOpen={isRealmModalOpen} onClose={() => setIsRealmModalOpen(false)} iggId={selectedIggId} />
+            <HeroesModal isOpen={isHeroesModalOpen} onClose={() => setIsHeroesModalOpen(false)} iggId={selectedIggId} />
+            <CargoShipModal isOpen={isCargoShipModalOpen} onClose={() => setIsCargoShipModalOpen(false)} iggId={selectedIggId} />
+            <GemsCoinsModal isOpen={isGemsCoinsModalOpen} onClose={() => setIsGemsCoinsModalOpen(false)} iggId={selectedIggId} />
+            <ConstructionModal isOpen={isConstructionModalOpen} onClose={() => setIsConstructionModalOpen(false)} iggId={selectedIggId} />
+            <ResearchModal isOpen={isResearchModalOpen} onClose={() => setIsResearchModalOpen(false)} iggId={selectedIggId} />
+            <MilitaryModal isOpen={isMilitaryModalOpen} onClose={() => setIsMilitaryModalOpen(false)} iggId={selectedIggId} />
+            <HuntingModal isOpen={isHuntingModalOpen} onClose={() => setIsHuntingModalOpen(false)} iggId={selectedIggId} />
+            <ArtifactsModal isOpen={isArtifactsModalOpen} onClose={() => setIsArtifactsModalOpen(false)} iggId={selectedIggId} />
+            <PetsModal isOpen={isPetsModalOpen} onClose={() => setIsPetsModalOpen(false)} iggId={selectedIggId} />
+            <GuildFestModal isOpen={isGuildFestModalOpen} onClose={() => setIsGuildFestModalOpen(false)} iggId={selectedIggId} />
+            <ScheduleModal isOpen={isScheduleModalOpen} onClose={() => setIsScheduleModalOpen(false)} iggId={selectedIggId} />
+            <ChaosArenaModal isOpen={isChaosArenaModalOpen} onClose={() => setIsChaosArenaModalOpen(false)} iggId={selectedIggId} />
+            <GearsModal isOpen={isGearsModalOpen} onClose={() => setIsGearsModalOpen(false)} iggId={selectedIggId} />
         </div>
     )
 }

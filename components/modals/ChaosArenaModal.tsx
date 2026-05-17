@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Loader2, Swords } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
+import KonohaModal from './KonohaModal'
 import { useDebounce } from '@/hooks/useDebounce'
 
 interface ChaosArenaModalProps {
@@ -133,74 +134,34 @@ export default function ChaosArenaModal({ isOpen, onClose, iggId }: ChaosArenaMo
 
     if (!iggId) {
         return (
-            <AnimatePresence>
-                {isOpen && (
-                    <>
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={onClose}
-                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-                        />
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="fixed inset-4 md:inset-20 bg-background-secondary rounded-2xl border border-white/10 shadow-2xl z-50 flex items-center justify-center"
-                        >
-                            <div className="text-center">
-                                <p className="text-xl text-white mb-2">No IGG ID Selected</p>
-                                <p className="text-gray-400">Please select an IGG ID to configure chaos arena settings</p>
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
+            <KonohaModal
+                isOpen={isOpen}
+                onClose={onClose}
+                title="Chaos Arena"
+                iggId={iggId}
+                icon={Swords}
+                iconColor="#EF4444"
+                iconBg="rgba(239,68,68,0.15)"
+                iconBorder="rgba(239,68,68,0.3)"
+            >
+                <div />
+            </KonohaModal>
         )
     }
 
     return (
-        <AnimatePresence>
-            {isOpen && (
-                <>
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={onClose}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-                    />
-
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="fixed inset-2 sm:inset-4 md:inset-10 lg:inset-20 bg-background-secondary rounded-xl md:rounded-2xl border border-white/10 shadow-2xl z-50 flex flex-col overflow-hidden"
-                    >
-                        {/* Header */}
-                        <div className="flex items-center justify-between px-3 md:px-6 py-2.5 md:py-4 border-b border-white/10 bg-background-tertiary/50">
-                            <div className="min-w-0">
-                                <div className="flex items-center gap-2 md:gap-3">
-                                    <Swords className="w-5 h-5 md:w-6 md:h-6 text-red-400 flex-shrink-0" />
-                                    <h2 className="text-sm md:text-2xl font-bold text-white truncate">Chaos Arena</h2>
-                                    {saving && (
-                                        <Loader2 className="w-4 h-4 animate-spin text-primary-400 flex-shrink-0" />
-                                    )}
-                                </div>
-                                <p className="text-[10px] md:text-sm text-gray-400 truncate">IGG ID: {iggId}</p>
-                            </div>
-                            <button
-                                onClick={onClose}
-                                className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-surface hover:bg-surface-hover flex items-center justify-center transition-colors flex-shrink-0"
-                            >
-                                <X className="w-4 h-4 md:w-5 md:h-5" />
-                            </button>
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-6 scrollbar-thin">
-                            {loading ? (
+        <KonohaModal
+            isOpen={isOpen}
+            onClose={onClose}
+            title="Chaos Arena"
+            iggId={iggId}
+            icon={Swords}
+            iconColor="#EF4444"
+            iconBg="rgba(239,68,68,0.15)"
+            iconBorder="rgba(239,68,68,0.3)"
+            maxWidth="860px"
+        >
+            {loading ? (
                                 <div className="flex items-center justify-center py-12">
                                     <Loader2 className="w-8 h-8 animate-spin text-primary-400" />
                                 </div>
@@ -266,54 +227,6 @@ export default function ChaosArenaModal({ isOpen, onClose, iggId }: ChaosArenaMo
                                     </div>
                                 </div>
                             )}
-                        </div>
-
-                        {/* Footer */}
-                        <div className="grid grid-cols-2 md:flex md:flex-row md:items-center md:justify-between gap-2 px-3 md:px-6 py-2.5 md:py-4 border-t border-white/10 bg-background-tertiary/50">
-                            <button
-                                onClick={onClose}
-                                className="order-1 md:order-2 px-4 md:px-6 py-2 md:py-2.5 rounded-lg md:rounded-xl bg-surface hover:bg-surface-hover text-gray-300 text-sm font-medium transition-colors"
-                            >
-                                Close
-                            </button>
-                            <button
-                                onClick={async () => {
-                                    if (!iggId || !settings) return
-                                    setSaving(true)
-                                    try {
-                                        const res = await fetch(`/api/settings/${iggId}`, {
-                                            method: 'PUT',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify(settings),
-                                        })
-                                        if (res.ok) {
-                                            toast.success('Chaos Arena settings saved successfully!')
-                                            onClose()
-                                        } else {
-                                            toast.error('Failed to save settings')
-                                        }
-                                    } catch (error) {
-                                        toast.error('Error saving settings')
-                                    } finally {
-                                        setSaving(false)
-                                    }
-                                }}
-                                disabled={saving}
-                                className="order-2 md:order-1 px-4 md:px-6 py-2 md:py-2.5 rounded-lg md:rounded-xl bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                                {saving ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                        Saving...
-                                    </>
-                                ) : (
-                                    'Save'
-                                )}
-                            </button>
-                        </div>
-                    </motion.div>
-                </>
-            )}
-        </AnimatePresence>
+        </KonohaModal>
     )
 }

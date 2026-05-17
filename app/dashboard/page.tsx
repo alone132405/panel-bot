@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import {
     Settings2,
     Database,
-    BarChart3,
+    Activity,
     ArrowRight
 } from 'lucide-react'
 import SubscriptionTimer from '@/components/ui/SubscriptionTimer'
@@ -16,14 +16,19 @@ interface ActionCard {
     description: string
     icon: any
     href: string
-    gradient: string
+    accentClass: string
+    gradientStart: string
+    gradientEnd: string
+    delay: number
 }
 
 export default function DashboardPage() {
     const router = useRouter()
     const [subscriptions, setSubscriptions] = useState<any[]>([])
+    const [isMounted, setIsMounted] = useState(false)
 
     useEffect(() => {
+        setIsMounted(true)
         fetch('/api/subscription')
             .then(res => res.json())
             .then(data => {
@@ -39,25 +44,34 @@ export default function DashboardPage() {
 
     const actionCards: ActionCard[] = [
         {
-            title: 'Bot Settings',
-            description: 'Configure your bot preferences, auto-gather resources, and manage automation settings',
+            title: 'Protocol Config',
+            description: 'Advanced configuration matrix. Manage automation parameters, resources, and overrides.',
             icon: Settings2,
             href: '/dashboard/settings',
-            gradient: 'from-primary-600 to-primary-700',
+            accentClass: 'text-accent-1 bg-accent-1/10',
+            gradientStart: 'from-accent-1',
+            gradientEnd: 'to-accent-2',
+            delay: 0.1
         },
         {
-            title: 'Bank Settings',
-            description: 'Manage bank operations, GP tasks, guild commands, and security configurations',
+            title: 'Vault Systems',
+            description: 'Centralized banking operations. Automate resource distribution securely.',
             icon: Database,
             href: '/dashboard/bank',
-            gradient: 'from-accent-emerald to-emerald-600',
+            accentClass: 'text-accent-2 bg-accent-2/10',
+            gradientStart: 'from-accent-2',
+            gradientEnd: 'to-accent-3',
+            delay: 0.2
         },
         {
-            title: 'Reports',
-            description: 'View comprehensive analytics, statistics, and performance reports for your bots',
-            icon: BarChart3,
+            title: 'Telemetry Analytics',
+            description: 'Real-time analytics engine. Monitor efficiency, yield rates, and logs.',
+            icon: Activity,
             href: '/dashboard/reports',
-            gradient: 'from-accent-purple to-purple-600',
+            accentClass: 'text-accent-3 bg-accent-3/10',
+            gradientStart: 'from-accent-3',
+            gradientEnd: 'to-accent-1',
+            delay: 0.3
         },
     ]
 
@@ -65,140 +79,157 @@ export default function DashboardPage() {
         hidden: { opacity: 0 },
         show: {
             opacity: 1,
-            transition: {
-                staggerChildren: 0.15,
-            },
+            transition: { staggerChildren: 0.06 },
         },
     }
 
     const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        show: { opacity: 1, y: 0 },
+        hidden: { opacity: 0, y: 16 },
+        show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
     }
 
+    if (!isMounted) return null
+
     return (
-        <div className="p-3 sm:p-6 space-y-6 sm:space-y-8">
-            {/* Welcome Section */}
-            <div>
-                <h1 className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2">Welcome back! 👋</h1>
-                <p className="text-gray-400 text-sm sm:text-lg">Manage your bot operations from the dashboard</p>
-            </div>
-
-            {/* Main Action Cards */}
-            <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="show"
-                className="w-full max-w-7xl"
+        <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="space-y-8 sm:space-y-10 max-w-[1400px] mx-auto"
+        >
+            {/* HERO SECTION */}
+            <motion.div 
+                variants={itemVariants}
+                className="relative w-full rounded-2xl overflow-hidden border border-accent-1/20 bg-bg-surface"
+                style={{
+                    backgroundImage: 'radial-gradient(circle at 100% 0%, rgba(0,255,178,0.12) 0%, rgba(123,94,255,0.08) 40%, transparent 80%)'
+                }}
             >
-                {/* Desktop Grid View */}
-                <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {actionCards.map((card) => {
-                        const Icon = card.icon
-                        return (
-                            <motion.div
-                                key={`desktop-${card.title}`}
-                                variants={itemVariants}
-                                whileHover={{ y: -8, scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                onClick={() => router.push(card.href)}
-                                className="glass-card p-8 cursor-pointer group relative overflow-hidden"
-                            >
-                                {/* Gradient Background on Hover */}
-                                <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                <div className="scan-line"></div>
+                
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between p-8 md:p-12 min-h-[280px]">
+                    <div className="max-w-xl">
+                        {/* Status Pill */}
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-accent-1/10 border border-accent-1/30 mb-6">
+                            <div className="w-2 h-2 rounded-full bg-accent-1 animate-pulse-slow"></div>
+                            <span className="font-orbitron text-[10px] tracking-[0.2em] text-accent-1 uppercase">
+                                System Fully Operational
+                            </span>
+                        </div>
+                        
+                        <h1 className="font-orbitron text-4xl md:text-[52px] leading-[1.1] mb-4">
+                            <span className="text-text-primary">Orchestrate</span><br />
+                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-accent-1 to-accent-2">Your Network.</span>
+                        </h1>
+                        
+                        <p className="font-sans text-[16px] text-text-muted mb-8 max-w-[480px]">
+                            Seamlessly interact with your bot infrastructure through our high-performance liquid interface.
+                        </p>
 
-                                <div className="relative">
-                                    {/* Icon */}
-                                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${card.gradient} flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                                        <Icon className="w-8 h-8 text-white" />
-                                    </div>
+                        <div className="flex flex-wrap gap-4">
+                            <button onClick={() => router.push('/dashboard/settings')} className="group px-7 py-3 rounded-[10px] bg-gradient-to-br from-accent-1 to-accent-2 text-[#07070E] font-sans text-[14px] font-bold flex items-center gap-2 hover:shadow-[0_0_20px_rgba(0,255,178,0.4)] hover:brightness-110 hover:-translate-y-[2px] transition-all duration-250">
+                                <span>Initialize Setup</span>
+                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </button>
+                            <button onClick={() => router.push('/dashboard/reports')} className="px-7 py-3 rounded-[10px] border border-border bg-transparent text-text-primary font-sans text-[14px] hover:bg-accent-2/10 hover:border-accent-2 transition-all duration-200">
+                                View Logs
+                            </button>
+                        </div>
+                    </div>
 
-                                    {/* Content */}
-                                    <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-gradient transition-all">
-                                        {card.title}
-                                    </h3>
-                                    <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                                        {card.description}
-                                    </p>
-
-                                    {/* Action Button */}
-                                    <div className="flex items-center gap-2 text-primary-400 font-semibold group-hover:gap-3 transition-all">
-                                        <span>Open</span>
-                                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )
-                    })}
-                </div>
-
-                {/* Mobile List View - Redesigned */}
-                <div className="sm:hidden grid grid-cols-1 gap-4">
-                    {actionCards.map((card) => {
-                        const Icon = card.icon
-                        return (
-                            <motion.div
-                                key={`mobile-${card.title}`}
-                                variants={itemVariants}
-                                whileTap={{ scale: 0.98 }}
-                                onClick={() => router.push(card.href)}
-                                className="glass-card p-5 cursor-pointer group relative overflow-hidden"
-                            >
-                                {/* Subtle Gradient Background */}
-                                <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-5 group-active:opacity-10 transition-opacity duration-300`} />
-
-                                <div className="relative flex items-start justify-between gap-4">
-                                    <div className="flex-1">
-                                        {/* Icon & Title Row */}
-                                        <div className="flex items-center gap-3 mb-3">
-                                            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${card.gradient} flex items-center justify-center shadow-lg`}>
-                                                <Icon className="w-5 h-5 text-white" />
-                                            </div>
-                                            <h3 className="text-lg font-bold text-white">
-                                                {card.title}
-                                            </h3>
-                                        </div>
-
-                                        {/* Description */}
-                                        <p className="text-gray-400 text-xs leading-relaxed mb-4">
-                                            {card.description}
-                                        </p>
-
-                                        {/* Action Button */}
-                                        <div className={`inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 group-active:bg-white/10 transition-colors ${card.gradient.includes('primary') ? 'text-primary-400' : card.gradient.includes('emerald') ? 'text-accent-emerald' : 'text-accent-purple'}`}>
-                                            <span>Open Dashboard</span>
-                                            <ArrowRight className="w-3.5 h-3.5" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )
-                    })}
+                    {/* Right side floating chips */}
+                    <div className="hidden lg:flex flex-col gap-4 mt-8 md:mt-0 relative w-[240px] h-[200px]">
+                        <div className="absolute top-0 right-0 px-4 py-3 rounded-xl bg-bg-surface border border-accent-1/20 animate-[float_3s_ease-in-out_infinite]">
+                            <span className="font-sans text-sm font-medium text-text-primary flex items-center gap-2">
+                                ⚡ Bot Status: <span className="text-accent-1">RUNNING</span>
+                            </span>
+                        </div>
+                        <div className="absolute top-[70px] right-[40px] px-4 py-3 rounded-xl bg-bg-surface border border-accent-1/20 animate-[float_3.5s_ease-in-out_infinite_0.5s]">
+                            <span className="font-sans text-sm font-medium text-text-primary flex items-center gap-2">
+                                🕐 Uptime: <span className="text-accent-2">99.8%</span>
+                            </span>
+                        </div>
+                        <div className="absolute top-[140px] right-[20px] px-4 py-3 rounded-xl bg-bg-surface border border-accent-1/20 animate-[float_4s_ease-in-out_infinite_1s]">
+                            <span className="font-sans text-sm font-medium text-text-primary flex items-center gap-2">
+                                📡 Sync: <span className="text-accent-1">Live</span>
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </motion.div>
 
-            {/* Subscription Status */}
+            {/* FEATURE CARDS ROW */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {actionCards.map((card, i) => (
+                    <motion.div 
+                        variants={itemVariants}
+                        key={i}
+                        onClick={() => router.push(card.href)}
+                        className="group relative bg-bg-surface border border-border rounded-[14px] p-7 cursor-pointer hover:-translate-y-[6px] hover:border-accent-1/50 transition-all duration-250 hover:shadow-glow-mint overflow-hidden"
+                    >
+                        {/* Top Accent Bar */}
+                        <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${card.gradientStart} ${card.gradientEnd} opacity-50 group-hover:opacity-100 transition-opacity`} />
+                        
+                        <div className={`w-[44px] h-[44px] rounded-[10px] flex items-center justify-center mb-5 ${card.accentClass}`}>
+                            <card.icon className="w-5 h-5" />
+                        </div>
+
+                        <h3 className="font-orbitron text-[14px] text-text-primary mb-2">
+                            {card.title}
+                        </h3>
+                        
+                        <p className="font-sans text-[13px] text-text-muted mb-6 line-clamp-2">
+                            {card.description}
+                        </p>
+
+                        <div className="mt-auto flex items-center justify-between">
+                            <span className={`font-sans text-[13px] font-bold flex items-center gap-1 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-250 ${card.accentClass.split(' ')[0]}`}>
+                                Configure <ArrowRight className="w-3 h-3" />
+                            </span>
+                            
+                            {/* Telemetry Sparkline (Only for the 3rd card) */}
+                            {i === 2 && (
+                                <div className="flex items-end gap-1 h-6">
+                                    {[40, 70, 45, 90, 60].map((h, idx) => (
+                                        <div key={idx} className="w-1.5 bg-accent-3/50 rounded-t-sm animate-pulse-slow" style={{ height: `${h}%`, animationDelay: `${idx * 0.1}s` }} />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                ))}
+            </div>
+
+            {/* ACTIVE LICENSES SECTION */}
             {subscriptions.length > 0 && (
-                <div className="space-y-4">
-                    {subscriptions.map((sub: any) => (
-                        <motion.div
-                            key={sub.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.5 }}
-                            className="max-w-7xl"
-                        >
-                            <SubscriptionTimer
-                                expiresAt={sub.expiresAt}
-                                plan={sub.plan}
-                                status={sub.status}
-                                iggId={sub.igg?.iggId}
-                                nickname={sub.igg?.displayName}
-                            />
-                        </motion.div>
-                    ))}
-                </div>
+                <motion.div variants={itemVariants} className="mt-4">
+                    <div className="flex items-center gap-3 mb-4 pl-1">
+                        <div className="w-[3px] h-[14px] bg-accent-1 rounded-full" />
+                        <h2 className="font-orbitron text-[11px] tracking-[0.3em] text-text-muted uppercase">
+                            Active Licenses
+                        </h2>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                        {subscriptions.map((sub: any, index: number) => (
+                            <motion.div
+                                key={sub.id}
+                                initial={{ opacity: 0, scale: 0.98 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.2 + (index * 0.1), duration: 0.4 }}
+                            >
+                                <SubscriptionTimer
+                                    expiresAt={sub.expiresAt}
+                                    plan={sub.plan}
+                                    status={sub.status}
+                                    iggId={sub.igg?.iggId}
+                                    nickname={sub.igg?.displayName}
+                                />
+                            </motion.div>
+                        ))}
+                    </div>
+                </motion.div>
             )}
-        </div>
+        </motion.div>
     )
 }

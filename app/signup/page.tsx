@@ -1,15 +1,16 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Mail, Lock, Eye, EyeOff, User, UserPlus, Phone, MessageCircle } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, User, UserPlus, Phone, MessageCircle, ArrowRight, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import AnimatedBackground from '@/components/ui/AnimatedBackground'
+import Image from 'next/image'
 
 export default function SignupPage() {
     const router = useRouter()
+    const [step, setStep] = useState(1)
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -22,8 +23,33 @@ export default function SignupPage() {
     const [showPassword, setShowPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
 
+    const nextStep = () => {
+        if (step === 1 && (!formData.name || !formData.email)) {
+            toast.error('Please fill all fields')
+            return
+        }
+        if (step === 2) {
+            if (!formData.password || !formData.confirmPassword) {
+                toast.error('Please enter a password')
+                return
+            }
+            if (formData.password !== formData.confirmPassword) {
+                toast.error("Passwords don't match")
+                return
+            }
+        }
+        setStep(prev => Math.min(prev + 1, 3))
+    }
+
+    const prevStep = () => setStep(prev => Math.max(prev - 1, 1))
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        if (step !== 3) {
+            nextStep()
+            return
+        }
 
         if (formData.password !== formData.confirmPassword) {
             toast.error("Passwords don't match")
@@ -33,7 +59,6 @@ export default function SignupPage() {
         setIsLoading(true)
 
         try {
-            // Combine country code and phone number for WhatsApp
             let contactValue = formData.contactValue || undefined
             if (formData.contactType === 'WHATSAPP' && formData.countryCode && formData.contactValue) {
                 contactValue = `+${formData.countryCode}${formData.contactValue}`
@@ -70,249 +95,332 @@ export default function SignupPage() {
 
     const getPasswordStrength = (password: string) => {
         if (password.length === 0) return { strength: 0, label: '', color: '' }
-        if (password.length < 8) return { strength: 25, label: 'Weak', color: 'bg-red-500' }
-        if (password.length < 12) return { strength: 50, label: 'Fair', color: 'bg-yellow-500' }
-        if (password.length < 16) return { strength: 75, label: 'Good', color: 'bg-blue-500' }
-        return { strength: 100, label: 'Strong', color: 'bg-green-500' }
+        if (password.length < 8) return { strength: 25, label: 'Weak', color: 'bg-[#FF4D6D] shadow-glow-red' }
+        if (password.length < 12) return { strength: 50, label: 'Fair', color: 'bg-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.5)]' }
+        if (password.length < 16) return { strength: 75, label: 'Good', color: 'bg-[#0088CC] shadow-[0_0_15px_rgba(0,136,204,0.5)]' }
+        return { strength: 100, label: 'Strong', color: 'bg-accent-1 shadow-glow-mint' }
     }
 
     const passwordStrength = getPasswordStrength(formData.password)
 
+    const stepVariants = {
+        hidden: { opacity: 0, x: 40 },
+        visible: { opacity: 1, x: 0, transition: { duration: 0.4, ease: "easeOut" } },
+        exit: { opacity: 0, x: -40, transition: { duration: 0.3 } }
+    }
+
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-            <AnimatedBackground />
+        <div className="min-h-screen flex bg-bg-base relative overflow-hidden">
+            {/* Global Animated Mesh Background */}
+            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-accent-1/5 mix-blend-screen filter blur-[100px] animate-blob" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-accent-2/5 mix-blend-screen filter blur-[100px] animate-blob animation-delay-2000" />
+            </div>
 
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="w-full max-w-md relative z-10"
-            >
-                <div className="glass-card p-8 space-y-6">
-                    {/* Logo and Title */}
-                    <div className="text-center space-y-2">
-                        <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                            className="w-16 h-16 bg-gradient-primary rounded-2xl mx-auto flex items-center justify-center mb-4"
-                        >
-                            <UserPlus className="w-8 h-8 text-white" />
-                        </motion.div>
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gradient">Create Account</h1>
-                        <p className="text-gray-400">Join us to manage your bots</p>
-                    </div>
+            <div className="w-full flex flex-col items-center justify-center relative z-10 p-6 sm:p-12">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="w-full max-w-md"
+                >
+                    <div className="bg-bg-surface border border-border rounded-[24px] p-8 shadow-[0_0_50px_rgba(123,94,255,0.05)] overflow-hidden">
+                        
+                        {/* Header */}
+                        <div className="flex flex-col items-center mb-8">
+                            <Image src="/logo.png" alt="Konoha Logo" width={64} height={64} className="object-contain drop-shadow-[0_0_15px_rgba(0,255,178,0.5)] mb-4" />
+                            <h2 className="font-orbitron text-2xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-accent-1 to-accent-2">
+                                REQUEST ACCESS
+                            </h2>
+                        </div>
 
-                    {/* Signup Form */}
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Name Input */}
-                        <div className="space-y-2">
-                            <label className="text-sm text-gray-300">Full Name</label>
-                            <div className="relative">
-                                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                <input
-                                    type="text"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="input-field w-full pl-11"
-                                    placeholder="John Doe"
-                                    required
+                        {/* Progress Bar */}
+                        <div className="mb-8">
+                            <div className="flex justify-between text-xs font-sans text-text-muted mb-2">
+                                <span className={step >= 1 ? "text-accent-1" : ""}>Account</span>
+                                <span className={step >= 2 ? "text-accent-1" : ""}>Security</span>
+                                <span className={step >= 3 ? "text-accent-1" : ""}>Contact</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-bg-elevated rounded-full overflow-hidden">
+                                <motion.div 
+                                    className="h-full bg-gradient-to-r from-accent-1 to-accent-2"
+                                    initial={{ width: "33%" }}
+                                    animate={{ width: `${(step / 3) * 100}%` }}
+                                    transition={{ duration: 0.4 }}
                                 />
                             </div>
                         </div>
 
-                        {/* Email Input */}
-                        <div className="space-y-2">
-                            <label className="text-sm text-gray-300">Email</label>
-                            <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                <input
-                                    type="email"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="input-field w-full pl-11"
-                                    placeholder="your@email.com"
-                                    required
-                                />
-                            </div>
-                        </div>
+                        {/* Form */}
+                        <form onSubmit={handleSubmit} className="relative min-h-[320px]">
+                            <AnimatePresence mode="wait">
+                                {/* Step 1: Account */}
+                                {step === 1 && (
+                                    <motion.div 
+                                        key="step1" 
+                                        variants={stepVariants} 
+                                        initial="hidden" 
+                                        animate="visible" 
+                                        exit="exit"
+                                        className="space-y-6 absolute w-full"
+                                    >
+                                        {/* Floating Label Input - Name */}
+                                        <div className="relative group">
+                                            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-accent-1 transition-colors z-10" />
+                                            <input
+                                                type="text"
+                                                id="name"
+                                                value={formData.name}
+                                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                                className="peer w-full h-14 pl-12 pr-4 bg-bg-elevated border border-border rounded-[12px] text-text-primary placeholder-transparent focus:outline-none focus:border-accent-1 focus:shadow-[0_0_15px_rgba(0,255,178,0.15)] transition-all pt-2"
+                                                placeholder="Full Name"
+                                                required
+                                            />
+                                            <label 
+                                                htmlFor="name"
+                                                className="absolute left-12 top-1/2 -translate-y-1/2 text-text-muted text-[14px] font-sans transition-all peer-focus:-top-2 peer-focus:left-4 peer-focus:text-[11px] peer-focus:text-accent-1 peer-focus:bg-bg-surface peer-focus:px-2 peer-valid:-top-2 peer-valid:left-4 peer-valid:text-[11px] peer-valid:text-accent-1 peer-valid:bg-bg-surface peer-valid:px-2 pointer-events-none rounded-full"
+                                            >
+                                                Full Name
+                                            </label>
+                                        </div>
 
-                        {/* Password Input */}
-                        <div className="space-y-2">
-                            <label className="text-sm text-gray-300">Password</label>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    className="input-field w-full pl-11 pr-11"
-                                    placeholder="••••••••"
-                                    required
-                                />
+                                        {/* Floating Label Input - Email */}
+                                        <div className="relative group">
+                                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-accent-1 transition-colors z-10" />
+                                            <input
+                                                type="email"
+                                                id="email"
+                                                value={formData.email}
+                                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                                className="peer w-full h-14 pl-12 pr-4 bg-bg-elevated border border-border rounded-[12px] text-text-primary placeholder-transparent focus:outline-none focus:border-accent-1 focus:shadow-[0_0_15px_rgba(0,255,178,0.15)] transition-all pt-2"
+                                                placeholder="Email Address"
+                                                required
+                                            />
+                                            <label 
+                                                htmlFor="email"
+                                                className="absolute left-12 top-1/2 -translate-y-1/2 text-text-muted text-[14px] font-sans transition-all peer-focus:-top-2 peer-focus:left-4 peer-focus:text-[11px] peer-focus:text-accent-1 peer-focus:bg-bg-surface peer-focus:px-2 peer-valid:-top-2 peer-valid:left-4 peer-valid:text-[11px] peer-valid:text-accent-1 peer-valid:bg-bg-surface peer-valid:px-2 pointer-events-none rounded-full"
+                                            >
+                                                Email Address
+                                            </label>
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {/* Step 2: Security */}
+                                {step === 2 && (
+                                    <motion.div 
+                                        key="step2" 
+                                        variants={stepVariants} 
+                                        initial="hidden" 
+                                        animate="visible" 
+                                        exit="exit"
+                                        className="space-y-6 absolute w-full"
+                                    >
+                                        {/* Floating Label Input - Password */}
+                                        <div className="relative group">
+                                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-accent-1 transition-colors z-10" />
+                                            <input
+                                                type={showPassword ? 'text' : 'password'}
+                                                id="password"
+                                                value={formData.password}
+                                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                                className="peer w-full h-14 pl-12 pr-12 bg-bg-elevated border border-border rounded-[12px] text-text-primary placeholder-transparent focus:outline-none focus:border-accent-1 focus:shadow-[0_0_15px_rgba(0,255,178,0.15)] transition-all pt-2"
+                                                placeholder="Password"
+                                                required
+                                            />
+                                            <label 
+                                                htmlFor="password"
+                                                className="absolute left-12 top-1/2 -translate-y-1/2 text-text-muted text-[14px] font-sans transition-all peer-focus:-top-2 peer-focus:left-4 peer-focus:text-[11px] peer-focus:text-accent-1 peer-focus:bg-bg-surface peer-focus:px-2 peer-valid:-top-2 peer-valid:left-4 peer-valid:text-[11px] peer-valid:text-accent-1 peer-valid:bg-bg-surface peer-valid:px-2 pointer-events-none rounded-full"
+                                            >
+                                                Password
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-accent-1 transition-colors z-10"
+                                            >
+                                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                            </button>
+                                            
+                                            {/* Password Strength Indicator */}
+                                            {formData.password && (
+                                                <div className="absolute -bottom-5 w-full space-y-1 left-0">
+                                                    <div className="h-1 bg-bg-elevated rounded-full overflow-hidden">
+                                                        <motion.div
+                                                            initial={{ width: 0 }}
+                                                            animate={{ width: `${passwordStrength.strength}%` }}
+                                                            className={`h-full ${passwordStrength.color} transition-all duration-300`}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Floating Label Input - Confirm Password */}
+                                        <div className="relative group mt-8">
+                                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-accent-1 transition-colors z-10" />
+                                            <input
+                                                type={showPassword ? 'text' : 'password'}
+                                                id="confirmPassword"
+                                                value={formData.confirmPassword}
+                                                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                                className="peer w-full h-14 pl-12 pr-4 bg-bg-elevated border border-border rounded-[12px] text-text-primary placeholder-transparent focus:outline-none focus:border-accent-1 focus:shadow-[0_0_15px_rgba(0,255,178,0.15)] transition-all pt-2"
+                                                placeholder="Confirm Password"
+                                                required
+                                            />
+                                            <label 
+                                                htmlFor="confirmPassword"
+                                                className="absolute left-12 top-1/2 -translate-y-1/2 text-text-muted text-[14px] font-sans transition-all peer-focus:-top-2 peer-focus:left-4 peer-focus:text-[11px] peer-focus:text-accent-1 peer-focus:bg-bg-surface peer-focus:px-2 peer-valid:-top-2 peer-valid:left-4 peer-valid:text-[11px] peer-valid:text-accent-1 peer-valid:bg-bg-surface peer-valid:px-2 pointer-events-none rounded-full"
+                                            >
+                                                Confirm Password
+                                            </label>
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {/* Step 3: Contact */}
+                                {step === 3 && (
+                                    <motion.div 
+                                        key="step3" 
+                                        variants={stepVariants} 
+                                        initial="hidden" 
+                                        animate="visible" 
+                                        exit="exit"
+                                        className="space-y-6 absolute w-full"
+                                    >
+                                        <div className="space-y-3">
+                                            <label className="text-[13px] font-sans text-text-muted uppercase tracking-wider">Contact Method</label>
+                                            <div className="flex gap-3">
+                                                {/* WhatsApp Chip */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormData({ ...formData, contactType: 'WHATSAPP', contactValue: '' })}
+                                                    className={`flex-1 py-3 flex flex-col items-center gap-1 rounded-xl border transition-all ${formData.contactType === 'WHATSAPP' ? 'bg-gradient-to-b from-[#25D366]/20 to-[#25D366]/10 border-[#25D366]/50 shadow-[0_0_15px_rgba(37,211,102,0.2)]' : 'bg-bg-elevated border-border hover:border-text-muted'}`}
+                                                >
+                                                    <Phone className={`w-5 h-5 ${formData.contactType === 'WHATSAPP' ? 'text-[#25D366]' : 'text-text-muted'}`} />
+                                                    <span className={`text-[11px] font-bold ${formData.contactType === 'WHATSAPP' ? 'text-[#25D366]' : 'text-text-muted'}`}>WhatsApp</span>
+                                                </button>
+                                                
+                                                {/* Line Chip */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormData({ ...formData, contactType: 'LINE', contactValue: '' })}
+                                                    className={`flex-1 py-3 flex flex-col items-center gap-1 rounded-xl border transition-all ${formData.contactType === 'LINE' ? 'bg-gradient-to-b from-[#00C300]/20 to-[#00C300]/10 border-[#00C300]/50 shadow-[0_0_15px_rgba(0,195,0,0.2)]' : 'bg-bg-elevated border-border hover:border-text-muted'}`}
+                                                >
+                                                    <MessageCircle className={`w-5 h-5 ${formData.contactType === 'LINE' ? 'text-[#00C300]' : 'text-text-muted'}`} />
+                                                    <span className={`text-[11px] font-bold ${formData.contactType === 'LINE' ? 'text-[#00C300]' : 'text-text-muted'}`}>Line</span>
+                                                </button>
+
+                                                {/* Telegram Chip */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormData({ ...formData, contactType: 'TELEGRAM', contactValue: '' })}
+                                                    className={`flex-1 py-3 flex flex-col items-center gap-1 rounded-xl border transition-all ${formData.contactType === 'TELEGRAM' ? 'bg-gradient-to-b from-[#0088CC]/20 to-[#0088CC]/10 border-[#0088CC]/50 shadow-[0_0_15px_rgba(0,136,204,0.2)]' : 'bg-bg-elevated border-border hover:border-text-muted'}`}
+                                                >
+                                                    <MessageCircle className={`w-5 h-5 ${formData.contactType === 'TELEGRAM' ? 'text-[#0088CC]' : 'text-text-muted'}`} />
+                                                    <span className={`text-[11px] font-bold ${formData.contactType === 'TELEGRAM' ? 'text-[#0088CC]' : 'text-text-muted'}`}>Telegram</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {formData.contactType === 'WHATSAPP' && (
+                                            <div className="flex gap-3">
+                                                <div className="relative w-24">
+                                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted text-sm">+</span>
+                                                    <input
+                                                        type="tel"
+                                                        value={formData.countryCode}
+                                                        onChange={(e) => setFormData({ ...formData, countryCode: e.target.value.replace(/\D/g, '') })}
+                                                        className="w-full h-14 pl-8 pr-2 bg-bg-elevated border border-border rounded-[12px] text-text-primary text-center focus:outline-none focus:border-[#25D366] transition-all"
+                                                        placeholder="91"
+                                                        maxLength={4}
+                                                    />
+                                                </div>
+                                                <div className="relative flex-1">
+                                                    <input
+                                                        type="tel"
+                                                        value={formData.contactValue}
+                                                        onChange={(e) => setFormData({ ...formData, contactValue: e.target.value.replace(/\D/g, '') })}
+                                                        className="w-full h-14 px-4 bg-bg-elevated border border-border rounded-[12px] text-text-primary focus:outline-none focus:border-[#25D366] transition-all"
+                                                        placeholder="Phone number"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {formData.contactType === 'LINE' && (
+                                            <input
+                                                type="text"
+                                                value={formData.contactValue}
+                                                onChange={(e) => setFormData({ ...formData, contactValue: e.target.value })}
+                                                className="w-full h-14 px-4 bg-bg-elevated border border-border rounded-[12px] text-text-primary focus:outline-none focus:border-[#00C300] transition-all"
+                                                placeholder="Enter Line ID"
+                                            />
+                                        )}
+
+                                        {formData.contactType === 'TELEGRAM' && (
+                                            <input
+                                                type="text"
+                                                value={formData.contactValue}
+                                                onChange={(e) => setFormData({ ...formData, contactValue: e.target.value })}
+                                                className="w-full h-14 px-4 bg-bg-elevated border border-border rounded-[12px] text-text-primary focus:outline-none focus:border-[#0088CC] transition-all"
+                                                placeholder="Enter Telegram Handle (e.g. @username)"
+                                            />
+                                        )}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </form>
+
+                        {/* Navigation Buttons */}
+                        <div className="flex gap-3 mt-8">
+                            {step > 1 && (
                                 <button
                                     type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                                    onClick={prevStep}
+                                    className="px-4 py-4 rounded-[12px] bg-bg-elevated border border-border text-text-muted hover:text-text-primary hover:bg-bg-elevated/80 transition-all flex items-center justify-center"
                                 >
-                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    <ArrowLeft className="w-5 h-5" />
                                 </button>
-                            </div>
-
-                            {/* Password Strength Indicator */}
-                            {formData.password && (
-                                <div className="space-y-1">
-                                    <div className="flex justify-between text-xs">
-                                        <span className="text-gray-400">Password strength</span>
-                                        <span className={`font-medium ${passwordStrength.color.replace('bg-', 'text-')}`}>
-                                            {passwordStrength.label}
-                                        </span>
-                                    </div>
-                                    <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            animate={{ width: `${passwordStrength.strength}%` }}
-                                            className={`h-full ${passwordStrength.color} transition-all duration-300`}
-                                        />
-                                    </div>
-                                </div>
                             )}
+                            
+                            <button
+                                type={step === 3 ? "submit" : "button"}
+                                onClick={step === 3 ? handleSubmit : nextStep}
+                                disabled={isLoading}
+                                className="flex-1 h-14 bg-gradient-to-r from-accent-1 to-accent-2 text-[#07070E] font-orbitron font-bold text-[16px] rounded-[12px] flex items-center justify-center gap-2 hover:brightness-110 hover:shadow-[0_0_25px_rgba(0,255,178,0.3)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-[0.98]"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <div className="w-5 h-5 border-2 border-[#07070E]/30 border-t-[#07070E] rounded-full animate-spin" />
+                                        PROCESSING...
+                                    </>
+                                ) : step === 3 ? (
+                                    <>
+                                        <UserPlus className="w-5 h-5" />
+                                        SUBMIT REQUEST
+                                    </>
+                                ) : (
+                                    <>
+                                        CONTINUE
+                                        <ArrowRight className="w-5 h-5" />
+                                    </>
+                                )}
+                            </button>
                         </div>
 
-                        {/* Confirm Password Input */}
-                        <div className="space-y-2">
-                            <label className="text-sm text-gray-300">Confirm Password</label>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    value={formData.confirmPassword}
-                                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                    className="input-field w-full pl-11"
-                                    placeholder="••••••••"
-                                    required
-                                />
-                            </div>
+                        <div className="mt-8 pt-6 border-t border-border text-center">
+                            <p className="font-sans text-text-muted text-[14px]">
+                                Already have access? <Link href="/login" className="text-accent-1 font-bold hover:brightness-125 transition-all">Sign In</Link>
+                            </p>
                         </div>
-
-                        {/* Contact Info Section */}
-                        <div className="space-y-2">
-                            <label className="text-sm text-gray-300">Contact Info (Optional)</label>
-                            <div className="relative">
-                                <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                <select
-                                    value={formData.contactType}
-                                    onChange={(e) => setFormData({
-                                        ...formData,
-                                        contactType: e.target.value as '' | 'WHATSAPP' | 'LINE' | 'TELEGRAM',
-                                        contactValue: '' // Reset value when type changes
-                                    })}
-                                    className="input-field w-full pl-11 appearance-none cursor-pointer"
-                                >
-                                    <option value="">Select contact method...</option>
-                                    <option value="WHATSAPP">WhatsApp</option>
-                                    <option value="LINE">Line App</option>
-                                    <option value="TELEGRAM">Telegram</option>
-                                </select>
-                            </div>
-
-                            {/* Conditional Input based on contact type */}
-                            {formData.contactType === 'WHATSAPP' && (
-                                <div className="grid grid-cols-[100px_1fr] gap-2 mt-2">
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">+</span>
-                                        <input
-                                            type="tel"
-                                            value={formData.countryCode || ''}
-                                            onChange={(e) => {
-                                                const value = e.target.value.replace(/\D/g, '')
-                                                setFormData({ ...formData, countryCode: value })
-                                            }}
-                                            className="input-field w-full pl-7 text-center"
-                                            placeholder="91"
-                                            maxLength={4}
-                                        />
-                                    </div>
-                                    <div className="relative">
-                                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                        <input
-                                            type="tel"
-                                            value={formData.contactValue}
-                                            onChange={(e) => {
-                                                const value = e.target.value.replace(/\D/g, '')
-                                                setFormData({ ...formData, contactValue: value })
-                                            }}
-                                            className="input-field w-full pl-11"
-                                            placeholder="Phone number"
-                                            pattern="[0-9]*"
-                                        />
-                                    </div>
-                                </div>
-                            )}
-
-                            {formData.contactType === 'LINE' && (
-                                <div className="relative mt-2">
-                                    <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        value={formData.contactValue}
-                                        onChange={(e) => setFormData({ ...formData, contactValue: e.target.value })}
-                                        className="input-field w-full pl-11"
-                                        placeholder="Enter Line ID"
-                                    />
-                                </div>
-                            )}
-
-                            {formData.contactType === 'TELEGRAM' && (
-                                <div className="relative mt-2">
-                                    <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        value={formData.contactValue}
-                                        onChange={(e) => setFormData({ ...formData, contactValue: e.target.value })}
-                                        className="input-field w-full pl-11"
-                                        placeholder="Enter Telegram ID (e.g. @username)"
-                                    />
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Submit Button */}
-                        <motion.button
-                            type="submit"
-                            disabled={isLoading}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-6"
-                        >
-                            {isLoading ? (
-                                <>
-                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    Creating account...
-                                </>
-                            ) : (
-                                <>
-                                    <UserPlus className="w-5 h-5" />
-                                    Create Account
-                                </>
-                            )}
-                        </motion.button>
-                    </form>
-
-                    {/* Login Link */}
-                    <div className="text-center text-sm text-gray-400">
-                        Already have an account?{' '}
-                        <Link href="/login" className="text-blue-400 hover:text-blue-300 transition-colors">
-                            Sign in
-                        </Link>
                     </div>
+                </motion.div>
+                
+                <div className="absolute bottom-6 font-mono text-[11px] text-text-muted/50 tracking-widest uppercase text-center w-full">
+                    © Copyright Konoha Bazaar
                 </div>
-
-                {/* Footer */}
-                <p className="text-center text-gray-500 text-sm mt-6">
-                    © Copyright Konoha Bazaar, All Rights Reserved.
-                </p>
-            </motion.div>
+            </div>
         </div>
     )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Clock, AlertTriangle, CheckCircle } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface SubscriptionTimerProps {
     expiresAt: string | Date
@@ -46,10 +46,8 @@ export default function SubscriptionTimer({ expiresAt, plan, status, iggId, nick
             return { days, hours, minutes, seconds, total: difference }
         }
 
-        // Initial calculation
         setTimeRemaining(calculateTimeRemaining())
 
-        // Update every second
         const interval = setInterval(() => {
             setTimeRemaining(calculateTimeRemaining())
         }, 1000)
@@ -58,113 +56,88 @@ export default function SubscriptionTimer({ expiresAt, plan, status, iggId, nick
     }, [expiresAt])
 
     const isExpired = timeRemaining.total <= 0
-    const isExpiringSoon = timeRemaining.days <= 3 && !isExpired
-
-    const getStatusColor = () => {
-        if (isExpired) return 'from-red-500/10 via-red-600/10 to-red-500/10 border-red-500/20'
-        if (isExpiringSoon) return 'from-yellow-500/10 via-yellow-600/10 to-yellow-500/10 border-yellow-500/20'
-        return 'from-accent-emerald/10 via-emerald-600/10 to-accent-emerald/10 border-accent-emerald/20'
-    }
-
-    const getTextColor = () => {
-        if (isExpired) return 'text-red-400'
-        if (isExpiringSoon) return 'text-yellow-400'
-        return 'text-accent-emerald'
-    }
-
     const formatNumber = (num: number) => num.toString().padStart(2, '0')
 
     return (
-        <div className={`glass-card p-6 bg-gradient-to-r ${getStatusColor()}`}>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                {/* Left side - Plan info */}
-                <div className="flex items-center gap-4">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${isExpired ? 'bg-red-500/20' : isExpiringSoon ? 'bg-yellow-500/20' : 'bg-accent-emerald/20'
-                        }`}>
-                        {isExpired ? (
-                            <AlertTriangle className={`w-7 h-7 ${getTextColor()}`} />
-                        ) : isExpiringSoon ? (
-                            <Clock className={`w-7 h-7 ${getTextColor()}`} />
-                        ) : (
-                            <CheckCircle className={`w-7 h-7 ${getTextColor()}`} />
-                        )}
-                    </div>
+        <div className="relative bg-gradient-to-br from-accent-1/5 to-transparent border border-accent-1/20 rounded-[14px] p-6 overflow-hidden">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                {/* Left side - Info */}
+                <div className="flex items-start gap-4">
+                    <div className="mt-1.5 w-2.5 h-2.5 rounded-full bg-accent-1 shadow-glow-mint animate-pulse-slow shrink-0" />
                     <div>
-                        <h3 className="text-xl font-bold text-white mb-1">
-                            {nickname ? `${nickname} (${iggId})` : iggId ? `IGG: ${iggId}` : `${plan} Plan`}
+                        <h3 className="font-sans font-bold text-[16px] text-text-primary mb-1">
+                            {nickname || plan}
                         </h3>
-
-                        <p className={`text-sm ${getTextColor()}`}>
-                            {isExpired
-                                ? 'Your subscription has expired'
-                                : isExpiringSoon
-                                    ? 'Your subscription is expiring soon!'
-                                    : `Status: ${status}`}
-                        </p>
-                        <p className="text-gray-500 text-xs mt-1">
-                            Expires: {new Date(expiresAt).toLocaleDateString('en-US', {
+                        <div className="font-mono text-[12px] text-text-muted mb-2">
+                            {iggId ? `ID: ${iggId}` : 'NO ID LINKED'}
+                        </div>
+                        <div className="text-[12px] text-text-muted">
+                            Exp: {new Date(expiresAt).toLocaleDateString('en-US', {
                                 year: 'numeric',
-                                month: 'long',
+                                month: 'short',
                                 day: 'numeric',
                                 hour: '2-digit',
                                 minute: '2-digit'
                             })}
-                        </p>
+                        </div>
                     </div>
                 </div>
 
                 {/* Right side - Timer */}
-                {!isExpired && (
-                    <div className="flex items-center gap-1 sm:gap-3">
-                        <div className="text-center">
-                            <div className={`text-xl sm:text-3xl font-bold ${getTextColor()}`}>
-                                {formatNumber(timeRemaining.days)}
-                            </div>
-                            <div className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wider">Days</div>
+                {!isExpired ? (
+                    <div className="flex items-center gap-2">
+                        <div className="flex flex-col items-center justify-center bg-accent-1/10 rounded-lg px-3.5 py-2 min-w-[64px]">
+                            <span className="font-orbitron text-[24px] md:text-[28px] text-accent-1 leading-none">{formatNumber(timeRemaining.days)}</span>
+                            <span className="font-sans text-[9px] tracking-[0.2em] text-text-muted uppercase mt-1">Days</span>
                         </div>
-                        <div className={`text-lg sm:text-2xl font-bold ${getTextColor()}`}>:</div>
-                        <div className="text-center">
-                            <div className={`text-xl sm:text-3xl font-bold ${getTextColor()}`}>
-                                {formatNumber(timeRemaining.hours)}
-                            </div>
-                            <div className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wider">Hours</div>
+                        <span className="font-orbitron text-accent-1 text-xl opacity-50">:</span>
+                        <div className="flex flex-col items-center justify-center bg-accent-1/10 rounded-lg px-3.5 py-2 min-w-[64px]">
+                            <span className="font-orbitron text-[24px] md:text-[28px] text-accent-1 leading-none">{formatNumber(timeRemaining.hours)}</span>
+                            <span className="font-sans text-[9px] tracking-[0.2em] text-text-muted uppercase mt-1">Hrs</span>
                         </div>
-                        <div className={`text-lg sm:text-2xl font-bold ${getTextColor()}`}>:</div>
-                        <div className="text-center">
-                            <div className={`text-xl sm:text-3xl font-bold ${getTextColor()}`}>
-                                {formatNumber(timeRemaining.minutes)}
-                            </div>
-                            <div className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wider">Mins</div>
+                        <span className="font-orbitron text-accent-1 text-xl opacity-50">:</span>
+                        <div className="flex flex-col items-center justify-center bg-accent-1/10 rounded-lg px-3.5 py-2 min-w-[64px]">
+                            <span className="font-orbitron text-[24px] md:text-[28px] text-accent-1 leading-none">{formatNumber(timeRemaining.minutes)}</span>
+                            <span className="font-sans text-[9px] tracking-[0.2em] text-text-muted uppercase mt-1">Mins</span>
                         </div>
-                        <div className={`text-lg sm:text-2xl font-bold ${getTextColor()}`}>:</div>
-                        <div className="text-center">
-                            <div className={`text-xl sm:text-3xl font-bold ${getTextColor()}`}>
-                                {formatNumber(timeRemaining.seconds)}
-                            </div>
-                            <div className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wider">Secs</div>
-                        </div>
+                        <span className="font-orbitron text-accent-1 text-xl opacity-50">:</span>
+                        <AnimatePresence mode="popLayout">
+                            <motion.div 
+                                key={timeRemaining.seconds}
+                                initial={{ scale: 1.1, opacity: 0.8 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ duration: 0.3 }}
+                                className="flex flex-col items-center justify-center bg-accent-1/10 rounded-lg px-3.5 py-2 min-w-[64px]"
+                            >
+                                <span className="font-orbitron text-[24px] md:text-[28px] text-accent-1 leading-none">{formatNumber(timeRemaining.seconds)}</span>
+                                <span className="font-sans text-[9px] tracking-[0.2em] text-text-muted uppercase mt-1">Secs</span>
+                            </motion.div>
+                        </AnimatePresence>
                     </div>
-                )}
-
-                {/* Expired state */}
-                {isExpired && (
-                    <div className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl text-sm font-semibold border border-red-500/30">
-                        EXPIRED
+                ) : (
+                    <div className="px-6 py-3 bg-accent-3/10 border border-accent-3/20 rounded-xl">
+                        <span className="font-orbitron text-accent-3 tracking-widest text-sm">LICENSE EXPIRED</span>
                     </div>
                 )}
             </div>
 
             {/* Progress bar */}
             {!isExpired && (
-                <div className="mt-4">
-                    <div className="h-2 bg-background-tertiary rounded-full overflow-hidden">
-                        <div
-                            className={`h-full transition-all duration-1000 ${isExpiringSoon ? 'bg-yellow-500' : 'bg-accent-emerald'
-                                }`}
+                <div className="mt-6 relative">
+                    <div className="w-full h-1 bg-accent-1/10 rounded-full overflow-hidden relative">
+                        <motion.div
+                            className="absolute top-0 left-0 h-full bg-gradient-to-r from-accent-1 to-accent-2"
                             style={{
                                 width: `${Math.min(100, Math.max(0, (timeRemaining.days / 30) * 100))}%`
                             }}
-                        />
+                        >
+                            {/* Shimmer Highlight */}
+                            <motion.div 
+                                animate={{ x: ['-100%', '200%'] }}
+                                transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                                className="w-[30%] h-full bg-gradient-to-r from-transparent via-white/50 to-transparent"
+                            />
+                        </motion.div>
                     </div>
                 </div>
             )}

@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { usePathname, useRouter } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import Image from 'next/image'
@@ -25,20 +25,20 @@ interface NavItem {
     name: string
     href: string
     icon: any
+    color: string
 }
 
 const navItems: NavItem[] = [
-    { name: 'Home', href: '/dashboard', icon: Home },
-    { name: 'Bot Settings', href: '/dashboard/settings', icon: Settings2 },
-    { name: 'Bank Settings', href: '/dashboard/bank', icon: Database },
-    { name: 'Reports', href: '/dashboard/reports', icon: BarChart3 },
+    { name: 'Home', href: '/dashboard', icon: Home, color: 'text-accent-1' },
+    { name: 'Settings', href: '/dashboard/settings', icon: Settings2, color: 'text-accent-2' },
+    { name: 'Bank', href: '/dashboard/bank', icon: Database, color: 'text-accent-gold' },
+    { name: 'Reports', href: '/dashboard/reports', icon: BarChart3, color: 'text-[#00BFFF]' },
 ]
 
 export default function SidebarLayout({ children }: SidebarLayoutProps) {
     const pathname = usePathname()
     const router = useRouter()
     const { data: session } = useSession()
-    const [sidebarOpen, setSidebarOpen] = useState(false)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
     const handleLogout = async () => {
@@ -48,226 +48,177 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
     }
 
     return (
-        <div className="min-h-screen bg-background-primary flex">
-            {/* Sidebar */}
-            <motion.aside
-                initial={false}
-                animate={{ width: sidebarOpen ? 280 : 80 }}
-                className="hidden lg:flex flex-col bg-background-secondary border-r border-white/5 relative z-20 h-screen sticky top-0"
-            >
-                {/* Logo */}
-                <div className={`h-20 flex items-center border-b border-white/5 flex-shrink-0 ${sidebarOpen ? 'justify-between px-6' : 'justify-center px-4'}`}>
-                    {sidebarOpen && (
-                        <motion.div
-                            initial={false}
-                            animate={{ opacity: 1 }}
-                            className="flex items-center gap-3"
-                        >
-                            <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden">
-                                <Image src="/logo.png" alt="Konoha Bot" width={40} height={40} className="object-contain" />
-                            </div>
-                            <div>
-                                <h1 className="text-lg font-bold text-white">Konoha Bot</h1>
-                                <p className="text-xs text-gray-400">Pro Dashboard</p>
-                            </div>
-                        </motion.div>
-                    )}
-                    <button
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="w-10 h-10 rounded-xl bg-surface hover:bg-surface-hover flex items-center justify-center transition-colors"
-                    >
-                        {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                    </button>
+        <div className="min-h-screen flex relative overflow-hidden konoha-bg text-text-primary selection:bg-accent-1/30 selection:text-white font-sans">
+            <div className="konoha-blob-1"></div>
+            <div className="konoha-blob-2"></div>
+            <div className="absolute inset-0 z-0 opacity-20 pointer-events-none mix-blend-overlay" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
+
+            {/* Desktop Sidebar */}
+            <aside className="hidden lg:flex flex-col relative z-20 w-[220px] h-screen sticky top-0 bg-gradient-to-b from-[#0B0B18] to-[#080810] border-r border-accent-2/10 shrink-0">
+                {/* TOP: Logo */}
+                <div className="pt-8 pb-6 flex flex-col items-center justify-center">
+                    <div className="relative w-16 h-16 mb-4">
+                        <Image src="/logo.png" alt="Logo" fill className="object-contain" priority />
+                    </div>
+                    <div className="text-center font-orbitron">
+                        <div className="text-[11px] tracking-[0.4em] text-accent-1">KONOHA</div>
+                        <div className="text-[11px] tracking-[0.4em] text-accent-2">BAZAAR</div>
+                    </div>
                 </div>
 
-                {/* Navigation - Scrollable */}
-                <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto scrollbar-thin min-h-0">
+                <div className="h-px w-full bg-gradient-to-r from-accent-2/30 to-transparent mb-4" />
+
+                {/* Navigation */}
+                <nav className="flex-1 px-0 space-y-1 overflow-y-auto scrollbar-thin pb-4">
                     {navItems.map((item) => {
                         const Icon = item.icon
-                        // For Home, only match exact path. For others, also match sub-paths
                         const isActive = item.href === '/dashboard'
                             ? pathname === '/dashboard'
                             : pathname === item.href || pathname?.startsWith(item.href + '/')
 
                         return (
-                            <motion.button
+                            <button
                                 key={item.name}
                                 onClick={() => router.push(item.href)}
-                                whileHover={{ x: 4 }}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
-                                    ? 'bg-primary-500/10 text-primary-400 border-l-4 border-primary-500 pl-3'
-                                    : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                                    }`}
+                                className={`w-full flex items-center h-12 px-6 transition-all duration-200 ${
+                                    isActive
+                                        ? 'border-l-[3px] border-accent-1 shadow-[inset_12px_0_20px_-12px_rgba(0,255,178,0.3)] bg-gradient-to-r from-accent-1/10 to-transparent'
+                                        : 'border-l-[3px] border-transparent hover:bg-accent-2/5 hover:text-text-primary text-text-muted'
+                                }`}
                             >
-                                <Icon className="w-5 h-5 flex-shrink-0" />
-                                {sidebarOpen && (
-                                    <span className="flex-1 text-left text-sm font-medium">{item.name}</span>
-                                )}
-                            </motion.button>
+                                <Icon className={`w-[18px] h-[18px] flex-shrink-0 ${isActive ? 'text-accent-1' : item.color}`} />
+                                <span className={`ml-[10px] text-[13px] font-medium ${isActive ? 'text-accent-1' : ''}`}>
+                                    {item.name}
+                                </span>
+                            </button>
                         )
                     })}
 
-                    {/* Admin Link - Only for admin users */}
                     {session?.user?.role === 'ADMIN' && (
                         <>
-                            <div className="my-4 border-t border-white/10" />
-                            <motion.button
+                            <div className="my-4 mx-6 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                            <button
                                 onClick={() => router.push('/dashboard/admin')}
-                                whileHover={{ x: 4 }}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${pathname === '/dashboard/admin'
-                                    ? 'bg-primary-500/10 text-primary-400 border-l-4 border-primary-500 pl-3'
-                                    : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                                    }`}
+                                className={`w-full flex items-center h-12 px-6 transition-all duration-200 ${
+                                    pathname === '/dashboard/admin'
+                                        ? 'border-l-[3px] border-accent-1 shadow-[inset_12px_0_20px_-12px_rgba(0,255,178,0.3)] bg-gradient-to-r from-accent-1/10 to-transparent'
+                                        : 'border-l-[3px] border-transparent hover:bg-accent-2/5 hover:text-text-primary text-text-muted'
+                                }`}
                             >
-                                <UserCog className="w-5 h-5 flex-shrink-0" />
-                                {sidebarOpen && (
-                                    <span className="flex-1 text-left text-sm font-medium">Admin Panel</span>
-                                )}
-                            </motion.button>
+                                <UserCog className={`w-[18px] h-[18px] flex-shrink-0 ${pathname === '/dashboard/admin' ? 'text-accent-1' : 'text-accent-3'}`} />
+                                <span className={`ml-[10px] text-[13px] font-medium ${pathname === '/dashboard/admin' ? 'text-accent-1' : ''}`}>
+                                    Admin
+                                </span>
+                            </button>
                         </>
                     )}
                 </nav>
 
-                {/* User Profile - Fixed at bottom */}
-                <div className={`p-4 border-t border-white/5 flex-shrink-0 ${sidebarOpen ? '' : 'flex flex-col items-center'}`}>
-                    <div className={`flex items-center gap-3 rounded-xl bg-surface ${sidebarOpen ? 'p-3' : 'w-12 h-12 p-0 justify-center'}`}>
-                        <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
+                {/* BOTTOM: User / Logout */}
+                <div className="mt-auto border-t border-accent-2/10">
+                    <div className="p-4 flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent-1 to-accent-2 flex items-center justify-center text-bg-base font-bold text-sm shrink-0">
                             {session?.user?.name?.charAt(0) || 'U'}
                         </div>
-                        {sidebarOpen && (
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-white truncate">{session?.user?.name}</p>
-                                <p className="text-xs text-gray-400 truncate">{session?.user?.email}</p>
-                            </div>
-                        )}
+                        <div className="flex-1 min-w-0">
+                            <div className="text-[12px] text-text-muted truncate">{session?.user?.name || 'User'}</div>
+                            <div className="text-[10px] font-orbitron text-accent-1 truncate">{session?.user?.role || 'OPERATOR'}</div>
+                        </div>
                     </div>
                     <button
                         onClick={handleLogout}
-                        className={`mt-2 flex items-center gap-3 rounded-xl text-gray-300 hover:bg-rose-500/10 hover:text-rose-400 transition-all ${sidebarOpen ? 'w-full px-4 py-2.5' : 'w-10 h-10 justify-center'
-                            }`}
+                        className="w-full group flex items-center justify-center gap-2 py-3 text-text-muted hover:bg-accent-3/10 hover:text-accent-3 transition-colors duration-200"
                     >
-                        <LogOut className="w-5 h-5" />
-                        {sidebarOpen && <span className="text-sm font-medium">Logout</span>}
+                        <LogOut className="w-4 h-4 group-hover:text-accent-3 transition-colors" />
+                        <span className="text-[13px] font-medium">Logout</span>
                     </button>
                 </div>
-            </motion.aside>
+            </aside>
 
             {/* Mobile Sidebar */}
-            {mobileMenuOpen && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-                    onClick={() => setMobileMenuOpen(false)}
-                >
-                    <motion.aside
-                        initial={{ x: -280 }}
-                        animate={{ x: 0 }}
-                        exit={{ x: -280 }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="w-80 h-full bg-background-secondary border-r border-white/5 flex flex-col"
+            <AnimatePresence>
+                {mobileMenuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="lg:hidden fixed inset-0 z-50 flex"
                     >
-                        {/* Mobile Logo */}
-                        <div className="h-20 flex items-center justify-between px-6 border-b border-white/5">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden">
-                                    <Image src="/logo.png" alt="Konoha Bot" width={40} height={40} className="object-contain" />
+                        <div className="absolute inset-0 bg-bg-base/80 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
+                        
+                        <motion.aside
+                            initial={{ x: '-100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '-100%' }}
+                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                            className="relative w-[220px] h-full bg-gradient-to-b from-[#0B0B18] to-[#080810] border-r border-accent-2/10 flex flex-col"
+                        >
+                            {/* Mobile Header */}
+                            <div className="p-6 flex items-center justify-between">
+                                <div className="text-center font-orbitron">
+                                    <div className="text-[11px] tracking-[0.4em] text-accent-1">KONOHA</div>
                                 </div>
-                                <div>
-                                    <h1 className="text-lg font-bold text-white">Konoha Bot</h1>
-                                    <p className="text-xs text-gray-400">Pro Dashboard</p>
-                                </div>
+                                <button onClick={() => setMobileMenuOpen(false)} className="w-8 h-8 rounded-full bg-bg-elevated flex items-center justify-center text-text-muted hover:text-text-primary">
+                                    <X className="w-4 h-4" />
+                                </button>
                             </div>
-                            <button
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="w-8 h-8 rounded-lg bg-surface hover:bg-surface-hover flex items-center justify-center"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                        </div>
-
-                        {/* Mobile Navigation */}
-                        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto scrollbar-thin">
-                            {navItems.map((item) => {
-                                const Icon = item.icon
-                                const isActive = pathname === item.href
-
-                                return (
+                            
+                            {/* Mobile Nav */}
+                            <nav className="flex-1 px-0 space-y-1 overflow-y-auto">
+                                {navItems.map((item) => (
                                     <button
                                         key={item.name}
-                                        onClick={() => {
-                                            router.push(item.href)
-                                            setMobileMenuOpen(false)
-                                        }}
-                                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
-                                            ? 'bg-primary-500/10 text-primary-400'
-                                            : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                                            }`}
+                                        onClick={() => { router.push(item.href); setMobileMenuOpen(false); }}
+                                        className={`w-full flex items-center h-12 px-6 transition-all duration-200 ${pathname === item.href ? 'border-l-[3px] border-accent-1 bg-gradient-to-r from-accent-1/10 to-transparent' : 'border-l-[3px] border-transparent text-text-muted hover:bg-accent-2/5'}`}
                                     >
-                                        <Icon className="w-5 h-5" />
-                                        <span className="flex-1 text-left text-sm font-medium">{item.name}</span>
+                                        <item.icon className={`w-[18px] h-[18px] ${pathname === item.href ? 'text-accent-1' : item.color}`} />
+                                        <span className={`ml-[10px] text-[13px] font-medium ${pathname === item.href ? 'text-accent-1' : ''}`}>{item.name}</span>
                                     </button>
-                                )
-                            })}
-                        </nav>
+                                ))}
+                            </nav>
+                        </motion.aside>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-                        {/* Mobile User Profile */}
-                        <div className="p-4 border-t border-white/5">
-                            <div className="flex items-center gap-3 p-3 rounded-xl bg-surface">
-                                <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center text-white font-bold">
-                                    {session?.user?.name?.charAt(0) || 'U'}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-white truncate">{session?.user?.name}</p>
-                                    <p className="text-xs text-gray-400 truncate">{session?.user?.email}</p>
-                                </div>
-                            </div>
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col min-w-0 z-30 relative h-screen overflow-hidden">
+                {/* Floating Header */}
+                <div className="px-4 md:px-8 pt-6 pb-2">
+                    <header className="h-[72px] bg-bg-surface border border-border rounded-2xl px-6 flex items-center justify-between shadow-lg">
+                        <div className="flex items-center gap-4">
                             <button
-                                onClick={handleLogout}
-                                className="w-full mt-2 flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-300 hover:bg-rose-500/10 hover:text-rose-400 transition-all"
+                                onClick={() => setMobileMenuOpen(true)}
+                                className="lg:hidden w-10 h-10 rounded-full bg-bg-elevated hover:bg-accent-2/10 flex items-center justify-center transition-colors text-text-primary"
                             >
-                                <LogOut className="w-5 h-5" />
-                                <span className="text-sm font-medium">Logout</span>
+                                <Menu className="w-5 h-5" />
                             </button>
+
+                            <h2 className="text-xl md:text-2xl font-orbitron font-bold tracking-[0.1em] text-text-primary">
+                                {pathname?.includes('/settings') ? 'PROTOCOL CONFIG' :
+                                    pathname?.includes('/bank') ? 'VAULT SYSTEMS' :
+                                        pathname?.includes('/reports') ? 'TELEMETRY' :
+                                            pathname?.includes('/admin') ? 'NEXUS CONTROL' :
+                                                'NETWORK OVERVIEW'}
+                            </h2>
                         </div>
-                    </motion.aside>
-                </motion.div>
-            )}
-
-            {/* Main Content */}
-            <div className="flex-1 flex flex-col min-w-0">
-                {/* Top Header */}
-                <header className="h-20 bg-background-secondary/80 backdrop-blur-xl border-b border-white/5 sticky top-0 z-10 flex items-center justify-between px-6">
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => setMobileMenuOpen(true)}
-                            className="lg:hidden w-10 h-10 rounded-xl bg-surface hover:bg-surface-hover flex items-center justify-center"
-                        >
-                            <Menu className="w-5 h-5" />
-                        </button>
-
-                        <h2 className="text-2xl font-bold text-white">
-                            {pathname?.includes('/settings') ? 'Bot Settings' :
-                                pathname?.includes('/bank') ? 'Bank Settings' :
-                                    pathname?.includes('/reports') ? 'Reports' :
-                                        'Dashboard'}
-                        </h2>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        <div className="hidden sm:block text-right">
-                            <p className="text-sm font-medium text-white">{session?.user?.name}</p>
-                            <p className="text-xs text-gray-400">{session?.user?.email}</p>
-                        </div>
-                    </div>
-                </header>
+                    </header>
+                </div>
 
                 {/* Page Content */}
-                <main className="flex-1 overflow-auto">
-                    {children}
+                <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-8 scrollbar-thin relative">
+                    <motion.div
+                        key={pathname}
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                        className="min-h-full py-4 pb-24"
+                    >
+                        {children}
+                    </motion.div>
                 </main>
             </div>
         </div>
     )
 }
+
