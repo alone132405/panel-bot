@@ -27,6 +27,10 @@ export function getConfigFilePath(iggId: string, fileName: string): string {
     return path.join(getConfigRoot(), iggId, fileName)
 }
 
+export function getReportsExportPath(iggId: string): string {
+    return path.join(getConfigRoot(), iggId, 'stats', 'exported')
+}
+
 async function writeJsonConfigFile(iggId: string, fileName: string, settings: any): Promise<ConfigWriteResult> {
     const filePath = getConfigFilePath(iggId, fileName)
     await fs.mkdir(path.dirname(filePath), { recursive: true })

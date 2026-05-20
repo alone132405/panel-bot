@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/authOptions'
-import { getConfigDir, getConfigFilePath } from '@/lib/fileSync'
+import { getReportsExportPath } from '@/lib/fileSync'
 import fs from 'fs/promises'
 import path from 'path'
 import * as XLSX from 'xlsx'
@@ -19,20 +19,7 @@ export async function GET(
     const isDownload = searchParams.get('download') === 'true'
 
     try {
-        let basePath = path.join(getConfigDir(), params.iggId, 'stats', 'exported')
-
-        // Try to read settings.json for custom reports path
-        try {
-            const settingsPath = getConfigFilePath(params.iggId, 'settings.json')
-            const settingsContent = await fs.readFile(settingsPath, 'utf-8')
-            const settings = JSON.parse(settingsContent)
-
-            if (settings.reportsPath) {
-                basePath = settings.reportsPath
-            }
-        } catch (e) {
-            // Use default path if settings fail
-        }
+        const basePath = getReportsExportPath(params.iggId)
 
         const filePath = path.join(basePath, params.filename)
 
