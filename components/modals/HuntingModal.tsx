@@ -1,11 +1,14 @@
 'use client'
 
-import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Loader2, Target, Save } from 'lucide-react'
+import { ListChecks, Loader2, Target, Zap } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import KonohaModal from './KonohaModal'
+import { ModalSummaryGrid } from '@/components/ui/ModalSummaryGrid'
+import { Checkbox } from '@/components/ui/Checkbox'
+import { TacticalSelect } from '@/components/ui/TacticalSelect'
+import { SettingInfoLabel } from '@/components/ui/SettingInfoLabel'
+import { useAutoSaveSettings } from '@/hooks/useAutoSaveSettings'
 
 interface HuntingModalProps {
     isOpen: boolean
@@ -17,8 +20,6 @@ export default function HuntingModal({ isOpen, onClose, iggId }: HuntingModalPro
     const [settings, setSettings] = useState<any>(null)
     const [loading, setLoading] = useState(true)
 
-    // Prevent background scroll when modal is open
-    useBodyScrollLock(isOpen)
     const [saving, setSaving] = useState(false)
 
     // Hunting settings
@@ -149,8 +150,6 @@ export default function HuntingModal({ isOpen, onClose, iggId }: HuntingModalPro
             })
 
             if (res.ok) {
-                toast.success('Settings saved successfully')
-                onClose()
                 setSettings(updatedSettings)
             } else {
                 toast.error('Failed to save settings')
@@ -161,6 +160,36 @@ export default function HuntingModal({ isOpen, onClose, iggId }: HuntingModalPro
             setSaving(false)
         }
     }
+
+    useAutoSaveSettings(
+        isOpen && !loading && Boolean(iggId && settings),
+        saveSettings,
+        [
+            huntMonsters,
+            maxTravelTime,
+            sendingDelay,
+            useEnergyItems,
+            useWingedBoots,
+            sendUnfinishedToGuildChat,
+            avoidConflict,
+            alsoAvoidGuild,
+            useSaberfangSkill,
+            huntPriority,
+            huntLevel1,
+            huntLevel2,
+            huntLevel3,
+            huntLevel4,
+            huntLevel5,
+            huntMagicPhysical,
+            huntHighMDEF,
+            huntHighPDEF,
+            startHuntWhenEnergy,
+            useComboPrediction,
+            stopAfterOneKill,
+        ]
+    )
+
+    const enabledLevels = [huntLevel1, huntLevel2, huntLevel3, huntLevel4, huntLevel5].filter(Boolean).length
 
     if (!iggId) {
         return (
@@ -190,32 +219,35 @@ export default function HuntingModal({ isOpen, onClose, iggId }: HuntingModalPro
             iconBg="rgba(249,115,22,0.15)"
             iconBorder="rgba(249,115,22,0.3)"
             saving={saving}
-            onSave={saveSettings}
+            statusLabel={saving ? 'Syncing...' : 'Auto-sync. Use Protocol Apply Changes to deploy.'}
             maxWidth="860px"
         >
             {loading ? (
                                 <div className="flex items-center justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-primary-400" />
+                                    <Loader2 className="w-8 h-8 animate-spin text-[#00FFB2]" />
                                 </div>
                             ) : (
                                 <div className="w-full space-y-6">
+                                    <ModalSummaryGrid
+                                        items={[
+                                            { label: 'Hunting', value: huntMonsters ? 'On' : 'Off', icon: Target, tone: 'gold' },
+                                            { label: 'Levels', value: `${enabledLevels}/5`, icon: ListChecks, tone: 'mint' },
+                                            { label: 'Energy', value: `${startHuntWhenEnergy}%`, icon: Zap, tone: 'cyan' },
+                                        ]}
+                                    />
+
                                     {/* Hunt Monsters and Settings */}
-                                    <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer w-fit">
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={huntMonsters}
-                                                onChange={(e) => setHuntMonsters(e.target.checked)}
-                                                className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                            />
-                                            <span className="text-sm text-white">Hunt Monsters</span>
-                                        </label>
-                                    </div>
+                                    <label className="flex min-h-[58px] cursor-pointer items-center justify-between gap-4 rounded-lg border border-white/10 bg-bg-inset/70 px-4 py-3 transition-colors hover:border-white/20 hover:bg-white/[0.035]">
+                                        <SettingInfoLabel label="Hunt Monsters" />
+                                        <Checkbox checked={huntMonsters} onChange={setHuntMonsters} />
+                                    </label>
 
                                     {/* Max Travel Time and Sending Delay */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                            <label className="block text-xs sm:text-sm text-gray-300 mb-2">Max Travel Time (Seconds):</label>
+                                    <div className="grid grid-cols-2 gap-3 md:gap-4">
+                                        <div className="p-3 sm:p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)]">
+                                            <div className="mb-2">
+                                                <SettingInfoLabel label="Max Travel Time (Seconds)" className="text-xs sm:text-sm text-gray-300" />
+                                            </div>
                                             <input
                                                 type="number"
                                                 step="1"
@@ -229,12 +261,14 @@ export default function HuntingModal({ isOpen, onClose, iggId }: HuntingModalPro
                                                     }
                                                 }}
                                                 onBlur={(e) => setMaxTravelTime(Math.min(3600, Math.max(1, Math.floor(Number(e.target.value)))))}
-                                                className="w-32 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                className="w-32 px-3 py-2 bg-[#07070E]/50 border border-[rgba(123,94,255,0.2)] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#7B5EFF]/50"
                                             />
                                         </div>
 
-                                        <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                            <label className="block text-xs sm:text-sm text-gray-300 mb-2">Sending Delay (MS):</label>
+                                        <div className="p-3 sm:p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)]">
+                                            <div className="mb-2">
+                                                <SettingInfoLabel label="Sending Delay (MS)" className="text-xs sm:text-sm text-gray-300" />
+                                            </div>
                                             <input
                                                 type="number"
                                                 step="1"
@@ -248,15 +282,18 @@ export default function HuntingModal({ isOpen, onClose, iggId }: HuntingModalPro
                                                     }
                                                 }}
                                                 onBlur={(e) => setSendingDelay(Math.min(10000, Math.max(200, Math.floor(Number(e.target.value)))))}
-                                                className="w-32 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                className="w-32 px-3 py-2 bg-[#07070E]/50 border border-[rgba(123,94,255,0.2)] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#7B5EFF]/50"
                                             />
                                         </div>
                                     </div>
 
+
                                     {/* Hunting Options */}
                                     <div className="space-y-3">
-                                        <h3 className="text-base sm:text-lg font-bold text-white">Hunting Options</h3>
-                                        <div className="flex flex-wrap gap-3">
+                                        <h3>
+                                            <SettingInfoLabel label="Hunting Options" className="text-base sm:text-lg font-bold text-white" />
+                                        </h3>
+                                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                                             {[
                                                 { label: 'Use Energy Items', value: useEnergyItems, setter: setUseEnergyItems },
                                                 { label: 'Use Winged Boots (On Steal)', value: useWingedBoots, setter: setUseWingedBoots },
@@ -264,52 +301,39 @@ export default function HuntingModal({ isOpen, onClose, iggId }: HuntingModalPro
                                                 { label: 'Avoid Conflict', value: avoidConflict, setter: setAvoidConflict },
                                                 { label: 'Also Avoid Guild?', value: alsoAvoidGuild, setter: setAlsoAvoidGuild },
                                             ].map((option, index) => (
-                                                <label key={index} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={option.value}
-                                                        onChange={(e) => option.setter(e.target.checked)}
-                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                    />
-                                                    <span className="text-sm text-white">{option.label}</span>
+                                                <label key={index} className="flex min-h-[58px] cursor-pointer items-center justify-between gap-4 rounded-lg border border-white/10 bg-bg-inset/70 px-4 py-3 transition-colors hover:border-white/20 hover:bg-white/[0.035]">
+                                                    <SettingInfoLabel label={option.label} />
+                                                    <Checkbox checked={option.value} onChange={option.setter} />
                                                 </label>
                                             ))}
                                         </div>
                                     </div>
 
                                     {/* Use Saberfang Skill and Hunt Priority */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                            <label className="flex items-center gap-2 cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={useSaberfangSkill}
-                                                    onChange={(e) => setUseSaberfangSkill(e.target.checked)}
-                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                                <span className="text-sm text-white">Use Saberfang Skill (If Possible)</span>
-                                            </label>
-                                        </div>
+                                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
+                                        <label className="flex min-h-[58px] cursor-pointer items-center justify-between gap-4 rounded-lg border border-white/10 bg-bg-inset/70 px-4 py-3 transition-colors hover:border-white/20 hover:bg-white/[0.035]">
+                                            <SettingInfoLabel label="Use Saberfang Skill (If Possible)" />
+                                            <Checkbox checked={useSaberfangSkill} onChange={setUseSaberfangSkill} />
+                                        </label>
 
-                                        <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                            <label className="block text-xs sm:text-sm text-gray-300 mb-2">Hunt Priority:</label>
-                                            <select
-                                                value={huntPriority}
-                                                onChange={(e) => setHuntPriority(e.target.value)}
-                                                className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                            >
-                                                <option value="0">Any</option>
-                                                <option value="1">Full Health</option>
-                                                <option value="2">Lowest Health</option>
-                                                <option value="3">Steal</option>
-                                            </select>
+                                        <div className="p-3 sm:p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)]">
+                                            <div className="mb-2">
+                                                <SettingInfoLabel label="Hunt Priority" className="text-xs sm:text-sm text-gray-300" />
+                                            </div>
+                                            <TacticalSelect
+                                                value={String(huntPriority)}
+                                                onChange={setHuntPriority}
+                                                options={[{ value: "0", label: "Any" }, { value: "1", label: "Full Health" }, { value: "2", label: "Lowest Health" }, { value: "3", label: "Steal" }]}
+                                            />
                                         </div>
                                     </div>
 
                                     {/* Levels to Hunt */}
                                     <div className="space-y-3">
-                                        <h3 className="text-sm font-medium text-gray-300">Levels to Hunt:</h3>
-                                        <div className="flex flex-wrap gap-3">
+                                        <h3>
+                                            <SettingInfoLabel label="Levels to Hunt" className="text-sm font-medium text-gray-300" />
+                                        </h3>
+                                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                                             {[
                                                 { label: '1', value: huntLevel1, setter: setHuntLevel1 },
                                                 { label: '2', value: huntLevel2, setter: setHuntLevel2 },
@@ -317,14 +341,9 @@ export default function HuntingModal({ isOpen, onClose, iggId }: HuntingModalPro
                                                 { label: '4', value: huntLevel4, setter: setHuntLevel4 },
                                                 { label: '5', value: huntLevel5, setter: setHuntLevel5 },
                                             ].map((option, index) => (
-                                                <label key={index} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={option.value}
-                                                        onChange={(e) => option.setter(e.target.checked)}
-                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                    />
-                                                    <span className="text-sm text-white">{option.label}</span>
+                                                <label key={index} className="flex min-h-[58px] cursor-pointer items-center justify-between gap-2 rounded-lg border border-white/10 bg-bg-inset/70 px-4 py-3 transition-colors hover:border-white/20 hover:bg-white/[0.035]">
+                                                    <SettingInfoLabel label={`Level ${option.label}`} helpText={`Allows hunting level ${option.label} monsters.`} />
+                                                    <Checkbox checked={option.value} onChange={option.setter} />
                                                 </label>
                                             ))}
                                         </div>
@@ -332,30 +351,29 @@ export default function HuntingModal({ isOpen, onClose, iggId }: HuntingModalPro
 
                                     {/* Types to Hunt */}
                                     <div className="space-y-3">
-                                        <h3 className="text-sm font-medium text-gray-300">Types to Hunt:</h3>
-                                        <div className="flex flex-wrap gap-3">
+                                        <h3>
+                                            <SettingInfoLabel label="Types to Hunt" className="text-sm font-medium text-gray-300" />
+                                        </h3>
+                                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                                             {[
                                                 { label: 'Magic and Physical', value: huntMagicPhysical, setter: setHuntMagicPhysical },
                                                 { label: 'High MDEF', value: huntHighMDEF, setter: setHuntHighMDEF },
                                                 { label: 'High PDEF', value: huntHighPDEF, setter: setHuntHighPDEF },
                                             ].map((option, index) => (
-                                                <label key={index} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={option.value}
-                                                        onChange={(e) => option.setter(e.target.checked)}
-                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                    />
-                                                    <span className="text-sm text-white">{option.label}</span>
+                                                <label key={index} className="flex min-h-[58px] cursor-pointer items-center justify-between gap-4 rounded-lg border border-white/10 bg-bg-inset/70 px-4 py-3 transition-colors hover:border-white/20 hover:bg-white/[0.035]">
+                                                    <SettingInfoLabel label={option.label} className="text-[13px] sm:text-[14px] md:text-sm text-white" />
+                                                    <Checkbox checked={option.value} onChange={option.setter} />
                                                 </label>
                                             ))}
                                         </div>
                                     </div>
 
                                     {/* Start Hunt When Energy and Options */}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                            <label className="block text-xs sm:text-sm text-gray-300 mb-2">Start Hunt When Energy Is More Than:</label>
+                                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
+                                        <div className="p-3 sm:p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)]">
+                                            <div className="mb-2">
+                                                <SettingInfoLabel label="Start Hunt When Energy Is More Than" className="text-xs sm:text-sm text-gray-300" />
+                                            </div>
                                             <div className="flex items-center gap-2">
                                                 <input
                                                     type="number"
@@ -370,33 +388,20 @@ export default function HuntingModal({ isOpen, onClose, iggId }: HuntingModalPro
                                                         }
                                                     }}
                                                     onBlur={(e) => setStartHuntWhenEnergy(Math.min(100, Math.max(0, Math.floor(Number(e.target.value)))))}
-                                                    className="w-24 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                    className="w-24 px-3 py-2 bg-[#07070E]/50 border border-[rgba(123,94,255,0.2)] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#7B5EFF]/50"
                                                 />
                                                 <span className="text-sm text-gray-400">%</span>
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                            <label className="flex items-center gap-2 cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={useComboPrediction}
-                                                    onChange={(e) => setUseComboPrediction(e.target.checked)}
-                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                                <span className="text-sm text-white">Use Combo Prediction</span>
+                                        <div className="flex flex-col gap-2 pt-2">
+                                            <label className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-white/[0.035] transition-colors">
+                                                <Checkbox checked={useComboPrediction} onChange={setUseComboPrediction} />
+                                                <SettingInfoLabel label="Use Combo Prediction" className="text-sm text-gray-300" />
                                             </label>
-                                        </div>
-
-                                        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                            <label className="flex items-center gap-2 cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={stopAfterOneKill}
-                                                    onChange={(e) => setStopAfterOneKill(e.target.checked)}
-                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                                <span className="text-sm text-white">Stop After One Kill</span>
+                                            <label className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-white/[0.035] transition-colors">
+                                                <Checkbox checked={stopAfterOneKill} onChange={setStopAfterOneKill} />
+                                                <SettingInfoLabel label="Stop hunting once a single monster is killed" className="text-sm text-gray-300" />
                                             </label>
                                         </div>
                                     </div>

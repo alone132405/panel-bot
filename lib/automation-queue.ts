@@ -31,12 +31,12 @@ class AutomationQueue {
     public async enqueue(iggId: string, io: any) {
         // If already waiting in queue, skip (the waiting run will pick up all current changes)
         if (this.queue.some(item => item.iggId === iggId)) {
-            console.log(`IGG ID ${iggId} is already waiting in the queue.`)
+            // console.log(`IGG ID ${iggId} is already waiting in the queue.`)
             return
         }
 
         this.queue.push({ iggId, io })
-        console.log(`Enqueued IGG ID: ${iggId}. Queue size: ${this.queue.length}`)
+        // console.log(`Enqueued IGG ID: ${iggId}. Queue size: ${this.queue.length}`)
 
         this.broadcastQueueStatus(io)
 
@@ -143,7 +143,7 @@ class AutomationQueue {
         let isConsole = await this.isConsoleSession()
 
         while (!isConsole) {
-            console.log('RDP detected. Waiting for disconnect...')
+            // console.log('RDP detected. Waiting for disconnect...')
 
             if (io) {
                 io.to(`igg-${iggId}`).emit('automation_status', {
@@ -159,7 +159,7 @@ class AutomationQueue {
     }
 
     private async runAutomation(iggId: string): Promise<void> {
-        console.log('Running automation for IGG ID:', iggId)
+        // console.log('Running automation for IGG ID:', iggId)
 
         // Coordinates
         const SEARCH_BOX_X = 994
@@ -426,8 +426,8 @@ Write-Output "=== AUTOMATION COMPLETE ==="
             } catch (execError: any) {
                 stdout = execError.stdout || '';
                 const stderr = execError.stderr || '';
-                console.log('PowerShell exec error output:', stdout);
-                console.log('PowerShell exec stderr:', stderr);
+                // console.log('PowerShell exec error output:', stdout);
+                // console.log('PowerShell exec stderr:', stderr);
 
                 if (stdout.includes('ERROR:')) {
                     const lines = stdout.split('\\n');
@@ -442,7 +442,7 @@ Write-Output "=== AUTOMATION COMPLETE ==="
                 throw new Error('Automation script failed to execute (code 1).');
             }
 
-            console.log('PowerShell output:', stdout)
+            // console.log('PowerShell output:', stdout)
 
             if (stdout.includes('ERROR:')) {
                 throw new Error('Lords Mobile Bot application not found.')

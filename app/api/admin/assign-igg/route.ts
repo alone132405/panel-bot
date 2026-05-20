@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { prisma } from '@/lib/prisma'
+import { getConfigDir } from '@/lib/fileSync'
 import fs from 'fs/promises'
 import path from 'path'
 
@@ -19,7 +20,7 @@ export async function POST(req: Request) {
         }
 
         // Verify IGG ID folder exists
-        const configPath = path.join(process.cwd(), 'config', iggId)
+        const configPath = path.join(getConfigDir(), iggId)
         try {
             await fs.access(configPath)
         } catch {
@@ -29,10 +30,29 @@ export async function POST(req: Request) {
                 // Create a default settings.json
                 await fs.writeFile(
                     path.join(configPath, 'settings.json'),
-                    JSON.stringify({}, null, 2),
+                    JSON.stringify({
+                        miscSettings: {
+                            giftResetTime: '00:00:00',
+                            dayGiftResetTime: '00:00:00',
+                            giftResetType: 0,
+                            giftResetDay: 0,
+                            saveGuildStats: false,
+                            saveFestStats: false,
+                            saveGuildList: false,
+                            hourReset: 0,
+                            giftExpMode: 1,
+                            giftUpload: false,
+                        },
+                        statSettings: {
+                            pointGoalHunt: [0, 1, 3, 9, 18],
+                            pointGoalPurchase: [1, 2, 4, 8, 16],
+                            finalPointGoalHunt: 50,
+                            finalPointGoalPurchase: 50,
+                        },
+                    }, null, 2),
                     'utf-8'
                 )
-            } catch (mkdirError) {
+            } catch {
                 return NextResponse.json(
                     { error: 'Failed to create config directory for IGG ID' },
                     { status: 500 }

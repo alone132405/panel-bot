@@ -1,11 +1,12 @@
 'use client'
 
-import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Loader2, Package, Save } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import KonohaModal from './KonohaModal'
+import { Backpack, Clock, Package, Truck, UserRound } from 'lucide-react'
+import { useDebounce } from '@/hooks/useDebounce'
+import { getNestedValue, setNestedValue } from '@/lib/settingsMapper'
+import { ModalSummaryGrid } from '@/components/ui/ModalSummaryGrid'
+import { ResponsiveModalShell, ToggleControl, StepperControl, InputControl, TabDef } from '@/components/ui/ResponsiveModalShell'
 
 interface SupplyModalProps {
     isOpen: boolean
@@ -13,111 +14,31 @@ interface SupplyModalProps {
     iggId: string | null
 }
 
-interface InventoryResource {
-    name: string
-    reserved: number
-    threshold: number
-}
+const TABS: TabDef[] = [
+    { id: 'general', label: 'Delivery', icon: Truck },
+    { id: 'inventory', label: 'Inventory', icon: Package },
+    { id: 'bag', label: 'Bag Items', icon: Backpack },
+]
 
-interface BagResource {
-    name: string
-    reserved: number
-}
+const RESOURCE_NAMES = ['Food', 'Stone', 'Wood', 'Ore', 'Gold']
 
 export default function SupplyModal({ isOpen, onClose, iggId }: SupplyModalProps) {
-    const [fullSettings, setFullSettings] = useState<any>(null)
+    const [settings, setSettings] = useState<any>(null)
     const [loading, setLoading] = useState(true)
-
-    // Prevent background scroll when modal is open
-    useBodyScrollLock(isOpen)
     const [saving, setSaving] = useState(false)
 
-    // Resource settings
-    const [sendTo, setSendTo] = useState('F C 1')
-    const [maxTravelTime, setMaxTravelTime] = useState(600)
-    const [supplySpeed, setSupplySpeed] = useState(0.1)
-    const [useSpeedGear, setUseSpeedGear] = useState(false)
-    const [sendResources, setSendResources] = useState(false)
-    const [useBagResource, setUseBagResource] = useState(false)
-    const [typesToSend, setTypesToSend] = useState<boolean[]>([true, true, true, true, true])
-    const [bagTypesToSend, setBagTypesToSend] = useState<boolean[]>([false, false, false, false, false])
-
-    // Inventory resources
-    const [inventory, setInventory] = useState<InventoryResource[]>([
-        { name: 'Food', reserved: 500000, threshold: 1000000 },
-        { name: 'Stone', reserved: 500000, threshold: 1000000 },
-        { name: 'Wood', reserved: 20000000, threshold: 40000000 },
-        { name: 'Ore', reserved: 500000, threshold: 1000000 },
-        { name: 'Gold', reserved: 500000, threshold: 1000000 },
-    ])
-
-    // Bag resources
-    const [bag, setBag] = useState<BagResource[]>([
-        { name: 'Food', reserved: 100 },
-        { name: 'Stone', reserved: 100 },
-        { name: 'Wood', reserved: 100 },
-        { name: 'Ore', reserved: 100 },
-        { name: 'Gold', reserved: 100 },
-    ])
-
     useEffect(() => {
-        if (isOpen && iggId) {
-            loadSettings()
-        }
+        if (isOpen && iggId) loadSettings()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, iggId])
 
     const loadSettings = async () => {
-        if (!iggId) {
-            toast.error('Please select an IGG ID first')
-            return
-        }
-
         setLoading(true)
         try {
             const res = await fetch(`/api/settings/${iggId}`)
             if (res.ok) {
                 const data = await res.json()
-                setFullSettings(data)
-
-                // Load supply settings if they exist
-                if (data.supplySettings) {
-                    setSendTo(data.supplySettings.playerToSend || 'F C 1')
-                    setMaxTravelTime(data.supplySettings.maxTravelTime || 600)
-                    setSupplySpeed(data.supplySettings.supplySpeed || 0.1)
-                    setUseSpeedGear(data.supplySettings.speedGear || false)
-                    setSendResources(data.supplySettings.sendResources || false)
-                    setUseBagResource(data.supplySettings.useBagResource || false)
-
-                    // Map reservedRss and supplyMin arrays to inventory state
-                    if (data.supplySettings.reservedRss && data.supplySettings.supplyMin) {
-                        const resourceNames = ['Food', 'Stone', 'Wood', 'Ore', 'Gold']
-                        const mappedInventory = resourceNames.map((name, index) => ({
-                            name,
-                            reserved: data.supplySettings.reservedRss[index] ?? 500000,
-                            threshold: data.supplySettings.supplyMin[index] ?? 1000000,
-                        }))
-                        setInventory(mappedInventory)
-                    }
-
-                    // Map reservedBagRss array to bag state
-                    if (data.supplySettings.reservedBagRss) {
-                        const resourceNames = ['Food', 'Stone', 'Wood', 'Ore', 'Gold']
-                        const mappedBag = resourceNames.map((name, index) => ({
-                            name,
-                            reserved: data.supplySettings.reservedBagRss[index] ?? 100,
-                        }))
-                        setBag(mappedBag)
-                    }
-
-                    // Load typesToSend and bagTypesToSend
-                    if (data.supplySettings.typesToSend) {
-                        setTypesToSend(data.supplySettings.typesToSend)
-                    }
-                    if (data.supplySettings.bagTypesToSend) {
-                        setBagTypesToSend(data.supplySettings.bagTypesToSend)
-                    }
-                }
+                setSettings(data)
             } else {
                 toast.error('Failed to load settings')
             }
@@ -128,293 +49,225 @@ export default function SupplyModal({ isOpen, onClose, iggId }: SupplyModalProps
         }
     }
 
-    const saveSettings = async () => {
-        if (!iggId || !fullSettings) return
-
+    const saveSetting = async (path: string, value: any) => {
+        if (!iggId) return
         setSaving(true)
         try {
-            // Build updated settings
-            const updatedSettings = {
-                ...fullSettings,
-                supplySettings: {
-                    ...fullSettings.supplySettings,
-                    playerToSend: sendTo,
-                    maxTravelTime: maxTravelTime,
-                    supplySpeed: supplySpeed,
-                    speedGear: useSpeedGear,
-                    sendResources: sendResources,
-                    useBagResource: useBagResource,
-                    reservedRss: inventory.map(r => r.reserved),
-                    supplyMin: inventory.map(r => r.threshold),
-                    reservedBagRss: bag.map(r => r.reserved),
-                    typesToSend: typesToSend,
-                    bagTypesToSend: bagTypesToSend,
-                }
-            }
-
             const res = await fetch(`/api/settings/${iggId}`, {
-                method: 'PUT',
+                method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedSettings),
+                body: JSON.stringify({ path, value }),
             })
-
             if (res.ok) {
-                toast.success('Settings saved successfully')
-                onClose()
-                setFullSettings(updatedSettings)
+                const updatedSettings = { ...settings }
+                setNestedValue(updatedSettings, path, value)
+                setSettings(updatedSettings)
             } else {
-                toast.error('Failed to save settings')
+                toast.error('Failed to save setting')
             }
         } catch (error) {
-            toast.error('Error saving settings')
+            toast.error('Error saving setting')
         } finally {
             setSaving(false)
         }
     }
 
-    const handleInventoryChange = (index: number, field: 'reserved' | 'threshold', value: number) => {
-        const updated = [...inventory]
-        updated[index][field] = value
-        setInventory(updated)
+    const debouncedSave = useDebounce(saveSetting, 500)
+
+    const handleSettingChange = (path: string, value: any) => {
+        const updatedSettings = { ...settings }
+        setNestedValue(updatedSettings, path, value)
+        setSettings(updatedSettings)
+        debouncedSave(path, value)
     }
 
-    const handleBagChange = (index: number, value: number) => {
-        const updated = [...bag]
-        updated[index].reserved = value
-        setBag(updated)
+    const handleArrayChange = (arrayPath: string, index: number, value: any) => {
+        const arr = [...(getNestedValue(settings, arrayPath) || [])]
+        arr[index] = value
+        handleSettingChange(arrayPath, arr)
     }
 
-    if (!iggId) {
-        return (
-            <KonohaModal
-                isOpen={isOpen}
-                onClose={onClose}
-                title="Supply Settings"
-                iggId={iggId}
-                icon={Loader2}
-                iconColor="#64748b"
-                iconBg="rgba(100,116,139,0.15)"
-                iconBorder="rgba(100,116,139,0.3)"
-            >
-                <div />
-            </KonohaModal>
-        )
+    const renderSectionContent = (tabId: string, isMobile: boolean, isTablet: boolean) => {
+        if (!settings) return null
+        
+        const gridClass = isMobile
+            ? 'grid grid-cols-1 gap-1.5'
+            : isTablet
+                ? 'grid grid-cols-2 gap-2'
+                : 'grid grid-cols-2 gap-3'
+        const supplySettings = settings.supplySettings || {}
+
+        if (tabId === 'general') {
+            return (
+                <div className="flex flex-col gap-8">
+                    <ModalSummaryGrid
+                        items={[
+                            { label: 'Target', value: supplySettings.playerToSend || 'Unset', icon: UserRound, tone: 'mint' },
+                            { label: 'Travel', value: `${Number(supplySettings.maxTravelTime || 600)}s`, icon: Clock, tone: 'cyan' },
+                            { label: 'Gear', value: supplySettings.speedGear ? 'On' : 'Off', icon: Truck, tone: 'gold' },
+                        ]}
+                    />
+
+                    <div className="space-y-4">
+                        <h3 className="text-[13px] font-semibold text-[#6B7A99] tracking-widest uppercase mb-4">Core Settings</h3>
+                        <div className={gridClass}>
+                            <InputControl 
+                                label="Auto Send To (Name)" 
+                                val={settings.supplySettings?.playerToSend || 'F C 1'} 
+                                onChange={(v) => handleSettingChange('supplySettings.playerToSend', v)} 
+                                isMobile={isMobile} 
+                            />
+                            <StepperControl 
+                                label="Max Travel Time (Seconds)" 
+                                val={Number(settings.supplySettings?.maxTravelTime || 600)} 
+                                min={1} max={36000} 
+                                onChange={(v) => handleSettingChange('supplySettings.maxTravelTime', v)} 
+                                isMobile={isMobile} 
+                            />
+                            <InputControl 
+                                label="Supply Speed (0.01 - 0.99)" 
+                                type="number"
+                                val={String(settings.supplySettings?.supplySpeed || 0.1)} 
+                                onChange={(v) => handleSettingChange('supplySettings.supplySpeed', Number(v))} 
+                                isMobile={isMobile} 
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-4 border-t border-[rgba(255,255,255,0.04)] pt-6">
+                        <h3 className="text-[13px] font-semibold text-[#6B7A99] tracking-widest uppercase mb-4">Speed Gear</h3>
+                        <div className={gridClass}>
+                            <ToggleControl 
+                                label="Use Speed Gear" 
+                                checked={!!settings.supplySettings?.speedGear} 
+                                onChange={(v) => handleSettingChange('supplySettings.speedGear', v)} 
+                                isMobile={isMobile} 
+                            />
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+
+        if (tabId === 'inventory') {
+            const selectedTypes = RESOURCE_NAMES.filter((_, index) => !!supplySettings.typesToSend?.[index]).length
+
+            return (
+                <div className="flex flex-col gap-6">
+                    <ModalSummaryGrid
+                        items={[
+                            { label: 'Inventory', value: supplySettings.sendResources ? 'On' : 'Off', icon: Package, tone: 'mint' },
+                            { label: 'Resources', value: `${selectedTypes}/5`, icon: Truck, tone: 'cyan' },
+                            { label: 'Speed', value: String(supplySettings.supplySpeed || 0.1), icon: Clock, tone: 'gold' },
+                        ]}
+                    />
+
+                    <div className="space-y-4">
+                        <ToggleControl 
+                            label="Auto Send Resources" 
+                            checked={!!settings.supplySettings?.sendResources} 
+                            onChange={(v) => handleSettingChange('supplySettings.sendResources', v)} 
+                            isMobile={isMobile} 
+                        />
+                    </div>
+                    
+                    <div className="space-y-4">
+                        {RESOURCE_NAMES.map((name, i) => (
+                            <div key={name} className="p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] flex flex-col gap-4">
+                                <div className="flex items-center gap-3 border-b border-[rgba(255,255,255,0.04)] pb-3">
+                                    <ToggleControl 
+                                        label={name} 
+                                        checked={!!(settings.supplySettings?.typesToSend?.[i])} 
+                                        onChange={(v) => handleArrayChange('supplySettings.typesToSend', i, v)} 
+                                        isMobile={isMobile} 
+                                    />
+                                </div>
+                                <div className={gridClass}>
+                                    <InputControl 
+                                        label="Reserved Amount" 
+                                        type="number"
+                                        val={String(settings.supplySettings?.reservedRss?.[i] ?? 500000)} 
+                                        onChange={(v) => handleArrayChange('supplySettings.reservedRss', i, Number(v))} 
+                                        isMobile={isMobile} 
+                                    />
+                                    <InputControl 
+                                        label="Threshold" 
+                                        type="number"
+                                        val={String(settings.supplySettings?.supplyMin?.[i] ?? 1000000)} 
+                                        onChange={(v) => handleArrayChange('supplySettings.supplyMin', i, Number(v))} 
+                                        isMobile={isMobile} 
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )
+        }
+
+        if (tabId === 'bag') {
+            const selectedBagTypes = RESOURCE_NAMES.filter((_, index) => !!supplySettings.bagTypesToSend?.[index]).length
+
+            return (
+                <div className="flex flex-col gap-6">
+                    <ModalSummaryGrid
+                        items={[
+                            { label: 'Bag Send', value: supplySettings.useBagResource ? 'On' : 'Off', icon: Backpack, tone: 'mint' },
+                            { label: 'Resources', value: `${selectedBagTypes}/5`, icon: Package, tone: 'cyan' },
+                            { label: 'Target', value: supplySettings.playerToSend || 'Unset', icon: UserRound, tone: 'gold' },
+                        ]}
+                    />
+
+                    <div className="space-y-4">
+                        <ToggleControl 
+                            label="Send Bag Resources" 
+                            checked={!!settings.supplySettings?.useBagResource} 
+                            onChange={(v) => handleSettingChange('supplySettings.useBagResource', v)} 
+                            isMobile={isMobile} 
+                        />
+                    </div>
+                    
+                    <div className="space-y-4">
+                        {RESOURCE_NAMES.map((name, i) => (
+                            <div key={name} className="p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] flex flex-col gap-4">
+                                <div className="flex items-center gap-3 border-b border-[rgba(255,255,255,0.04)] pb-3">
+                                    <ToggleControl 
+                                        label={name} 
+                                        checked={!!(settings.supplySettings?.bagTypesToSend?.[i])} 
+                                        onChange={(v) => handleArrayChange('supplySettings.bagTypesToSend', i, v)} 
+                                        isMobile={isMobile} 
+                                    />
+                                </div>
+                                <div>
+                                    <InputControl 
+                                        label="Reserved Amount" 
+                                        type="number"
+                                        val={String(settings.supplySettings?.reservedBagRss?.[i] ?? 100)} 
+                                        onChange={(v) => handleArrayChange('supplySettings.reservedBagRss', i, Number(v))} 
+                                        isMobile={isMobile} 
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )
+        }
+        return null
     }
 
     return (
-        <KonohaModal
+        <ResponsiveModalShell
             isOpen={isOpen}
             onClose={onClose}
             title="Supply Settings"
             iggId={iggId}
-            icon={Loader2}
-            iconColor="#64748b"
-            iconBg="rgba(100,116,139,0.15)"
-            iconBorder="rgba(100,116,139,0.3)"
+            headerIcon={Package}
+            tabs={TABS}
+            loading={loading}
             saving={saving}
-            onSave={saveSettings}
-            maxWidth="860px"
-        >
-            {loading ? (
-                                <div className="flex items-center justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-primary-400" />
-                                </div>
-                            ) : (
-                                <div className="w-full space-y-6">
-                                    {/* General Settings */}
-                                    <div className="space-y-4">
-                                        <h3 className="text-base sm:text-lg font-bold text-white border-b border-white/10 pb-2">General Settings</h3>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                                <label className="block text-xs sm:text-sm text-gray-300 mb-2">Auto Send To:</label>
-                                                <input
-                                                    type="text"
-                                                    value={sendTo}
-                                                    onChange={(e) => setSendTo(e.target.value)}
-                                                    className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                            </div>
-
-                                            <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                                <label className="block text-xs sm:text-sm text-gray-300 mb-2">Max Travel Time (Seconds):</label>
-                                                <input
-                                                    type="number"
-                                                    min={1}
-                                                    max={36000}
-                                                    step="1"
-                                                    value={maxTravelTime}
-                                                    onChange={(e) => setMaxTravelTime(Math.floor(Number(e.target.value)))}
-                                                    onKeyDown={(e) => {
-                                                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
-                                                            e.preventDefault();
-                                                        }
-                                                    }}
-                                                    onBlur={(e) => setMaxTravelTime(Math.max(1, Math.min(36000, Math.floor(Number(e.target.value)))))}
-                                                    className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                            </div>
-
-                                            <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                                <label className="block text-xs sm:text-sm text-gray-300 mb-2">Supply Speed (Seconds):</label>
-                                                <input
-                                                    type="number"
-                                                    step="0.01"
-                                                    min={0.01}
-                                                    max={0.99}
-                                                    value={supplySpeed}
-                                                    onChange={(e) => {
-                                                        let val = e.target.value;
-                                                        if (val.includes('.') && val.split('.')[1].length > 2) {
-                                                            val = val.substring(0, val.indexOf('.') + 3);
-                                                        }
-                                                        setSupplySpeed(Number(val));
-                                                    }}
-                                                    onBlur={(e) => {
-                                                        const clamped = Math.max(0.01, Math.min(0.99, Number(e.target.value)));
-                                                        setSupplySpeed(Number(clamped.toFixed(2)));
-                                                    }}
-                                                    className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            <label className="flex items-center justify-between p-4 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                <span className="text-sm text-gray-300">Use Speed Gear</span>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={useSpeedGear}
-                                                    onChange={(e) => setUseSpeedGear(e.target.checked)}
-                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                            </label>
-                                        </div>
-                                    </div>
-
-                                    {/* Inventory Section */}
-                                    <div className="space-y-4">
-                                        <h3 className="text-base sm:text-lg font-bold text-white border-b border-white/10 pb-2">Inventory</h3>
-
-                                        <div className="flex items-center justify-between p-4 rounded-xl bg-primary-500/10 border border-primary-500/20 mb-3">
-                                            <label className="flex items-center gap-3 cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={sendResources}
-                                                    onChange={(e) => setSendResources(e.target.checked)}
-                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                                <span className="text-sm font-medium text-primary-300">Auto Send Resources</span>
-                                            </label>
-                                        </div>
-
-                                        <div className="space-y-3">
-                                            {inventory.map((resource, index) => (
-                                                <div key={resource.name} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 rounded-xl bg-surface/50 hover:bg-surface transition-colors">
-                                                    <div className="flex items-center gap-3">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={typesToSend[index] || false}
-                                                            onChange={(e) => {
-                                                                const updated = [...typesToSend]
-                                                                updated[index] = e.target.checked
-                                                                setTypesToSend(updated)
-                                                            }}
-                                                            className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                        />
-                                                        <span className="text-white font-medium">{resource.name}</span>
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-xs text-gray-400 mb-1">Reserved Amount</label>
-                                                        <input
-                                                            type="number"
-                                                            step="1"
-                                                            min={100000}
-                                                            max={4290000000}
-                                                            value={resource.reserved}
-                                                            onChange={(e) => handleInventoryChange(index, 'reserved', Math.floor(Number(e.target.value)))}
-                                                            onBlur={(e) => {
-                                                                const val = Math.max(100000, Math.min(4290000000, Math.floor(Number(e.target.value))))
-                                                                handleInventoryChange(index, 'reserved', val)
-                                                            }}
-                                                            className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-xs text-gray-400 mb-1">Amount needed before supply</label>
-                                                        <input
-                                                            type="number"
-                                                            step="1"
-                                                            min={100000}
-                                                            max={4290000000}
-                                                            value={resource.threshold}
-                                                            onChange={(e) => handleInventoryChange(index, 'threshold', Math.floor(Number(e.target.value)))}
-                                                            onBlur={(e) => {
-                                                                const val = Math.max(100000, Math.min(4290000000, Math.floor(Number(e.target.value))))
-                                                                handleInventoryChange(index, 'threshold', val)
-                                                            }}
-                                                            className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                        />
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Bag Section */}
-                                    <div className="space-y-4">
-                                        <h3 className="text-base sm:text-lg font-bold text-white border-b border-white/10 pb-2">Send Resources (Bag)</h3>
-
-                                        <div className="flex items-center justify-between p-4 rounded-xl bg-primary-500/10 border border-primary-500/20 mb-3">
-                                            <label className="flex items-center gap-3 cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={useBagResource}
-                                                    onChange={(e) => setUseBagResource(e.target.checked)}
-                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                                <span className="text-sm font-medium text-primary-300">Send Bag Resources</span>
-                                            </label>
-                                        </div>
-
-                                        <div className="space-y-3">
-                                            {bag.map((resource, index) => (
-                                                <div key={resource.name} className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-xl bg-surface/50 hover:bg-surface transition-colors">
-                                                    <div className="flex items-center gap-3">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={bagTypesToSend[index] || false}
-                                                            onChange={(e) => {
-                                                                const updated = [...bagTypesToSend]
-                                                                updated[index] = e.target.checked
-                                                                setBagTypesToSend(updated)
-                                                            }}
-                                                            className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                        />
-                                                        <span className="text-white font-medium">{resource.name}</span>
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-xs text-gray-400 mb-1">Reserved Amount</label>
-                                                        <input
-                                                            type="number"
-                                                            step="1"
-                                                            min={100000}
-                                                            max={4290000000}
-                                                            value={resource.reserved}
-                                                            onChange={(e) => handleBagChange(index, Math.floor(Number(e.target.value)))}
-                                                            onBlur={(e) => {
-                                                                const val = Math.max(100000, Math.min(4290000000, Math.floor(Number(e.target.value))))
-                                                                handleBagChange(index, val)
-                                                            }}
-                                                            className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                        />
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-        </KonohaModal>
+            statusLabel={saving ? 'Syncing...' : 'Auto-sync'}
+            renderSectionContent={renderSectionContent}
+        />
     )
 }

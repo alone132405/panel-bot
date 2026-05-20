@@ -1,15 +1,15 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { prisma } from '@/lib/prisma'
+import { getConfigDir } from '@/lib/fileSync'
 import fs from 'fs/promises'
-import path from 'path'
 
 export async function GET(req: Request) {
     const authError = await requireAdmin(req as any)
     if (authError) return authError
 
     try {
-        const configPath = path.join(process.cwd(), 'config')
+        const configPath = getConfigDir()
 
         // Read all directories in config folder
         const entries = await fs.readdir(configPath, { withFileTypes: true })

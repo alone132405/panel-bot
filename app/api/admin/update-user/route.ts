@@ -8,7 +8,7 @@ export async function PUT(req: Request) {
 
     try {
         const body = await req.json()
-        const { userId, name, email, role, contactType, contactValue, subscriptionExpiresAt } = body
+        const { userId, name, email, role, contactType, contactValue } = body
 
         if (!userId) {
             return NextResponse.json(

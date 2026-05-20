@@ -4,41 +4,112 @@ import chokidar from 'chokidar'
 import { Server as SocketIOServer } from 'socket.io'
 import { Server as HTTPServer } from 'http'
 
-// Config directory - can be set via environment variable
-// Defaults to user specified path
-const CONFIG_DIR = process.env.CONFIG_DIR || 'C:\\Users\\Administrator\\Downloads\\LordsBot-Release\\config'
+export interface ConfigWriteResult {
+    filePath: string
+    bytes: number
+    mtime: string
+}
+
+function getConfigRoot(): string {
+    return path.resolve(
+        process.env.CONFIG_DIR ||
+        process.env.CONFIG_PATH ||
+        process.env.EXTERNAL_CONFIG_ROOT ||
+        path.join(process.cwd(), 'config')
+    )
+}
+
+export function getConfigDir(): string {
+    return getConfigRoot()
+}
+
+export function getConfigFilePath(iggId: string, fileName: string): string {
+    return path.join(getConfigRoot(), iggId, fileName)
+}
+
+async function writeJsonConfigFile(iggId: string, fileName: string, settings: any): Promise<ConfigWriteResult> {
+    const filePath = getConfigFilePath(iggId, fileName)
+    await fs.mkdir(path.dirname(filePath), { recursive: true })
+    await fs.writeFile(filePath, JSON.stringify(settings, null, 2), 'utf-8')
+
+    const content = await fs.readFile(filePath, 'utf-8')
+    const parsed = JSON.parse(content)
+    if (JSON.stringify(parsed) !== JSON.stringify(settings)) {
+        throw new Error(`Config write verification failed for ${filePath}`)
+    }
+
+    const stat = await fs.stat(filePath)
+    const result = {
+        filePath,
+        bytes: stat.size,
+        mtime: stat.mtime.toISOString(),
+    }
+    // console.log(`[config-sync] wrote ${fileName} for ${iggId} -> ${filePath} (${result.bytes} bytes)`)
+    return result
+}
 
 // File system operations
 export async function readSettingsFile(iggId: string): Promise<any> {
-    const filePath = path.join(CONFIG_DIR, iggId, 'settings.json')
+    const filePath = getConfigFilePath(iggId, 'settings.json')
     const content = await fs.readFile(filePath, 'utf-8')
     return JSON.parse(content)
 }
 
 export async function readBankSettingsFile(iggId: string): Promise<any> {
-    const filePath = path.join(CONFIG_DIR, iggId, 'banksettings.json')
+    const filePath = getConfigFilePath(iggId, 'banksettings.json')
     const content = await fs.readFile(filePath, 'utf-8')
     return JSON.parse(content)
 }
 
-export async function writeSettingsFile(iggId: string, settings: any): Promise<void> {
-    const filePath = path.join(CONFIG_DIR, iggId, 'settings.json')
-    await fs.writeFile(filePath, JSON.stringify(settings, null, 2), 'utf-8')
+export async function readManageGuildSettingsFile(iggId: string): Promise<any> {
+    const filePath = getConfigFilePath(iggId, 'manageGuild.json')
+    const content = await fs.readFile(filePath, 'utf-8')
+    return JSON.parse(content)
 }
 
-export async function writeBankSettingsFile(iggId: string, settings: any): Promise<void> {
-    const filePath = path.join(CONFIG_DIR, iggId, 'banksettings.json')
-    await fs.writeFile(filePath, JSON.stringify(settings, null, 2), 'utf-8')
+export async function writeSettingsFile(iggId: string, settings: any): Promise<ConfigWriteResult> {
+    return writeJsonConfigFile(iggId, 'settings.json', settings)
+}
+
+export async function writeBankSettingsFile(iggId: string, settings: any): Promise<ConfigWriteResult> {
+    return writeJsonConfigFile(iggId, 'banksettings.json', settings)
+}
+
+export async function writeManageGuildSettingsFile(iggId: string, settings: any): Promise<ConfigWriteResult> {
+    return writeJsonConfigFile(iggId, 'manageGuild.json', settings)
+}
+
+export function mergeBankSettingsWithManageGuild(bankSettings: any, manageGuildSettings: any): any {
+    return {
+        ...bankSettings,
+        enableWhiteList: Boolean(manageGuildSettings?.enableAutoAccept || manageGuildSettings?.enableAutoRank),
+        enableBlackList: Boolean(manageGuildSettings?.enableBlackList),
+    }
+}
+
+export async function readMergedBankSettingsFile(iggId: string): Promise<any> {
+    const bankSettings = await readBankSettingsFile(iggId)
+
+    try {
+        const manageGuildSettings = await readManageGuildSettingsFile(iggId)
+        return mergeBankSettingsWithManageGuild(bankSettings, manageGuildSettings)
+    } catch {
+        return mergeBankSettingsWithManageGuild(bankSettings, {})
+    }
 }
 
 export async function validateIggIdExists(iggId: string): Promise<boolean> {
     try {
-        const folderPath = path.join(CONFIG_DIR, iggId)
+        const folderPath = path.join(getConfigRoot(), iggId)
         const stats = await fs.stat(folderPath)
         return stats.isDirectory()
     } catch {
         return false
     }
+}
+
+function isArrayIndexKey(key: string): boolean {
+    return /^\d+$/.test(key)
 }
 
 export function updateNestedProperty(obj: any, path: string, value: any): any {
@@ -47,10 +118,14 @@ export function updateNestedProperty(obj: any, path: string, value: any): any {
 
     let current = result
     for (let i = 0; i < keys.length - 1; i++) {
-        if (!(keys[i] in current)) {
-            current[keys[i]] = {}
+        const key = keys[i]
+        const nextKey = keys[i + 1]
+
+        if (current[key] === undefined || current[key] === null || typeof current[key] !== 'object') {
+            current[key] = isArrayIndexKey(nextKey) ? [] : {}
         }
-        current = current[keys[i]]
+
+        current = current[key]
     }
 
     current[keys[keys.length - 1]] = value
@@ -72,20 +147,20 @@ export function initializeWebSocket(server: HTTPServer) {
     })
 
     io.on('connection', (socket) => {
-        console.log('Client connected:', socket.id)
+        // console.log('Client connected:', socket.id)
 
         socket.on('subscribe', (iggId: string) => {
             socket.join(`igg-${iggId}`)
-            console.log(`Client ${socket.id} subscribed to IGG ID: ${iggId}`)
+            // console.log(`Client ${socket.id} subscribed to IGG ID: ${iggId}`)
         })
 
         socket.on('unsubscribe', (iggId: string) => {
             socket.leave(`igg-${iggId}`)
-            console.log(`Client ${socket.id} unsubscribed from IGG ID: ${iggId}`)
+            // console.log(`Client ${socket.id} unsubscribed from IGG ID: ${iggId}`)
         })
 
         socket.on('disconnect', () => {
-            console.log('Client disconnected:', socket.id)
+            // console.log('Client disconnected:', socket.id)
         })
     })
 
@@ -95,7 +170,8 @@ export function initializeWebSocket(server: HTTPServer) {
 export function initializeFileWatcher() {
     if (watcher) return watcher
 
-    watcher = chokidar.watch([`${CONFIG_DIR}/*/settings.json`, `${CONFIG_DIR}/*/banksettings.json`], {
+    const configDir = getConfigRoot()
+    watcher = chokidar.watch([`${configDir}/*/settings.json`, `${configDir}/*/banksettings.json`, `${configDir}/*/manageGuild.json`], {
         persistent: true,
         ignoreInitial: true,
         awaitWriteFinish: {
@@ -108,10 +184,10 @@ export function initializeFileWatcher() {
         try {
             const iggId = path.basename(path.dirname(filePath))
             const fileName = path.basename(filePath)
-            console.log(`File changed for IGG ID ${iggId}: ${fileName}`)
+            // console.log(`File changed for IGG ID ${iggId}: ${fileName}`)
 
-            if (fileName.toLowerCase() === 'banksettings.json') {
-                const settings = await readBankSettingsFile(iggId)
+            if (fileName.toLowerCase() === 'banksettings.json' || fileName.toLowerCase() === 'manageguild.json') {
+                const settings = await readMergedBankSettingsFile(iggId)
                 if (io) {
                     io.to(`igg-${iggId}`).emit('bank-settings-updated', {
                         iggId,

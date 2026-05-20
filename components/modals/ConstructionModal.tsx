@@ -1,10 +1,15 @@
 'use client'
 
-import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Loader2, Hammer, Save } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useEffect, useState, type Dispatch, type SetStateAction } from 'react'
+import { ArrowUp, Hammer, Layers, Loader2, RotateCcw } from 'lucide-react'
 import { toast } from 'sonner'
+import KonohaModal from './KonohaModal'
+import { ModalSummaryGrid } from '@/components/ui/ModalSummaryGrid'
+import { Checkbox } from '@/components/ui/Checkbox'
+import { TacticalSelect } from '@/components/ui/TacticalSelect'
+import { SettingInfoLabel } from '@/components/ui/SettingInfoLabel'
+import { SettingHelpButton } from '@/components/ui/ResponsiveModalShell'
+import { useAutoSaveSettings } from '@/hooks/useAutoSaveSettings'
 
 interface ConstructionModalProps {
     isOpen: boolean
@@ -12,75 +17,141 @@ interface ConstructionModalProps {
     iggId: string | null
 }
 
+const SPAM_TARGET_OPTIONS = [
+    { value: '0', label: 'None' },
+    { value: '1', label: 'Farm' },
+    { value: '2', label: 'Mine' },
+    { value: '3', label: 'Lumber Mill' },
+    { value: '4', label: 'Quarry' },
+    { value: '5', label: 'Manor' },
+    { value: '6', label: 'Barracks' },
+    { value: '7', label: 'Infirmary' },
+    { value: '8', label: 'Spring' },
+]
+
+const SPAM_BUILDING_OPTIONS = [
+    { value: 'Farm', label: 'Farm' },
+    { value: 'Mine', label: 'Mine' },
+    { value: 'Lumber Mill', label: 'Lumber Mill' },
+    { value: 'Quarry', label: 'Quarry' },
+    { value: 'Manor', label: 'Manor' },
+    { value: 'Barracks', label: 'Barracks' },
+    { value: 'Infirmary', label: 'Infirmary' },
+    { value: 'Spring', label: 'Spring' },
+]
+
+const BUILDING_PRIORITY_OPTIONS = [
+    { value: '0', label: 'Castle' },
+    { value: '1', label: 'Resource' },
+    { value: '2', label: 'Academy' },
+    { value: '3', label: 'Manor' },
+    { value: '4', label: 'Barracks / Infirmary' },
+    { value: '5', label: 'Monsterhold' },
+    { value: '6', label: 'Familiars' },
+    { value: '7', label: 'Trading Post' },
+    { value: '8', label: 'Resource (No Manor)' },
+    { value: '9', label: 'Treasure Trove' },
+    { value: '10', label: 'Workshop' },
+    { value: '11', label: 'None' },
+    { value: '12', label: 'Lunar Foundry' },
+]
+
+const RESOURCE_BUILDING_OPTIONS = [
+    { value: '4', label: 'Farm' },
+    { value: '1', label: 'Lumber Mill' },
+    { value: '2', label: 'Quarry' },
+    { value: '3', label: 'Mine' },
+]
+
+const MILITARY_BUILDING_OPTIONS = [
+    { value: '5', label: 'Manor' },
+    { value: '7', label: 'Infirmary' },
+    { value: '6', label: 'Barracks' },
+]
+
+const FAMILIAR_BUILDING_OPTIONS = [
+    { value: '21', label: 'Spring' },
+    { value: '22', label: 'Mystic Spire' },
+    { value: '23', label: 'Gym' },
+]
+
+function clampWholeNumber(value: number, min: number, max: number) {
+    if (Number.isNaN(value)) return min
+    return Math.max(min, Math.min(max, Math.floor(value)))
+}
+
+function updateTarget(
+    setter: Dispatch<SetStateAction<number[]>>,
+    index: number,
+    value: string
+) {
+    setter((previous) => {
+        const next = [...previous]
+        next[index] = Number(value)
+        return next
+    })
+}
+
+function TargetGrid({
+    title,
+    countLabel,
+    targets,
+    options,
+    onChange,
+}: {
+    title: string
+    countLabel: string
+    targets: number[]
+    options: { value: string; label: string }[]
+    onChange: (index: number, value: string) => void
+}) {
+    return (
+        <section className="space-y-3">
+            <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-2">
+                <h3>
+                    <SettingInfoLabel label={title} className="text-[14px] font-black text-text-primary" />
+                </h3>
+                <span className="rounded-full border border-white/10 bg-bg-inset px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
+                    {countLabel}
+                </span>
+            </div>
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-4">
+                {targets.map((value, index) => (
+                    <div key={`${title}-${index}`} className="rounded-lg border border-white/10 bg-bg-inset/70 p-3">
+                        <div className="mb-2">
+                            <SettingInfoLabel label={`Location ${index + 1}`} className="text-[11px] font-bold uppercase tracking-[0.12em] text-text-muted" />
+                        </div>
+                        <TacticalSelect
+                            value={String(value)}
+                            onChange={(nextValue) => onChange(index, nextValue)}
+                            options={options}
+                        />
+                    </div>
+                ))}
+            </div>
+        </section>
+    )
+}
+
 export default function ConstructionModal({ isOpen, onClose, iggId }: ConstructionModalProps) {
     const [settings, setSettings] = useState<any>(null)
     const [loading, setLoading] = useState(true)
-
-    // Prevent background scroll when modal is open
-    useBodyScrollLock(isOpen)
     const [saving, setSaving] = useState(false)
 
-    // Construction settings
     const [autoBuild, setAutoBuild] = useState(false)
     const [upgrade, setUpgrade] = useState(false)
     const [lowestLevelFirst, setLowestLevelFirst] = useState(true)
     const [ignoreSpamTarget, setIgnoreSpamTarget] = useState(true)
     const [autoRentSecondQueue, setAutoRentSecondQueue] = useState(true)
     const [secondQueueSpamOnly, setSecondQueueSpamOnly] = useState(false)
-    const [spamTargetType, setSpamTargetType] = useState('None')
+    const [spamTargetType, setSpamTargetType] = useState('0')
     const [spamTargetBuilding, setSpamTargetBuilding] = useState('Farm')
-    const [buildingPriority, setBuildingPriority] = useState('Castle')
+    const [buildingPriority, setBuildingPriority] = useState('0')
     const [strict, setStrict] = useState(false)
     const [maxBuildingLevel, setMaxBuildingLevel] = useState(25)
-
-    // Building Target - Resource Buildings (18 locations)
-    const [resource1, setResource1] = useState(4)
-    const [resource2, setResource2] = useState(4)
-    const [resource3, setResource3] = useState(4)
-    const [resource4, setResource4] = useState(4)
-    const [resource5, setResource5] = useState(4)
-    const [resource6, setResource6] = useState(4)
-    const [resource7, setResource7] = useState(4)
-    const [resource8, setResource8] = useState(4)
-    const [resource9, setResource9] = useState(4)
-    const [resource10, setResource10] = useState(4)
-    const [resource11, setResource11] = useState(4)
-    const [resource12, setResource12] = useState(4)
-    const [resource13, setResource13] = useState(4)
-    const [resource14, setResource14] = useState(4)
-    const [resource15, setResource15] = useState(4)
-    const [resource16, setResource16] = useState(4)
-    const [resource17, setResource17] = useState(4)
-    const [resource18, setResource18] = useState(4)
-
-    // Building Target - Military Buildings (17 locations)
-    const [military1, setMilitary1] = useState(5)
-    const [military2, setMilitary2] = useState(5)
-    const [military3, setMilitary3] = useState(5)
-    const [military4, setMilitary4] = useState(5)
-    const [military5, setMilitary5] = useState(5)
-    const [military6, setMilitary6] = useState(5)
-    const [military7, setMilitary7] = useState(5)
-    const [military8, setMilitary8] = useState(5)
-    const [military9, setMilitary9] = useState(5)
-    const [military10, setMilitary10] = useState(5)
-    const [military11, setMilitary11] = useState(5)
-    const [military12, setMilitary12] = useState(5)
-    const [military13, setMilitary13] = useState(5)
-    const [military14, setMilitary14] = useState(5)
-    const [military15, setMilitary15] = useState(5)
-    const [military16, setMilitary16] = useState(5)
-    const [military17, setMilitary17] = useState(5)
-
-    // Building Target - Familiar Buildings (8 locations)
-    const [familiar1, setFamiliar1] = useState(21)
-    const [familiar2, setFamiliar2] = useState(21)
-    const [familiar3, setFamiliar3] = useState(21)
-    const [familiar4, setFamiliar4] = useState(21)
-    const [familiar5, setFamiliar5] = useState(21)
-    const [familiar6, setFamiliar6] = useState(21)
-    const [familiar7, setFamiliar7] = useState(21)
-    const [familiar8, setFamiliar8] = useState(21)
+    const [resourceTargets, setResourceTargets] = useState<number[]>(Array(18).fill(4))
+    const [militaryTargets, setMilitaryTargets] = useState<number[]>(Array(17).fill(5))
+    const [familiarTargets, setFamiliarTargets] = useState<number[]>(Array(8).fill(21))
 
     useEffect(() => {
         if (isOpen && iggId) {
@@ -100,43 +171,28 @@ export default function ConstructionModal({ isOpen, onClose, iggId }: Constructi
             const res = await fetch(`/api/settings/${iggId}`)
             if (res.ok) {
                 const data = await res.json()
+                const buildSettings = data.buildSettingsNew || {}
+                const targets = Array.isArray(buildSettings.BuildingTarget) ? buildSettings.BuildingTarget : []
+
                 setSettings(data)
-
-                if (data.buildSettingsNew) {
-                    setAutoBuild(data.buildSettingsNew.autoBuild ?? false)
-                    setUpgrade(data.buildSettingsNew.autoUpgrade ?? false)
-                    setLowestLevelFirst(data.buildSettingsNew.buildByLowestLevel ?? true)
-                    setIgnoreSpamTarget(data.buildSettingsNew.ignoreSpamTarget ?? true)
-                    setAutoRentSecondQueue(data.buildSettingsNew.autoBuySecondQueue ?? true)
-                    setSecondQueueSpamOnly(data.buildSettingsNew.secondQueueSpamOnly ?? false)
-                    setSpamTargetType(String(data.buildSettingsNew.newSpamTarget ?? 0))
-                    setSpamTargetBuilding(data.buildSettingsNew.spamTargetBuilding ?? 'Farm')
-                    setBuildingPriority(String(data.buildSettingsNew.buildPriority ?? 0))
-                    setStrict(data.buildSettingsNew.strictPriority ?? false)
-                    setMaxBuildingLevel(data.buildSettingsNew.maxBuildLevel ?? 25)
-
-                    // Load Building Target - Resource Buildings (array indices 1-18)
-                    for (let i = 1; i <= 18; i++) {
-                        const setter = eval(`setResource${i}`)
-                        setter(data.buildSettingsNew.BuildingTarget?.[i] ?? 4)
-                    }
-
-                    // Load Building Target - Military Buildings (array indices 19-35)
-                    for (let i = 1; i <= 17; i++) {
-                        const setter = eval(`setMilitary${i}`)
-                        setter(data.buildSettingsNew.BuildingTarget?.[18 + i] ?? 5)
-                    }
-
-                    // Load Building Target - Familiar Buildings (array indices 36-43)
-                    for (let i = 1; i <= 8; i++) {
-                        const setter = eval(`setFamiliar${i}`)
-                        setter(data.buildSettingsNew.BuildingTarget?.[35 + i] ?? 21)
-                    }
-                }
+                setAutoBuild(buildSettings.autoBuild ?? false)
+                setUpgrade(buildSettings.autoUpgrade ?? false)
+                setLowestLevelFirst(buildSettings.buildByLowestLevel ?? true)
+                setIgnoreSpamTarget(buildSettings.ignoreSpamTarget ?? true)
+                setAutoRentSecondQueue(buildSettings.autoBuySecondQueue ?? true)
+                setSecondQueueSpamOnly(buildSettings.secondQueueSpamOnly ?? false)
+                setSpamTargetType(String(buildSettings.newSpamTarget ?? 0))
+                setSpamTargetBuilding(buildSettings.spamTargetBuilding ?? 'Farm')
+                setBuildingPriority(String(buildSettings.buildPriority ?? 0))
+                setStrict(buildSettings.strictPriority ?? false)
+                setMaxBuildingLevel(buildSettings.maxBuildLevel ?? 25)
+                setResourceTargets(Array.from({ length: 18 }, (_, index) => targets[index + 1] ?? 4))
+                setMilitaryTargets(Array.from({ length: 17 }, (_, index) => targets[index + 19] ?? 5))
+                setFamiliarTargets(Array.from({ length: 8 }, (_, index) => targets[index + 36] ?? 21))
             } else {
                 toast.error('Failed to load settings')
             }
-        } catch (error) {
+        } catch {
             toast.error('Error loading settings')
         } finally {
             setLoading(false)
@@ -148,26 +204,28 @@ export default function ConstructionModal({ isOpen, onClose, iggId }: Constructi
 
         setSaving(true)
         try {
-            // Build the BuildingTarget array from current state
-            const buildingTargetArray = settings.buildSettingsNew?.BuildingTarget ? [...settings.buildSettingsNew.BuildingTarget] : []
+            const existingTargets = Array.isArray(settings.buildSettingsNew?.BuildingTarget)
+                ? settings.buildSettingsNew.BuildingTarget
+                : []
+            const buildingTargetArray = Array.from(
+                { length: Math.max(existingTargets.length, 44) },
+                (_, index) => existingTargets[index] ?? 0
+            )
 
-            // Update resource buildings (indices 1-18)
-            for (let i = 1; i <= 18; i++) {
-                buildingTargetArray[i] = eval(`resource${i}`)
-            }
-            // Update military buildings (indices 19-35)
-            for (let i = 1; i <= 17; i++) {
-                buildingTargetArray[18 + i] = eval(`military${i}`)
-            }
-            // Update familiar buildings (indices 36-43)
-            for (let i = 1; i <= 8; i++) {
-                buildingTargetArray[35 + i] = eval(`familiar${i}`)
-            }
+            resourceTargets.forEach((value, index) => {
+                buildingTargetArray[index + 1] = value
+            })
+            militaryTargets.forEach((value, index) => {
+                buildingTargetArray[index + 19] = value
+            })
+            familiarTargets.forEach((value, index) => {
+                buildingTargetArray[index + 36] = value
+            })
 
             const updatedSettings = {
                 ...settings,
                 buildSettingsNew: {
-                    ...settings.buildSettingsNew,
+                    ...(settings.buildSettingsNew || {}),
                     autoBuild,
                     autoUpgrade: upgrade,
                     buildByLowestLevel: lowestLevelFirst,
@@ -178,9 +236,9 @@ export default function ConstructionModal({ isOpen, onClose, iggId }: Constructi
                     spamTargetBuilding,
                     buildPriority: Number(buildingPriority),
                     strictPriority: strict,
-                    maxBuildLevel: maxBuildingLevel,
+                    maxBuildLevel: clampWholeNumber(maxBuildingLevel, 0, 50),
                     BuildingTarget: buildingTargetArray,
-                }
+                },
             }
 
             const res = await fetch(`/api/settings/${iggId}`, {
@@ -190,310 +248,171 @@ export default function ConstructionModal({ isOpen, onClose, iggId }: Constructi
             })
 
             if (res.ok) {
-                toast.success('Settings saved successfully')
-                onClose()
                 setSettings(updatedSettings)
             } else {
                 toast.error('Failed to save settings')
             }
-        } catch (error) {
+        } catch {
             toast.error('Error saving settings')
         } finally {
             setSaving(false)
         }
     }
 
-    const handleResetBuildData = () => {
-        toast.success('Build data reset!')
-        // In a real implementation, this would call an API endpoint
-    }
+    useAutoSaveSettings(
+        isOpen && !loading && Boolean(iggId && settings),
+        saveSettings,
+        [
+            autoBuild,
+            upgrade,
+            lowestLevelFirst,
+            ignoreSpamTarget,
+            autoRentSecondQueue,
+            secondQueueSpamOnly,
+            spamTargetType,
+            spamTargetBuilding,
+            buildingPriority,
+            strict,
+            maxBuildingLevel,
+            resourceTargets,
+            militaryTargets,
+            familiarTargets,
+        ]
+    )
 
-    if (!iggId) {
-        return (
-            <AnimatePresence>
-                {isOpen && (
-                    <>
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={onClose}
-                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-                        />
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="fixed inset-4 md:inset-20 bg-background-secondary rounded-2xl border border-white/10 shadow-2xl z-50 flex items-center justify-center"
-                        >
-                            <div className="text-center">
-                                <p className="text-xl text-white mb-2">No IGG ID Selected</p>
-                                <p className="text-gray-400">Please select an IGG ID to configure construction settings</p>
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
-        )
-    }
+    const toggleOptions = [
+        { label: 'Auto Build', value: autoBuild, setter: setAutoBuild },
+        { label: 'Upgrade', value: upgrade, setter: setUpgrade },
+        { label: 'Lowest Level First', value: lowestLevelFirst, setter: setLowestLevelFirst },
+        { label: 'Ignore Spam Target', value: ignoreSpamTarget, setter: setIgnoreSpamTarget },
+        { label: 'Auto-Rent Second Queue', value: autoRentSecondQueue, setter: setAutoRentSecondQueue },
+        { label: 'Second Queue (Spam Only)', value: secondQueueSpamOnly, setter: setSecondQueueSpamOnly },
+        { label: 'Strict Priority', value: strict, setter: setStrict },
+    ]
 
     return (
-        <AnimatePresence>
-            {isOpen && (
-                <>
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={onClose}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+        <KonohaModal
+            isOpen={isOpen}
+            onClose={onClose}
+            title="Construction"
+            iggId={iggId}
+            icon={Hammer}
+            iconColor="#fb923c"
+            iconBg="rgba(251,146,60,0.14)"
+            iconBorder="rgba(251,146,60,0.30)"
+            saving={saving}
+            statusLabel={saving ? 'Syncing...' : 'Auto-sync. Use Protocol Apply Changes to deploy.'}
+            maxWidth="1120px"
+        >
+            {loading ? (
+                <div className="flex min-h-[360px] items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-accent-1" />
+                </div>
+            ) : (
+                <div className="space-y-6">
+                    <ModalSummaryGrid
+                        items={[
+                            { label: 'Auto Build', value: autoBuild ? 'On' : 'Off', icon: Hammer, tone: 'gold' },
+                            { label: 'Enabled', value: [autoBuild, upgrade, lowestLevelFirst, ignoreSpamTarget, autoRentSecondQueue, secondQueueSpamOnly, strict].filter(Boolean).length, icon: Layers, tone: 'mint' },
+                            { label: 'Max Level', value: maxBuildingLevel, icon: ArrowUp, tone: 'cyan' },
+                        ]}
                     />
 
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="fixed inset-2 sm:inset-4 md:inset-10 lg:inset-20 bg-background-secondary rounded-xl md:rounded-2xl border border-white/10 shadow-2xl z-50 flex flex-col overflow-hidden"
-                    >
-                        {/* Header */}
-                        <div className="flex items-center justify-between px-3 md:px-6 py-2.5 md:py-4 border-b border-white/10 bg-background-tertiary/50">
-                            <div className="min-w-0">
-                                <div className="flex items-center gap-2 md:gap-3">
-                                    <Hammer className="w-5 h-5 md:w-6 md:h-6 text-orange-400 flex-shrink-0" />
-                                    <h2 className="text-sm md:text-2xl font-bold text-white truncate">Construction</h2>
-                                    {saving && (
-                                        <Loader2 className="w-4 h-4 animate-spin text-primary-400 flex-shrink-0" />
-                                    )}
+                    <section className="space-y-4">
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 xl:grid-cols-3">
+                            {toggleOptions.map((option) => (
+                                <label
+                                    key={option.label}
+                                    className="flex min-h-[48px] sm:min-h-[58px] cursor-pointer items-center justify-between gap-4 rounded-lg border border-white/10 bg-bg-inset/70 px-3 py-2 sm:px-4 sm:py-3 transition-colors hover:border-white/20 hover:bg-white/[0.035]"
+                                >
+                                    <SettingInfoLabel label={option.label} className="text-[13px] sm:text-[14px]" />
+                                    <Checkbox checked={option.value} onChange={option.setter} />
+                                </label>
+                            ))}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+                            <div className="rounded-lg border border-white/10 bg-bg-inset/70 p-4">
+                                <div className="mb-2">
+                                    <SettingInfoLabel label="Spam Target Type" className="text-[12px] font-black uppercase tracking-[0.14em] text-text-muted" />
                                 </div>
-                                <p className="text-[10px] md:text-sm text-gray-400 truncate">IGG ID: {iggId}</p>
+                                <TacticalSelect value={spamTargetType} onChange={setSpamTargetType} options={SPAM_TARGET_OPTIONS} />
                             </div>
-                            <button
-                                onClick={onClose}
-                                className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-surface hover:bg-surface-hover flex items-center justify-center transition-colors flex-shrink-0"
-                            >
-                                <X className="w-4 h-4 md:w-5 md:h-5" />
-                            </button>
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-6 scrollbar-thin">
-                            {loading ? (
-                                <div className="flex items-center justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-primary-400" />
+                            <div className="rounded-lg border border-white/10 bg-bg-inset/70 p-4">
+                                <div className="mb-2">
+                                    <SettingInfoLabel label="Spam Target Building" className="text-[12px] font-black uppercase tracking-[0.14em] text-text-muted" />
                                 </div>
-                            ) : (
-                                <div className="w-full space-y-6">
-                                    {/* Main Options */}
-                                    <div className="flex flex-wrap gap-3">
-                                        {[
-                                            { label: 'Auto Build', value: autoBuild, setter: setAutoBuild },
-                                            { label: 'Upgrade', value: upgrade, setter: setUpgrade },
-                                            { label: 'Lowest Level First', value: lowestLevelFirst, setter: setLowestLevelFirst },
-                                            { label: 'Ignore Spam Target', value: ignoreSpamTarget, setter: setIgnoreSpamTarget },
-                                            { label: 'Auto-Rent Second Queue', value: autoRentSecondQueue, setter: setAutoRentSecondQueue },
-                                            { label: 'Second Queue (Spam Only)', value: secondQueueSpamOnly, setter: setSecondQueueSpamOnly },
-                                        ].map((option, index) => (
-                                            <label key={index} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={option.value}
-                                                    onChange={(e) => option.setter(e.target.checked)}
-                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                                <span className="text-sm text-white">{option.label}</span>
-                                            </label>
-                                        ))}
-                                    </div>
-
-
-                                    {/* Spam Target Type, Building Priority, and Max Building Level - Grid Row */}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                            <label className="block text-xs sm:text-sm text-gray-300 mb-2">Spam Target Type:</label>
-                                            <select
-                                                value={spamTargetType}
-                                                onChange={(e) => setSpamTargetType(e.target.value)}
-                                                className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                            >
-                                                <option value="0">None</option>
-                                                <option value="1">Farm</option>
-                                                <option value="2">Mine</option>
-                                                <option value="3">Lumber Mill</option>
-                                                <option value="4">Quarry</option>
-                                                <option value="5">Manor</option>
-                                                <option value="6">Barracks</option>
-                                                <option value="7">Infirmary</option>
-                                                <option value="8">Spring</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                            <label className="block text-xs sm:text-sm text-gray-300 mb-2">Building Priority:</label>
-                                            <select
-                                                value={buildingPriority}
-                                                onChange={(e) => setBuildingPriority(e.target.value)}
-                                                className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                            >
-                                                <option value="0">Castle</option>
-                                                <option value="1">Resource</option>
-                                                <option value="2">Academy</option>
-                                                <option value="3">Manor</option>
-                                                <option value="4">Barracks / Infirmary</option>
-                                                <option value="5">Monsterhold</option>
-                                                <option value="6">Familiars</option>
-                                                <option value="7">Trading Post</option>
-                                                <option value="8">Resource (No Manor)</option>
-                                                <option value="9">Treasure Trove</option>
-                                                <option value="10">Workshop</option>
-                                                <option value="11">None</option>
-                                                <option value="12">Lunar Foundry</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                            <label className="block text-xs sm:text-sm text-gray-300 mb-2">Max Building Level:</label>
-                                            <input
-                                                type="number"
-                                                min={0}
-                                                max={50}
-                                                value={maxBuildingLevel}
-                                                onChange={(e) => setMaxBuildingLevel(Math.min(50, Math.max(0, Math.floor(Number(e.target.value)))))}
-                                                className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Building Target Section */}
-                                    <div className="space-y-4 pt-6 border-t border-white/10">
-                                        <h3 className="text-base sm:text-lg font-bold text-white">Building Target</h3>
-
-                                        {/* Resource Buildings */}
-                                        <div>
-                                            <h4 className="text-sm font-medium text-gray-300 mb-3">Resource Buildings (18 Locations)</h4>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                                                {Array.from({ length: 18 }, (_, i) => i + 1).map((num) => {
-                                                    const value = eval(`resource${num}`)
-                                                    const setter = eval(`setResource${num}`)
-                                                    return (
-                                                        <div key={`resource${num}`} className="p-3 rounded-xl bg-surface/50">
-                                                            <label className="block text-xs text-gray-400 mb-2">Location {num}</label>
-                                                            <select
-                                                                value={value}
-                                                                onChange={(e) => {
-                                                                    setter(Number(e.target.value))
-                                                                }}
-                                                                className="w-full px-2 py-1.5 bg-background-tertiary border border-white/10 rounded-lg text-white text-xs focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                            >
-                                                                <option value={4}>Farm</option>
-                                                                <option value={1}>Lumber Mill</option>
-                                                                <option value={2}>Quarry</option>
-                                                                <option value={3}>Mine</option>
-                                                            </select>
-                                                        </div>
-                                                    )
-                                                })}
-                                            </div>
-                                        </div>
-
-                                        {/* Military Buildings */}
-                                        <div>
-                                            <h4 className="text-sm font-medium text-gray-300 mb-3">Military Buildings (17 Locations)</h4>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                                                {Array.from({ length: 17 }, (_, i) => i + 1).map((num) => {
-                                                    const value = eval(`military${num}`)
-                                                    const setter = eval(`setMilitary${num}`)
-                                                    return (
-                                                        <div key={`military${num}`} className="p-3 rounded-xl bg-surface/50">
-                                                            <label className="block text-xs text-gray-400 mb-2">Location {num}</label>
-                                                            <select
-                                                                value={value}
-                                                                onChange={(e) => {
-                                                                    setter(Number(e.target.value))
-                                                                }}
-                                                                className="w-full px-2 py-1.5 bg-background-tertiary border border-white/10 rounded-lg text-white text-xs focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                            >
-                                                                <option value={5}>Manor</option>
-                                                                <option value={7}>Infirmary</option>
-                                                                <option value={6}>Barracks</option>
-                                                            </select>
-                                                        </div>
-                                                    )
-                                                })}
-                                            </div>
-                                        </div>
-
-                                        {/* Familiar Buildings */}
-                                        <div>
-                                            <h4 className="text-sm font-medium text-gray-300 mb-3">Familiar Buildings (8 Locations)</h4>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                                                {Array.from({ length: 8 }, (_, i) => i + 1).map((num) => {
-                                                    const value = eval(`familiar${num}`)
-                                                    const setter = eval(`setFamiliar${num}`)
-                                                    // Assuming `setting`, `isDisabled`, `handleSettingChange` are defined elsewhere in the component scope
-                                                    // For this specific change, we'll adapt to the existing `value` and `setter` pattern.
-                                                    return (
-                                                        <div key={`familiar${num}`} className="p-3 rounded-xl bg-surface/50">
-                                                            <label className="block text-xs text-gray-400 mb-2">Location {num}</label>
-                                                            <select
-                                                                value={value}
-                                                                onChange={(e) => {
-                                                                    setter(Number(e.target.value))
-                                                                }}
-                                                                className="w-full px-2 py-1.5 bg-background-tertiary border border-white/10 rounded-lg text-white text-xs focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                            >
-                                                                <option value={21}>Spring</option>
-                                                                <option value={22}>Mystic Spire</option>
-                                                                <option value={23}>Gym</option>
-                                                            </select>
-                                                        </div>
-                                                    )
-                                                })}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Reset Build Data Button */}
-                                    <div className="flex justify-center pt-4">
-                                        <button
-                                            onClick={handleResetBuildData}
-                                            className="px-6 py-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-300 font-medium transition-colors"
-                                        >
-                                            Reset Build Data
-                                        </button>
-                                    </div>
+                                <TacticalSelect value={spamTargetBuilding} onChange={setSpamTargetBuilding} options={SPAM_BUILDING_OPTIONS} />
+                            </div>
+                            <div className="rounded-lg border border-white/10 bg-bg-inset/70 p-4">
+                                <div className="mb-2">
+                                    <SettingInfoLabel label="Building Priority" className="text-[12px] font-black uppercase tracking-[0.14em] text-text-muted" />
                                 </div>
-                            )}
-                        </div>
-
-                        {/* Footer */}
-                        <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-2 px-3 md:px-6 py-2.5 md:py-4 border-t border-white/10 bg-background-tertiary/50">
-                            <p className="hidden md:block text-sm text-gray-400">Click "Save Changes" to save your settings</p>
-                            <div className="flex gap-2 w-full md:w-auto">
-                                <button
-                                    onClick={onClose}
-                                    className="flex-1 md:flex-none px-4 md:px-6 py-2 md:py-2.5 rounded-lg md:rounded-xl bg-surface hover:bg-surface-hover text-gray-300 text-sm font-medium transition-colors"
-                                >
-                                    Close
-                                </button>
-                                <button
-                                    onClick={saveSettings}
-                                    disabled={saving}
-                                    className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-2 md:py-2.5 rounded-lg md:rounded-xl bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium transition-colors disabled:opacity-50"
-                                >
-                                    {saving ? (
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                    ) : (
-                                        <Save className="w-4 h-4" />
-                                    )}
-                                    <span className="hidden sm:inline">Save Changes</span>
-                                    <span className="sm:hidden">Save</span>
-                                </button>
+                                <TacticalSelect value={buildingPriority} onChange={setBuildingPriority} options={BUILDING_PRIORITY_OPTIONS} />
+                            </div>
+                            <div className="rounded-lg border border-white/10 bg-bg-inset/70 p-4">
+                                <div className="mb-2">
+                                    <SettingInfoLabel label="Max Building Level" className="text-[12px] font-black uppercase tracking-[0.14em] text-text-muted" />
+                                </div>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    max={50}
+                                    value={maxBuildingLevel}
+                                    onChange={(event) => setMaxBuildingLevel(clampWholeNumber(Number(event.target.value), 0, 50))}
+                                    className="input-field w-full font-mono text-[14px] font-black text-accent-cyan"
+                                />
                             </div>
                         </div>
-                    </motion.div>
-                </>
+                    </section>
+
+                    <div className="border-t border-white/10 pt-5">
+                        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h2>
+                                    <SettingInfoLabel label="Building Target" className="text-[17px] font-black text-text-primary" />
+                                </h2>
+                                <p className="mt-1 text-[12px] text-text-muted">Assign each construction slot to the building type the bot should maintain.</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => toast.success('Build data reset queued')}
+                                    className="inline-flex items-center justify-center gap-2 rounded-md border border-accent-3/25 bg-accent-3/10 px-3 py-2 text-[12px] font-bold text-accent-3 transition-colors hover:bg-accent-3/15"
+                                >
+                                    <RotateCcw className="h-4 w-4" />
+                                    Reset Build Data
+                                </button>
+                                <SettingHelpButton label="Reset Build Data" />
+                            </div>
+                        </div>
+
+                        <div className="space-y-6">
+                            <TargetGrid
+                                title="Resource Buildings"
+                                countLabel="18 locations"
+                                targets={resourceTargets}
+                                options={RESOURCE_BUILDING_OPTIONS}
+                                onChange={(index, value) => updateTarget(setResourceTargets, index, value)}
+                            />
+                            <TargetGrid
+                                title="Military Buildings"
+                                countLabel="17 locations"
+                                targets={militaryTargets}
+                                options={MILITARY_BUILDING_OPTIONS}
+                                onChange={(index, value) => updateTarget(setMilitaryTargets, index, value)}
+                            />
+                            <TargetGrid
+                                title="Familiar Buildings"
+                                countLabel="8 locations"
+                                targets={familiarTargets}
+                                options={FAMILIAR_BUILDING_OPTIONS}
+                                onChange={(index, value) => updateTarget(setFamiliarTargets, index, value)}
+                            />
+                        </div>
+                    </div>
+                </div>
             )}
-        </AnimatePresence>
+        </KonohaModal>
     )
 }
-

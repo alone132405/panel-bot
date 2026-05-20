@@ -1,11 +1,14 @@
 'use client'
 
-import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Loader2, Save, ShieldCheck } from 'lucide-react'
+import { Clock, Loader2, RefreshCw, ShieldCheck } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import KonohaModal from './KonohaModal'
+import { ModalSummaryGrid } from '@/components/ui/ModalSummaryGrid'
+import { Checkbox } from '@/components/ui/Checkbox'
+import { TacticalSelect } from '@/components/ui/TacticalSelect'
+import { SettingInfoLabel } from '@/components/ui/SettingInfoLabel'
+import { useAutoSaveSettings } from '@/hooks/useAutoSaveSettings'
 
 interface GearsModalProps {
     isOpen: boolean
@@ -17,8 +20,6 @@ export default function GearsModal({ isOpen, onClose, iggId }: GearsModalProps) 
     const [fullSettings, setFullSettings] = useState<any>(null)
     const [loading, setLoading] = useState(true)
 
-    // Prevent background scroll when modal is open
-    useBodyScrollLock(isOpen)
     const [saving, setSaving] = useState(false)
 
     // Gear settings
@@ -101,8 +102,6 @@ export default function GearsModal({ isOpen, onClose, iggId }: GearsModalProps) 
             })
 
             if (res.ok) {
-                toast.success('Settings saved successfully')
-                onClose()
                 setFullSettings(updatedSettings)
             } else {
                 toast.error('Failed to save settings')
@@ -113,6 +112,14 @@ export default function GearsModal({ isOpen, onClose, iggId }: GearsModalProps) 
             setSaving(false)
         }
     }
+
+    useAutoSaveSettings(
+        isOpen && !loading && Boolean(iggId && fullSettings),
+        saveSettings,
+        [autoSwitchGear, idleGearTime, idleGearSet]
+    )
+
+    const idleGearLabel = idleGearOptions.find((option) => option.value === idleGearSet)?.label || 'None'
 
     if (!iggId) {
         return (
@@ -142,33 +149,36 @@ export default function GearsModal({ isOpen, onClose, iggId }: GearsModalProps) 
             iconBg="rgba(100,116,139,0.15)"
             iconBorder="rgba(100,116,139,0.3)"
             saving={saving}
-            onSave={saveSettings}
+            statusLabel={saving ? 'Syncing...' : 'Auto-sync. Use Protocol Apply Changes to deploy.'}
             maxWidth="860px"
         >
             {loading ? (
                                 <div className="flex items-center justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-primary-400" />
+                                    <Loader2 className="w-8 h-8 animate-spin text-[#00FFB2]" />
                                 </div>
                             ) : (
                                 <div className="w-full space-y-6">
+                                    <ModalSummaryGrid
+                                        items={[
+                                            { label: 'Switch', value: autoSwitchGear ? 'On' : 'Off', icon: RefreshCw, tone: 'cyan' },
+                                            { label: 'Idle Gear', value: idleGearLabel, icon: ShieldCheck, tone: 'mint' },
+                                            { label: 'Idle Time', value: `${idleGearTime}s`, icon: Clock, tone: 'gold' },
+                                        ]}
+                                    />
+
                                     {/* Gear Settings Grid */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-2 gap-3 md:gap-4">
                                         {/* Auto Switch Gears */}
-                                        <div className="flex items-center justify-between p-4 rounded-xl bg-surface/50 hover:bg-surface transition-colors">
-                                            <label className="flex items-center gap-3 cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={autoSwitchGear}
-                                                    onChange={(e) => setAutoSwitchGear(e.target.checked)}
-                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                                <span className="text-sm text-gray-300">Auto Switch Gears</span>
+                                        <div className="flex items-center justify-between p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] hover:bg-[#161626] transition-colors">
+                                            <label className="flex items-center justify-between w-full cursor-pointer">
+                                                <SettingInfoLabel label="Auto Switch Gears" className="text-sm text-gray-300" />
+                                                <Checkbox checked={autoSwitchGear} onChange={setAutoSwitchGear} />
                                             </label>
                                         </div>
 
                                         {/* Idle Gear Time */}
-                                        <div className="flex items-center justify-between p-4 rounded-xl bg-surface/50 hover:bg-surface transition-colors">
-                                            <label className="text-sm text-gray-300">Idle Gear Time:</label>
+                                        <div className="flex min-w-0 flex-col items-start justify-between gap-3 p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] hover:bg-[#161626] transition-colors md:flex-row md:items-center">
+                                            <SettingInfoLabel label="Idle Gear Time" className="text-sm text-gray-300" />
                                             <input
                                                 type="number"
                                                 value={idleGearTime ?? ''}
@@ -183,24 +193,19 @@ export default function GearsModal({ isOpen, onClose, iggId }: GearsModalProps) 
                                                     const val = e.target.value === '' ? 0 : Math.floor(Number(e.target.value))
                                                     setIdleGearTime(Math.min(3600, Math.max(10, val)))
                                                 }}
-                                                className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
+                                                className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-[#07070E]/50 border border-[rgba(123,94,255,0.2)] rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-[#7B5EFF]/50 disabled:opacity-50"
                                             />
                                         </div>
 
                                         {/* Idle Gear Dropdown */}
-                                        <div className="flex items-center justify-between p-4 rounded-xl bg-surface/50 hover:bg-surface transition-colors">
-                                            <label className="text-sm text-gray-300">Idle Gear:</label>
-                                            <select
-                                                value={idleGearSet}
-                                                onChange={(e) => setIdleGearSet(Number(e.target.value))}
-                                                className="w-40 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                            >
-                                                {idleGearOptions.map((option) => (
-                                                    <option key={option.value} value={option.value}>
-                                                        {option.label}
-                                                    </option>
-                                                ))}
-                                            </select>
+                                        <div className="flex min-w-0 flex-col items-start justify-between gap-3 p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] hover:bg-[#161626] transition-colors md:flex-row md:items-center">
+                                            <SettingInfoLabel label="Idle Gear" className="text-sm text-gray-300" />
+                                            <TacticalSelect
+                                                value={String(idleGearSet)}
+                                                onChange={(v) => setIdleGearSet(Number(v))}
+                                                options={idleGearOptions.map(o => ({ value: String(o.value), label: o.label }))}
+                                                className="w-full md:w-44"
+                                            />
                                         </div>
                                     </div>
                                 </div>

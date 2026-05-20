@@ -1,9 +1,16 @@
 const { createServer } = require('http')
 const { parse } = require('url')
-const next = require('next')
 const { Server } = require('socket.io')
+const { loadEnvConfig } = require('@next/env')
 
 const dev = process.env.NODE_ENV !== 'production'
+loadEnvConfig(process.cwd(), dev)
+
+if (dev && !process.env.NEXT_DIST_DIR) {
+    process.env.NEXT_DIST_DIR = '.next-dev'
+}
+
+const next = require('next')
 const hostname = 'localhost'
 const port = process.env.PORT || 3000
 
@@ -13,6 +20,7 @@ const handle = app.getRequestHandler()
 console.log('--- SERVER STARTING ---')
 console.log('NODE_ENV:', process.env.NODE_ENV)
 console.log('Dev Mode:', dev)
+console.log('CONFIG_DIR:', process.env.CONFIG_DIR || process.env.CONFIG_PATH || process.env.EXTERNAL_CONFIG_ROOT || 'not set')
 console.log('-----------------------')
 
 app.prepare().then(() => {
@@ -45,20 +53,20 @@ app.prepare().then(() => {
     global.io = io
 
     io.on('connection', (socket) => {
-        console.log('Client connected:', socket.id)
+        // console.log('Client connected:', socket.id)
 
         socket.on('subscribe', (iggId) => {
             socket.join(`igg-${iggId}`)
-            console.log(`Client ${socket.id} subscribed to IGG ID: ${iggId}`)
+            // console.log(`Client ${socket.id} subscribed to IGG ID: ${iggId}`)
         })
 
         socket.on('unsubscribe', (iggId) => {
             socket.leave(`igg-${iggId}`)
-            console.log(`Client ${socket.id} unsubscribed from IGG ID: ${iggId}`)
+            // console.log(`Client ${socket.id} unsubscribed from IGG ID: ${iggId}`)
         })
 
         socket.on('disconnect', () => {
-            console.log('Client disconnected:', socket.id)
+            // console.log('Client disconnected:', socket.id)
         })
     })
 

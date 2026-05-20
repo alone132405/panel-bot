@@ -1,11 +1,12 @@
 'use client'
 
-import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Loader2, Calendar, Clock, Shield, Eye, Home, Shuffle } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import KonohaModal from './KonohaModal'
+import { Calendar, Clock, ShieldCheck, Timer, Settings2 } from 'lucide-react'
+import { useDebounce } from '@/hooks/useDebounce'
+import { setNestedValue } from '@/lib/settingsMapper'
+import { ModalSummaryGrid } from '@/components/ui/ModalSummaryGrid'
+import { ResponsiveModalShell, ToggleControl, StepperControl, InputControl, TabDef } from '@/components/ui/ResponsiveModalShell'
 
 interface ScheduleModalProps {
     isOpen: boolean
@@ -13,69 +14,29 @@ interface ScheduleModalProps {
     iggId: string | null
 }
 
+const TABS: TabDef[] = [
+    { id: 'general', label: 'General', icon: Settings2 },
+    { id: 'time', label: 'Fixed Time', icon: Calendar },
+    { id: 'interval', label: 'Interval', icon: Timer },
+]
+
 export default function ScheduleModal({ isOpen, onClose, iggId }: ScheduleModalProps) {
     const [settings, setSettings] = useState<any>(null)
     const [loading, setLoading] = useState(true)
-    useBodyScrollLock(isOpen)
     const [saving, setSaving] = useState(false)
 
-    // Schedule settings
-    const [enableSchedule, setEnableSchedule] = useState(false)
-    const [recallArmies, setRecallArmies] = useState(false)
-    const [monitorShield, setMonitorShield] = useState(false)
-    const [monitorAntiScout, setMonitorAntiScout] = useState(false)
-    const [monitorShelter, setMonitorShelter] = useState(false)
-    const [randomizeSchedule, setRandomizeSchedule] = useState(false)
-    const [randomMaxMinutes, setRandomMaxMinutes] = useState(10)
-
-    // Schedule 1
-    const [schedule1Enabled, setSchedule1Enabled] = useState(true)
-    const [schedule1StartTime, setSchedule1StartTime] = useState('02:00')
-    const [schedule1EndTime, setSchedule1EndTime] = useState('04:30')
-
-    // Schedule 2
-    const [schedule2Enabled, setSchedule2Enabled] = useState(false)
-    const [schedule2OfflineAfter, setSchedule2OfflineAfter] = useState('01:00')
-    const [schedule2OnlineIn, setSchedule2OnlineIn] = useState('00:05')
-
     useEffect(() => {
-        if (isOpen && iggId) {
-            loadSettings()
-        }
+        if (isOpen && iggId) loadSettings()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, iggId])
 
     const loadSettings = async () => {
-        if (!iggId) {
-            toast.error('Please select an IGG ID first')
-            return
-        }
-
         setLoading(true)
         try {
             const res = await fetch(`/api/settings/${iggId}`)
             if (res.ok) {
                 const data = await res.json()
                 setSettings(data)
-
-                if (data.scheduleSettings) {
-                    setEnableSchedule(data.scheduleSettings.enableSchedule ?? false)
-                    setRecallArmies(data.scheduleSettings.recallTroops ?? false)
-                    setMonitorShield(data.scheduleSettings.checkShield ?? false)
-                    setMonitorAntiScout(data.scheduleSettings.checkAnti ?? false)
-                    setMonitorShelter(data.scheduleSettings.checkShelter ?? false)
-                    setRandomizeSchedule(data.scheduleSettings.randomizeSchedule ?? false)
-                    setRandomMaxMinutes(data.scheduleSettings.randMax ?? 10)
-
-                    const schedType = data.scheduleSettings.scheduleType ?? 0
-                    setSchedule1Enabled(schedType === 0)
-                    setSchedule2Enabled(schedType === 1)
-
-                    setSchedule1StartTime(data.scheduleSettings.schedule1StartTime ?? data.scheduleSettings.offlineTime ?? '02:00')
-                    setSchedule1EndTime(data.scheduleSettings.onlineTime ?? '04:30')
-                    setSchedule2OfflineAfter(data.scheduleSettings.offlineTime1 ?? '01:00')
-                    setSchedule2OnlineIn(data.scheduleSettings.onlineTime1 ?? '00:05')
-                }
             } else {
                 toast.error('Failed to load settings')
             }
@@ -86,269 +47,247 @@ export default function ScheduleModal({ isOpen, onClose, iggId }: ScheduleModalP
         }
     }
 
-    const updateSettingsObject = (path: string, value: any) => {
-        const keys = path.split('.')
-        // Deep clone to avoid mutation issues
-        const newSettings = JSON.parse(JSON.stringify(settings || {}))
-
-        // Ensure scheduleSettings exists if that's what we're updating
-        if (keys[0] === 'scheduleSettings' && !newSettings.scheduleSettings) {
-            newSettings.scheduleSettings = {}
-        }
-
-        let current: any = newSettings
-        for (let i = 0; i < keys.length - 1; i++) {
-            if (!current[keys[i]]) {
-                current[keys[i]] = {}
-            }
-            current = current[keys[i]]
-        }
-        current[keys[keys.length - 1]] = value
-        setSettings(newSettings)
-    }
-
-    const handleSave = async () => {
-        if (!iggId || !settings) return
+    const saveSetting = async (path: string, value: any) => {
+        if (!iggId) return
         setSaving(true)
         try {
             const res = await fetch(`/api/settings/${iggId}`, {
-                method: 'PUT',
+                method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(settings),
+                body: JSON.stringify({ path, value }),
             })
-
-            const data = await res.json().catch(() => ({}))
-
             if (res.ok) {
-                toast.success('Schedule settings saved!')
-                onClose()
+                const updatedSettings = { ...settings }
+                setNestedValue(updatedSettings, path, value)
+                setSettings(updatedSettings)
             } else {
-                if (res.status === 403) {
-                    toast.error(data.error || 'Subscription expired')
-                } else {
-                    toast.error(data.error || 'Failed to save settings')
-                }
+                toast.error('Failed to save setting')
             }
         } catch (error) {
-            toast.error('Error saving settings')
+            toast.error('Error saving setting')
         } finally {
             setSaving(false)
         }
     }
 
-    if (!iggId) {
-        return (
-            <KonohaModal
-                isOpen={isOpen}
-                onClose={onClose}
-                title="Schedule Settings"
-                iggId={iggId}
-                icon={Calendar}
-                iconColor="#64748b"
-                iconBg="rgba(100,116,139,0.15)"
-                iconBorder="rgba(100,116,139,0.3)"
-            >
-                <div />
-            </KonohaModal>
-        )
+    const debouncedSave = useDebounce(saveSetting, 500)
+
+    const handleSettingChange = (path: string, value: any) => {
+        const updatedSettings = { ...settings }
+        setNestedValue(updatedSettings, path, value)
+        setSettings(updatedSettings)
+        debouncedSave(path, value)
+    }
+
+    const renderSectionContent = (tabId: string, isMobile: boolean, isTablet: boolean) => {
+        if (!settings) return null
+        
+        const gridClass = isMobile
+            ? 'grid grid-cols-1 gap-1.5'
+            : isTablet
+                ? 'grid grid-cols-2 gap-2'
+                : 'grid grid-cols-2 gap-3'
+        const scheduleSettings = settings.scheduleSettings || {}
+
+        if (tabId === 'general') {
+            const checksEnabled = [scheduleSettings.checkShield, scheduleSettings.checkAnti, scheduleSettings.checkShelter].filter(Boolean).length
+
+            return (
+                <div className="flex flex-col gap-8">
+                    <ModalSummaryGrid
+                        items={[
+                            { label: 'Schedule', value: scheduleSettings.enableSchedule ? 'On' : 'Off', icon: Calendar, tone: 'mint' },
+                            { label: 'Checks', value: `${checksEnabled}/3`, icon: ShieldCheck, tone: 'cyan' },
+                            { label: 'Random', value: scheduleSettings.randomizeSchedule ? `${Number(scheduleSettings.randMax || 10)}m` : 'Off', icon: Timer, tone: 'gold' },
+                        ]}
+                    />
+
+                    <div className="space-y-4">
+                        <h3 className="text-[13px] font-semibold text-[#6B7A99] tracking-widest uppercase mb-4">Core Control</h3>
+                        <div className={gridClass}>
+                            <ToggleControl 
+                                label="Enable Schedule System" 
+                                checked={!!settings.scheduleSettings?.enableSchedule} 
+                                onChange={(v) => handleSettingChange('scheduleSettings.enableSchedule', v)} 
+                                isMobile={isMobile} 
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-4 border-t border-[rgba(255,255,255,0.04)] pt-6">
+                        <h3 className="text-[13px] font-semibold text-[#6B7A99] tracking-widest uppercase mb-4">Actions Before Offline</h3>
+                        <div className={gridClass}>
+                            <ToggleControl 
+                                label="Recall Armies" 
+                                checked={!!settings.scheduleSettings?.recallTroops} 
+                                onChange={(v) => handleSettingChange('scheduleSettings.recallTroops', v)} 
+                                isMobile={isMobile} 
+                            />
+                            <ToggleControl 
+                                label="Monitor Shield" 
+                                checked={!!settings.scheduleSettings?.checkShield} 
+                                onChange={(v) => handleSettingChange('scheduleSettings.checkShield', v)} 
+                                isMobile={isMobile} 
+                            />
+                            <ToggleControl 
+                                label="Monitor Anti-Scout" 
+                                checked={!!settings.scheduleSettings?.checkAnti} 
+                                onChange={(v) => handleSettingChange('scheduleSettings.checkAnti', v)} 
+                                isMobile={isMobile} 
+                            />
+                            <ToggleControl 
+                                label="Monitor Shelter" 
+                                checked={!!settings.scheduleSettings?.checkShelter} 
+                                onChange={(v) => handleSettingChange('scheduleSettings.checkShelter', v)} 
+                                isMobile={isMobile} 
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-4 border-t border-[rgba(255,255,255,0.04)] pt-6">
+                        <h3 className="text-[13px] font-semibold text-[#6B7A99] tracking-widest uppercase mb-4">Randomization</h3>
+                        <div className={gridClass}>
+                            <ToggleControl 
+                                label="Randomize Schedule" 
+                                checked={!!settings.scheduleSettings?.randomizeSchedule} 
+                                onChange={(v) => handleSettingChange('scheduleSettings.randomizeSchedule', v)} 
+                                isMobile={isMobile} 
+                            />
+                            <StepperControl 
+                                label="Random Max (Minutes)" 
+                                val={Number(settings.scheduleSettings?.randMax || 10)} 
+                                min={0} 
+                                max={9999} 
+                                onChange={(v) => handleSettingChange('scheduleSettings.randMax', v)} 
+                                isMobile={isMobile} 
+                                disabled={!settings.scheduleSettings?.randomizeSchedule}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+
+        const isTimeBased = settings.scheduleSettings?.scheduleType === 0
+        const isIntervalBased = settings.scheduleSettings?.scheduleType === 1
+
+        if (tabId === 'time') {
+            return (
+                <div className="flex flex-col gap-8">
+                    <ModalSummaryGrid
+                        items={[
+                            { label: 'Mode', value: isTimeBased ? 'Active' : 'Inactive', icon: Calendar, tone: isTimeBased ? 'mint' : 'rose' },
+                            { label: 'Offline', value: scheduleSettings.offlineTime || '02:00', icon: Clock, tone: 'cyan' },
+                            { label: 'Online', value: scheduleSettings.onlineTime || '04:30', icon: Timer, tone: 'gold' },
+                        ]}
+                    />
+
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-[13px] font-semibold text-[#6B7A99] tracking-widest uppercase">Fixed Time Schedule</h3>
+                            <button 
+                                onClick={() => handleSettingChange('scheduleSettings.scheduleType', 0)}
+                                className={`px-4 py-1.5 rounded-full text-[12px] font-semibold transition-colors ${isTimeBased ? 'bg-[#00C8FF]/10 text-[#00C8FF]' : 'bg-[#1A1E2A] text-[#6B7A99]'}`}
+                            >
+                                {isTimeBased ? 'Active Mode' : 'Set as Active'}
+                            </button>
+                        </div>
+                        
+                        <div className={gridClass}>
+                            <InputControl 
+                                label="Offline Time (Go Offline At)" 
+                                type="time"
+                                val={settings.scheduleSettings?.offlineTime || '02:00'} 
+                                onChange={(v) => {
+                                    const formattedTime = v.length === 5 ? `${v}:00` : v
+                                    handleSettingChange('scheduleSettings.offlineTime', formattedTime)
+                                }} 
+                                isMobile={isMobile} 
+                                disabled={!isTimeBased}
+                            />
+                            <InputControl 
+                                label="Online Time (Come Back At)" 
+                                type="time"
+                                val={settings.scheduleSettings?.onlineTime || '04:30'} 
+                                onChange={(v) => {
+                                    const formattedTime = v.length === 5 ? `${v}:00` : v
+                                    handleSettingChange('scheduleSettings.onlineTime', formattedTime)
+                                }} 
+                                isMobile={isMobile} 
+                                disabled={!isTimeBased}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+
+        if (tabId === 'interval') {
+            return (
+                <div className="flex flex-col gap-8">
+                    <ModalSummaryGrid
+                        items={[
+                            { label: 'Mode', value: isIntervalBased ? 'Active' : 'Inactive', icon: Timer, tone: isIntervalBased ? 'mint' : 'rose' },
+                            { label: 'Online', value: scheduleSettings.offlineTime1 || '01:00', icon: Clock, tone: 'cyan' },
+                            { label: 'Offline', value: scheduleSettings.onlineTime1 || '00:05', icon: Calendar, tone: 'gold' },
+                        ]}
+                    />
+
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-[13px] font-semibold text-[#6B7A99] tracking-widest uppercase">Interval Schedule</h3>
+                            <button 
+                                onClick={() => handleSettingChange('scheduleSettings.scheduleType', 1)}
+                                className={`px-4 py-1.5 rounded-full text-[12px] font-semibold transition-colors ${isIntervalBased ? 'bg-[#00C8FF]/10 text-[#00C8FF]' : 'bg-[#1A1E2A] text-[#6B7A99]'}`}
+                            >
+                                {isIntervalBased ? 'Active Mode' : 'Set as Active'}
+                            </button>
+                        </div>
+                        
+                        <div className={gridClass}>
+                            <InputControl 
+                                label="Stay Online For (HH:mm)" 
+                                type="time"
+                                val={settings.scheduleSettings?.offlineTime1 || '01:00'} 
+                                onChange={(v) => {
+                                    const formattedTime = v.length === 5 ? `${v}:00` : v
+                                    handleSettingChange('scheduleSettings.offlineTime1', formattedTime)
+                                }} 
+                                isMobile={isMobile} 
+                                disabled={!isIntervalBased}
+                            />
+                            <InputControl 
+                                label="Then Offline For (HH:mm)" 
+                                type="time"
+                                val={settings.scheduleSettings?.onlineTime1 || '00:05'} 
+                                onChange={(v) => {
+                                    const formattedTime = v.length === 5 ? `${v}:00` : v
+                                    handleSettingChange('scheduleSettings.onlineTime1', formattedTime)
+                                }} 
+                                isMobile={isMobile} 
+                                disabled={!isIntervalBased}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+
+        return null
     }
 
     return (
-        <KonohaModal
+        <ResponsiveModalShell
             isOpen={isOpen}
             onClose={onClose}
             title="Schedule Settings"
             iggId={iggId}
-            icon={Calendar}
-            iconColor="#64748b"
-            iconBg="rgba(100,116,139,0.15)"
-            iconBorder="rgba(100,116,139,0.3)"
+            headerIcon={Calendar}
+            tabs={TABS}
+            loading={loading}
             saving={saving}
-            onSave={handleSave}
-            maxWidth="860px"
-        >
-            {loading ? (
-                                <div className="flex items-center justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-primary-400" />
-                                </div>
-                            ) : (
-                                <div className="space-y-4 md:space-y-6 max-w-full">
-                                    {/* Enable Schedule Toggle */}
-                                    <div className="p-3 md:p-4 rounded-xl bg-primary-500/10 border border-primary-500/20">
-                                        <label className="flex items-center gap-3 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={enableSchedule}
-                                                onChange={(e) => {
-                                                    setEnableSchedule(e.target.checked)
-                                                    updateSettingsObject('scheduleSettings.enableSchedule', e.target.checked)
-                                                }}
-                                                className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50 flex-shrink-0"
-                                            />
-                                            <span className="text-sm md:text-base font-medium text-primary-300">Enable Schedule</span>
-                                        </label>
-                                    </div>
-
-                                    {/* Schedule Options */}
-                                    <div className="space-y-3 md:space-y-4">
-                                        <h3 className="text-sm md:text-lg font-bold text-white">Schedule Options</h3>
-
-                                        {/* Mobile: 2x2 Grid, Desktop: Flex wrap */}
-                                        <div className="grid grid-cols-2 md:flex md:flex-wrap gap-2 md:gap-3">
-                                            {[
-                                                { label: 'Recall Armies', mobileLabel: 'Recall Armies', value: recallArmies, setter: setRecallArmies, key: 'recallTroops' },
-                                                { label: 'Monitor Shield', mobileLabel: 'Monitor Shield', value: monitorShield, setter: setMonitorShield, key: 'checkShield' },
-                                                { label: 'Monitor Anti-Scout', mobileLabel: 'Anti-Scout', value: monitorAntiScout, setter: setMonitorAntiScout, key: 'checkAnti' },
-                                                { label: 'Monitor Shelter', mobileLabel: 'Shelter', value: monitorShelter, setter: setMonitorShelter, key: 'checkShelter' },
-                                            ].map((opt) => (
-                                                <label key={opt.key} className="flex items-center gap-2 p-2.5 md:px-4 md:py-2 rounded-lg md:rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={opt.value}
-                                                        onChange={(e) => {
-                                                            opt.setter(e.target.checked)
-                                                            updateSettingsObject(`scheduleSettings.${opt.key}`, e.target.checked)
-                                                        }}
-                                                        className="w-4 h-4 md:w-5 md:h-5 rounded bg-background-tertiary border-white/10 text-primary-500 flex-shrink-0"
-                                                    />
-                                                    <span className="text-xs md:text-sm text-white truncate">
-                                                        <span className="md:hidden">{opt.mobileLabel}</span>
-                                                        <span className="hidden md:inline">{opt.label}</span>
-                                                    </span>
-                                                </label>
-                                            ))}
-                                        </div>
-
-                                        {/* Randomize - Compact on mobile, inline on desktop */}
-                                        <div className="p-3 md:p-4 rounded-xl bg-surface/50 space-y-2 md:space-y-0 md:flex md:items-center md:gap-4">
-                                            <label className="flex items-center gap-2 cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={randomizeSchedule}
-                                                    onChange={(e) => {
-                                                        setRandomizeSchedule(e.target.checked)
-                                                        updateSettingsObject('scheduleSettings.randomizeSchedule', e.target.checked)
-                                                    }}
-                                                    className="w-4 h-4 md:w-5 md:h-5 rounded bg-background-tertiary border-white/10 text-primary-500 flex-shrink-0"
-                                                />
-                                                <span className="text-xs md:text-sm text-white">Randomize Schedule</span>
-                                            </label>
-                                            <div className="flex items-center gap-2 pl-6 md:pl-0">
-                                                <span className="text-xs md:text-sm text-gray-300">Random Max (Minutes):</span>
-                                                <input
-                                                    type="number"
-                                                    value={randomMaxMinutes ?? ''}
-                                                    min={0}
-                                                    max={9999}
-                                                    step="1"
-                                                    onChange={(e) => {
-                                                        const val = e.target.value === '' ? 0 : Math.floor(Number(e.target.value))
-                                                        setRandomMaxMinutes(Math.max(0, Math.min(9999, val)))
-                                                        updateSettingsObject('scheduleSettings.randMax', Math.max(0, Math.min(9999, val)))
-                                                    }}
-                                                    onKeyDown={(e) => {
-                                                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
-                                                            e.preventDefault();
-                                                        }
-                                                    }}
-                                                    onBlur={(e) => {
-                                                        const val = e.target.value === '' ? 0 : Math.floor(Number(e.target.value))
-                                                        setRandomMaxMinutes(Math.max(0, Math.min(9999, val)))
-                                                        updateSettingsObject('scheduleSettings.randMax', Math.max(0, Math.min(9999, val)))
-                                                    }}
-                                                    className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Schedule 1 */}
-                                    <div className={`p-3 md:p-4 rounded-xl border transition-colors space-y-3 ${schedule1Enabled ? 'bg-blue-500/10 border-blue-500/30' : 'bg-surface/30 border-white/5'}`}>
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <input
-                                                type="radio"
-                                                checked={schedule1Enabled}
-                                                onChange={() => {
-                                                    setSchedule1Enabled(true)
-                                                    setSchedule2Enabled(false)
-                                                    updateSettingsObject('scheduleSettings.scheduleType', 0)
-                                                }}
-                                                className="w-4 h-4 md:w-5 md:h-5 text-primary-500 flex-shrink-0"
-                                            />
-                                            <span className="text-sm md:text-lg font-bold text-white">Schedule 1</span>
-                                        </label>
-                                        {/* Mobile: Stacked, Desktop: Inline */}
-                                        <div className="pl-6 md:pl-7 space-y-2 md:space-y-0 md:flex md:items-center md:gap-3">
-                                            <span className="text-xs md:text-sm text-gray-300">Go offline between</span>
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <input
-                                                    type="time"
-                                                    value={schedule1StartTime}
-                                                    onChange={(e) => {
-                                                        setSchedule1StartTime(e.target.value)
-                                                        updateSettingsObject('scheduleSettings.schedule1StartTime', e.target.value)
-                                                        updateSettingsObject('scheduleSettings.offlineTime', e.target.value)
-                                                    }}
-                                                    className="w-24 md:w-28 px-2 md:px-3 py-1.5 md:py-2 bg-background-tertiary border border-white/10 rounded-lg text-white text-xs md:text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                                <span className="text-xs md:text-sm text-gray-300">and</span>
-                                                <input
-                                                    type="time"
-                                                    value={schedule1EndTime}
-                                                    onChange={(e) => {
-                                                        setSchedule1EndTime(e.target.value)
-                                                        updateSettingsObject('scheduleSettings.onlineTime', e.target.value)
-                                                    }}
-                                                    className="w-24 md:w-28 px-2 md:px-3 py-1.5 md:py-2 bg-background-tertiary border border-white/10 rounded-lg text-white text-xs md:text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Schedule 2 */}
-                                    <div className={`p-3 md:p-4 rounded-xl border transition-colors space-y-3 ${schedule2Enabled ? 'bg-purple-500/10 border-purple-500/30' : 'bg-surface/30 border-white/5'}`}>
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <input
-                                                type="radio"
-                                                checked={schedule2Enabled}
-                                                onChange={() => {
-                                                    setSchedule1Enabled(false)
-                                                    setSchedule2Enabled(true)
-                                                    updateSettingsObject('scheduleSettings.scheduleType', 1)
-                                                }}
-                                                className="w-4 h-4 md:w-5 md:h-5 text-primary-500 flex-shrink-0"
-                                            />
-                                            <span className="text-sm md:text-lg font-bold text-white">Schedule 2</span>
-                                        </label>
-                                        {/* Mobile: Stacked, Desktop: Inline */}
-                                        <div className="pl-6 md:pl-7 space-y-2 md:space-y-0 md:flex md:items-center md:gap-3">
-                                            <span className="text-xs md:text-sm text-gray-300">Go offline after</span>
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <input
-                                                    type="time"
-                                                    value={schedule2OfflineAfter}
-                                                    onChange={(e) => {
-                                                        setSchedule2OfflineAfter(e.target.value)
-                                                        updateSettingsObject('scheduleSettings.offlineTime1', e.target.value)
-                                                    }}
-                                                    className="w-24 md:w-28 px-2 md:px-3 py-1.5 md:py-2 bg-background-tertiary border border-white/10 rounded-lg text-white text-xs md:text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                                <span className="text-xs md:text-sm text-gray-300">hours, come back online in</span>
-                                                <input
-                                                    type="time"
-                                                    value={schedule2OnlineIn}
-                                                    onChange={(e) => {
-                                                        setSchedule2OnlineIn(e.target.value)
-                                                        updateSettingsObject('scheduleSettings.onlineTime1', e.target.value)
-                                                    }}
-                                                    className="w-24 md:w-28 px-2 md:px-3 py-1.5 md:py-2 bg-background-tertiary border border-white/10 rounded-lg text-white text-xs md:text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                                <span className="text-hidden md:inline text-xs md:text-sm text-gray-300">hours</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-        </KonohaModal>
+            statusLabel={saving ? 'Syncing...' : 'Auto-sync'}
+            renderSectionContent={renderSectionContent}
+        />
     )
 }

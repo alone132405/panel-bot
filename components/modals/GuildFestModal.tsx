@@ -1,11 +1,14 @@
 'use client'
 
-import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Loader2, Trophy, Save } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { Check, Gift, ListChecks, Loader2, Send, Trophy, X } from 'lucide-react'
 import { toast } from 'sonner'
 import KonohaModal from './KonohaModal'
+import { ModalSummaryGrid } from '@/components/ui/ModalSummaryGrid'
+import { Checkbox } from '@/components/ui/Checkbox'
+import { TacticalSelect } from '@/components/ui/TacticalSelect'
+import { SettingInfoLabel } from '@/components/ui/SettingInfoLabel'
+import { useAutoSaveSettings } from '@/hooks/useAutoSaveSettings'
 
 interface GuildFestModalProps {
     isOpen: boolean
@@ -13,25 +16,25 @@ interface GuildFestModalProps {
     iggId: string | null
 }
 
-interface Mission {
+type GuildFestMode = 'complete' | 'delete'
+type GuildFestSubTab = 'default' | '120' | '200'
+
+interface MissionData {
     id: number
     name: string
-    // Guild tab fields
-    enabled: boolean
-    minPoints: number
-    maxPoints: number
-    // Personal tab fields
-    automated: 'Yes' | 'No' | 'Partially'
-    solo120Enabled: boolean
-    solo120MinPoints: number
-    solo120MaxPoints: number
-    solo200Enabled: boolean
-    solo200MinPoints: number
-    solo200MaxPoints: number
+    c_enabled: boolean
+    c_min: number
+    c_max: number
+    c_auto: number
+    c_solo: any
+    d_enabled: boolean
+    d_min: number
+    d_max: number
+    d_solo: any
 }
 
-// Mission ID to name mapping
-const MISSION_MAP: { [key: number]: string } = {
+const MISSION_MAP: Record<number, string> = {
+    0: 'Get a random quest!',
     1: 'Complete Admin Quests',
     2: 'Complete Guild Quests',
     4: 'Send help to your guildmates',
@@ -41,91 +44,80 @@ const MISSION_MAP: { [key: number]: string } = {
     9: 'Complete Hero Stages',
     10: 'Cargo Ship Trades',
     11: 'Open Mystery Boxes',
-    19: 'Increase total Might',
     12: 'Increase Might (Troops)',
     13: 'Increase Might (Buildings)',
-    15: 'Increase Might (Quests)',
     14: 'Increase Might (Research)',
+    15: 'Increase Might (Quests)',
     18: 'Increase Might (Hero Armies)',
+    19: 'Increase total Might',
     21: 'Research Tech',
     22: 'Train Soldiers',
     29: 'Gather Resources',
     30: 'Supply Resources',
     37: 'Hero Colosseum Battles',
     41: 'Time reduced using Speed Ups',
-    98: 'Spend Gems',
-    99: 'Spend Guild Coins',
-    100: 'Purchase Special Bundles',
     60: 'Get Dark Essences',
     61: 'Win Darknest Coalition battles (Rally Captain only)',
     62: 'Use Holy Stars',
-    68: 'Encounter Labyrinth Guardians',
     64: 'Get Lv 19+ Dark Essences',
-    0: 'Get a random quest!',
-    71: 'Time reduced using Speed Up Merging',
+    68: 'Encounter Labyrinth Guardians',
     69: 'Merge Pacts',
     70: 'Use Fragments',
+    71: 'Time reduced using Speed Up Merging',
     72: 'Use Familiar Attack skills',
     74: 'Obtain [Legendary] Loot',
     78: 'Unlock Castle Stars',
     79: 'Encounter Elite/10x-Labyrinth Guardians',
-    80: 'Gain Familiar EXP with EXP items (Not inclusive of Fragments)',
+    80: 'Gain Familiar EXP with EXP items',
     81: 'Spend Luck Tokens',
     82: 'Meet a Gemming Gremlin in Kingdom Tycoon',
     83: 'Craft Gear',
     84: 'Upgrade Artifacts',
     85: 'Enhance Artifacts (includes Blessings)',
     86: 'Spend Artifact Coins',
+    98: 'Spend Gems',
+    99: 'Spend Guild Coins',
+    100: 'Purchase Special Bundles',
 }
 
-// Map IsAutomated value to display string
-const automatedValueToString = (val: number): 'Yes' | 'No' | 'Partially' => {
-    if (val === 2) return 'Yes'
-    if (val === 1) return 'Partially'
-    return 'No'
-}
-
-// Map display string to IsAutomated value
-const automatedStringToValue = (str: 'Yes' | 'No' | 'Partially'): number => {
-    if (str === 'Yes') return 2
-    if (str === 'Partially') return 1
-    return 0
-}
-
-// Default missions with their IDs
-const DEFAULT_MISSIONS: Mission[] = Object.entries(MISSION_MAP).map(([id, name]) => ({
-    id: parseInt(id),
+const DEFAULT_MISSIONS: MissionData[] = Object.entries(MISSION_MAP).map(([id, name]) => ({
+    id: parseInt(id, 10),
     name,
-    enabled: false,
-    minPoints: 175,
-    maxPoints: 355,
-    automated: 'No' as const,
-    solo120Enabled: false,
-    solo120MinPoints: 0,
-    solo120MaxPoints: 356,
-    solo200Enabled: false,
-    solo200MinPoints: 0,
-    solo200MaxPoints: 356,
+    c_enabled: false,
+    c_min: 175,
+    c_max: 355,
+    c_auto: 0,
+    c_solo: {},
+    d_enabled: false,
+    d_min: 100,
+    d_max: 355,
+    d_solo: {},
 }))
+
+const SUB_TAB_OPTIONS = [
+    { value: 'default', label: 'Guild Task' },
+    { value: '120', label: '120% Missions' },
+    { value: '200', label: '200% Missions' },
+]
+
+function clampWholeNumber(value: number, min: number, max: number) {
+    if (Number.isNaN(value)) return min
+    return Math.max(min, Math.min(max, Math.floor(value)))
+}
 
 export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModalProps) {
     const [settings, setSettings] = useState<any>(null)
     const [loading, setLoading] = useState(true)
-    const [activeTab, setActiveTab] = useState<'guild' | 'personal'>('guild')
-
-    // Prevent background scroll when modal is open
-    useBodyScrollLock(isOpen)
     const [saving, setSaving] = useState(false)
+    const [mode, setMode] = useState<GuildFestMode>('complete')
+    const [subTab, setSubTab] = useState<GuildFestSubTab>('default')
 
-    // Guild Fest settings
     const [collectRewards, setCollectRewards] = useState(false)
     const [completeMissions, setCompleteMissions] = useState(false)
-    const [sendMailToPlayer, setSendMailToPlayer] = useState('')
     const [buyExtraMission, setBuyExtraMission] = useState(false)
-    const [itemToBuy, setItemToBuy] = useState('[1051] Shield (8 h) - 150K')
-
-    // Missions list with IDs
-    const [missions, setMissions] = useState<Mission[]>(DEFAULT_MISSIONS)
+    const [mailPlayer, setMailPlayer] = useState('')
+    const [itemToBuyNum, setItemToBuyNum] = useState(1051)
+    const [missions, setMissions] = useState<MissionData[]>(DEFAULT_MISSIONS)
 
     useEffect(() => {
         if (isOpen && iggId) {
@@ -135,112 +127,107 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
     }, [isOpen, iggId])
 
     const loadSettings = async () => {
-        if (!iggId) {
-            toast.error('Please select an IGG ID first')
-            return
-        }
-
         setLoading(true)
         try {
             const res = await fetch(`/api/settings/${iggId}`)
             if (res.ok) {
                 const data = await res.json()
+                const guildFest = data.eventSettings?.guildFest
+                const completeSettings = guildFest?.gfMissionComplete
+                const removeSettings = guildFest?.gfMissionRemove
+
                 setSettings(data)
+                setCollectRewards(guildFest?.collectRewards ?? false)
+                setCompleteMissions(completeSettings?.completeMissions ?? false)
+                setBuyExtraMission(completeSettings?.buyExtraMission ?? false)
+                setMailPlayer(completeSettings?.mMailPlayerName ?? '')
+                setItemToBuyNum(completeSettings?.itemToBuy ?? 1051)
 
-                if (data.eventSettings?.guildFest) {
-                    const gf = data.eventSettings.guildFest
-                    setCollectRewards(gf.collectRewards ?? false)
+                setMissions(DEFAULT_MISSIONS.map((mission) => {
+                    const completeMission = completeSettings?.missionsToComplete_?.[mission.id]
+                    const removeMission = removeSettings?.missionsToRemove_?.[mission.id]
 
-                    // Load gfMissionComplete settings
-                    if (gf.gfMissionComplete) {
-                        const gfmc = gf.gfMissionComplete
-                        setCompleteMissions(gfmc.completeMissions ?? false)
-                        setBuyExtraMission(gfmc.buyExtraMission ?? false)
-                        setSendMailToPlayer(gfmc.mMailPlayerName ?? '')
-
-                        // Map itemToBuy number to display string
-                        if (gfmc.itemToBuy) {
-                            setItemToBuy(`[${gfmc.itemToBuy}]`)
-                        }
-
-                        // Map missions from missionsToComplete_
-                        if (gfmc.missionsToComplete_) {
-                            const missionData = gfmc.missionsToComplete_
-                            const updatedMissions = DEFAULT_MISSIONS.map((mission) => {
-                                const missionKey = mission.id.toString()
-                                if (missionData[missionKey]) {
-                                    const m = missionData[missionKey]
-                                    return {
-                                        ...mission,
-                                        enabled: m.ToComplete ?? false,
-                                        minPoints: m.TakeIfHigherThanPoints ?? 175,
-                                        maxPoints: m.MaxPoints ?? 355,
-                                        automated: automatedValueToString(m.IsAutomated ?? 0),
-                                        solo120Enabled: m.ToCompleteSolo120 ?? false,
-                                        solo120MinPoints: m.TakeIfHigherThanPointsSolo120 ?? 0,
-                                        solo120MaxPoints: m.MaxPointsSolo120 ?? 356,
-                                        solo200Enabled: m.ToCompleteSolo200 ?? false,
-                                        solo200MinPoints: m.TakeIfHigherThanPointsSolo200 ?? 0,
-                                        solo200MaxPoints: m.MaxPointsSolo200 ?? 356,
-                                    }
-                                }
-                                return mission
-                            })
-                            setMissions(updatedMissions)
-                        }
+                    return {
+                        ...mission,
+                        c_enabled: completeMission?.ToComplete ?? false,
+                        c_min: completeMission?.TakeIfHigherThanPoints ?? 175,
+                        c_max: completeMission?.MaxPoints ?? 355,
+                        c_auto: completeMission?.IsAutomated ?? 0,
+                        c_solo: {
+                            ToCompleteSolo120: completeMission?.ToCompleteSolo120,
+                            TakeIfHigherThanPointsSolo120: completeMission?.TakeIfHigherThanPointsSolo120,
+                            MaxPointsSolo120: completeMission?.MaxPointsSolo120,
+                            ToCompleteSolo200: completeMission?.ToCompleteSolo200,
+                            TakeIfHigherThanPointsSolo200: completeMission?.TakeIfHigherThanPointsSolo200,
+                            MaxPointsSolo200: completeMission?.MaxPointsSolo200,
+                        },
+                        d_enabled: removeMission?.ToRemove ?? false,
+                        d_min: removeMission?.RemoveIfLowerThanPoints ?? 100,
+                        d_max: removeMission?.MaxPoints ?? 355,
+                        d_solo: {
+                            ToRemoveSolo120: removeMission?.ToRemoveSolo120,
+                            ToRemoveSolo200: removeMission?.ToRemoveSolo200,
+                            RemoveIfLowerThanPointsSolo120: removeMission?.RemoveIfLowerThanPointsSolo120,
+                            RemoveIfLowerThanPointsSolo200: removeMission?.RemoveIfLowerThanPointsSolo200,
+                            MaxPointsSolo120: removeMission?.MaxPointsSolo120,
+                            MaxPointsSolo200: removeMission?.MaxPointsSolo200,
+                        },
                     }
-                }
+                }))
             } else {
                 toast.error('Failed to load settings')
             }
-        } catch (error) {
+        } catch {
             toast.error('Error loading settings')
         } finally {
             setLoading(false)
         }
     }
 
-    const saveSettings = async () => {
+    const handleSave = async () => {
         if (!iggId || !settings) return
 
         setSaving(true)
         try {
-            // Build missionsToComplete_ object from missions array using mission IDs
-            const missionsToComplete_: { [key: string]: any } = {}
+            const missionsToComplete_: any = {}
+            const missionsToRemove_: any = {}
+
             missions.forEach((mission) => {
-                missionsToComplete_[mission.id.toString()] = {
-                    ToComplete: mission.enabled,
-                    TakeIfHigherThanPoints: mission.minPoints,
-                    MaxPoints: mission.maxPoints,
-                    IsAutomated: automatedStringToValue(mission.automated),
-                    ToCompleteSolo120: mission.solo120Enabled,
-                    TakeIfHigherThanPointsSolo120: mission.solo120MinPoints,
-                    MaxPointsSolo120: mission.solo120MaxPoints,
-                    ToCompleteSolo200: mission.solo200Enabled,
-                    TakeIfHigherThanPointsSolo200: mission.solo200MinPoints,
-                    MaxPointsSolo200: mission.solo200MaxPoints,
+                missionsToComplete_[mission.id] = {
+                    ToComplete: mission.c_enabled,
+                    TakeIfHigherThanPoints: mission.c_min,
+                    MaxPoints: mission.c_max,
+                    IsAutomated: mission.c_auto,
+                    ...(mission.c_solo || {}),
+                }
+
+                missionsToRemove_[mission.id] = {
+                    ToRemove: mission.d_enabled,
+                    RemoveIfLowerThanPoints: mission.d_min,
+                    MaxPoints: mission.d_max,
+                    ...(mission.d_solo || {}),
                 }
             })
-
-            // Extract item number from display string (e.g., "[1051] Shield" -> 1051)
-            const itemMatch = itemToBuy.match(/\[(\d+)\]/)
-            const itemNumber = itemMatch ? parseInt(itemMatch[1]) : 1051
 
             const updatedSettings = {
                 ...settings,
                 eventSettings: {
-                    ...settings.eventSettings,
+                    ...(settings.eventSettings || {}),
                     guildFest: {
-                        ...settings.eventSettings?.guildFest,
+                        ...(settings.eventSettings?.guildFest || {}),
                         collectRewards,
                         gfMissionComplete: {
-                            ...settings.eventSettings?.guildFest?.gfMissionComplete,
-                            missionsToComplete_,
+                            ...(settings.eventSettings?.guildFest?.gfMissionComplete || {}),
                             completeMissions,
                             buyExtraMission,
-                            itemToBuy: itemNumber,
-                            mMailPlayerName: sendMailToPlayer,
-                            mToMailPlayer: sendMailToPlayer.length > 0,
+                            itemToBuy: itemToBuyNum,
+                            mMailPlayerName: mailPlayer,
+                            mToMailPlayer: mailPlayer.length > 0,
+                            missionsToComplete_,
+                        },
+                        gfMissionRemove: {
+                            ...(settings.eventSettings?.guildFest?.gfMissionRemove || {}),
+                            missionsToRemove_,
                         },
                     },
                 },
@@ -253,50 +240,159 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
             })
 
             if (res.ok) {
-                toast.success('Settings saved successfully')
-                onClose()
                 setSettings(updatedSettings)
             } else {
                 toast.error('Failed to save settings')
             }
-        } catch (error) {
+        } catch {
             toast.error('Error saving settings')
         } finally {
             setSaving(false)
         }
     }
 
-    const updateMission = (index: number, field: keyof Mission, value: any) => {
-        const updatedMissions = [...missions]
-        if (['minPoints', 'maxPoints'].includes(field)) {
-            value = Math.min(355, Math.max(0, isNaN(value) ? 0 : Math.floor(value)))
+    const getMissionState = (mission: MissionData) => {
+        if (mode === 'complete') {
+            if (subTab === '120') {
+                return {
+                    checked: !!mission.c_solo?.ToCompleteSolo120,
+                    min: mission.c_solo?.TakeIfHigherThanPointsSolo120 ?? 0,
+                    max: mission.c_solo?.MaxPointsSolo120 ?? 0,
+                }
+            }
+            if (subTab === '200') {
+                return {
+                    checked: !!mission.c_solo?.ToCompleteSolo200,
+                    min: mission.c_solo?.TakeIfHigherThanPointsSolo200 ?? 0,
+                    max: mission.c_solo?.MaxPointsSolo200 ?? 0,
+                }
+            }
+            return { checked: mission.c_enabled, min: mission.c_min, max: mission.c_max }
         }
-        if (['solo120MinPoints', 'solo120MaxPoints'].includes(field)) {
-            value = Math.min(400, Math.max(0, isNaN(value) ? 0 : Math.floor(value)))
+
+        if (subTab === '120') {
+            return {
+                checked: !!mission.d_solo?.ToRemoveSolo120,
+                min: mission.d_solo?.RemoveIfLowerThanPointsSolo120 ?? 0,
+                max: mission.d_solo?.MaxPointsSolo120 ?? 0,
+            }
         }
-        if (['solo200MinPoints', 'solo200MaxPoints'].includes(field)) {
-            value = Math.min(650, Math.max(0, isNaN(value) ? 0 : Math.floor(value)))
+        if (subTab === '200') {
+            return {
+                checked: !!mission.d_solo?.ToRemoveSolo200,
+                min: mission.d_solo?.RemoveIfLowerThanPointsSolo200 ?? 0,
+                max: mission.d_solo?.MaxPointsSolo200 ?? 0,
+            }
         }
-        updatedMissions[index] = { ...updatedMissions[index], [field]: value }
-        setMissions(updatedMissions)
+        return { checked: mission.d_enabled, min: mission.d_min, max: mission.d_max }
     }
 
-    if (!iggId) {
-        return (
-            <KonohaModal
-                isOpen={isOpen}
-                onClose={onClose}
-                title="Guild Fest"
-                iggId={iggId}
-                icon={Trophy}
-                iconColor="#EAB308"
-                iconBg="rgba(234,179,8,0.15)"
-                iconBorder="rgba(234,179,8,0.3)"
-            >
-                <div />
-            </KonohaModal>
-        )
+    const toggleMission = (index: number) => {
+        setMissions((previous) => previous.map((mission, missionIndex) => {
+            if (missionIndex !== index) return mission
+
+            if (mode === 'complete') {
+                if (subTab === '120') {
+                    return {
+                        ...mission,
+                        c_solo: {
+                            ...(mission.c_solo || {}),
+                            ToCompleteSolo120: !mission.c_solo?.ToCompleteSolo120,
+                        },
+                    }
+                }
+                if (subTab === '200') {
+                    return {
+                        ...mission,
+                        c_solo: {
+                            ...(mission.c_solo || {}),
+                            ToCompleteSolo200: !mission.c_solo?.ToCompleteSolo200,
+                        },
+                    }
+                }
+                return { ...mission, c_enabled: !mission.c_enabled }
+            }
+
+            if (subTab === '120') {
+                return {
+                    ...mission,
+                    d_solo: {
+                        ...(mission.d_solo || {}),
+                        ToRemoveSolo120: !mission.d_solo?.ToRemoveSolo120,
+                    },
+                }
+            }
+            if (subTab === '200') {
+                return {
+                    ...mission,
+                    d_solo: {
+                        ...(mission.d_solo || {}),
+                        ToRemoveSolo200: !mission.d_solo?.ToRemoveSolo200,
+                    },
+                }
+            }
+            return { ...mission, d_enabled: !mission.d_enabled }
+        }))
     }
+
+    const updateMissionValue = (index: number, key: 'min' | 'max', value: string) => {
+        const maxLimit = subTab === '120' ? 400 : subTab === '200' ? 650 : 355
+        const parsed = clampWholeNumber(parseInt(value, 10), 0, maxLimit)
+
+        setMissions((previous) => previous.map((mission, missionIndex) => {
+            if (missionIndex !== index) return mission
+
+            if (mode === 'complete') {
+                if (subTab === '120') {
+                    return {
+                        ...mission,
+                        c_solo: {
+                            ...(mission.c_solo || {}),
+                            [key === 'min' ? 'TakeIfHigherThanPointsSolo120' : 'MaxPointsSolo120']: parsed,
+                        },
+                    }
+                }
+                if (subTab === '200') {
+                    return {
+                        ...mission,
+                        c_solo: {
+                            ...(mission.c_solo || {}),
+                            [key === 'min' ? 'TakeIfHigherThanPointsSolo200' : 'MaxPointsSolo200']: parsed,
+                        },
+                    }
+                }
+                return key === 'min' ? { ...mission, c_min: parsed } : { ...mission, c_max: parsed }
+            }
+
+            if (subTab === '120') {
+                return {
+                    ...mission,
+                    d_solo: {
+                        ...(mission.d_solo || {}),
+                        [key === 'min' ? 'RemoveIfLowerThanPointsSolo120' : 'MaxPointsSolo120']: parsed,
+                    },
+                }
+            }
+            if (subTab === '200') {
+                return {
+                    ...mission,
+                    d_solo: {
+                        ...(mission.d_solo || {}),
+                        [key === 'min' ? 'RemoveIfLowerThanPointsSolo200' : 'MaxPointsSolo200']: parsed,
+                    },
+                }
+            }
+            return key === 'min' ? { ...mission, d_min: parsed } : { ...mission, d_max: parsed }
+        }))
+    }
+
+    const enabledCount = missions.filter((mission) => getMissionState(mission).checked).length
+
+    useAutoSaveSettings(
+        isOpen && !loading && Boolean(iggId && settings),
+        handleSave,
+        [collectRewards, completeMissions, buyExtraMission, mailPlayer, itemToBuyNum, missions]
+    )
 
     return (
         <KonohaModal
@@ -305,396 +401,181 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
             title="Guild Fest"
             iggId={iggId}
             icon={Trophy}
-            iconColor="#EAB308"
-            iconBg="rgba(234,179,8,0.15)"
-            iconBorder="rgba(234,179,8,0.3)"
+            iconColor="#ffbd4a"
+            iconBg="rgba(255,189,74,0.14)"
+            iconBorder="rgba(255,189,74,0.30)"
             saving={saving}
-            onSave={saveSettings}
-            maxWidth="860px"
+            statusLabel={saving ? 'Syncing...' : 'Auto-sync. Use Protocol Apply Changes to deploy.'}
+            maxWidth="980px"
         >
             {loading ? (
-                                <div className="flex items-center justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-primary-400" />
+                <div className="flex min-h-[360px] items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-accent-1" />
+                </div>
+            ) : (
+                <div className="space-y-6">
+                    <ModalSummaryGrid
+                        items={[
+                            { label: 'Rewards', value: collectRewards ? 'On' : 'Off', icon: Gift, tone: 'gold' },
+                            { label: 'Selected', value: enabledCount, icon: ListChecks, tone: mode === 'complete' ? 'mint' : 'rose' },
+                            { label: 'Mail', value: mailPlayer ? 'Set' : 'None', icon: Send, tone: 'cyan' },
+                        ]}
+                    />
+
+                    <section className="grid grid-cols-1 gap-1.5 sm:grid-cols-3 sm:gap-3">
+                        <label className="flex min-h-[44px] sm:min-h-[58px] cursor-pointer items-center justify-between gap-4 rounded-lg border border-white/10 bg-bg-inset/70 px-3 py-2 sm:px-4 sm:py-3 transition-colors hover:border-white/20 hover:bg-white/[0.035]">
+                            <SettingInfoLabel label="Collect Rewards" className="text-[12px] sm:text-[14px]" />
+                            <Checkbox checked={collectRewards} onChange={setCollectRewards} />
+                        </label>
+                        <label className="flex min-h-[44px] sm:min-h-[58px] cursor-pointer items-center justify-between gap-4 rounded-lg border border-white/10 bg-bg-inset/70 px-3 py-2 sm:px-4 sm:py-3 transition-colors hover:border-white/20 hover:bg-white/[0.035]">
+                            <SettingInfoLabel label="Complete Missions" className="text-[12px] sm:text-[14px]" />
+                            <Checkbox checked={completeMissions} onChange={setCompleteMissions} />
+                        </label>
+                        <label className="flex min-h-[44px] sm:min-h-[58px] cursor-pointer items-center justify-between gap-4 rounded-lg border border-white/10 bg-bg-inset/70 px-3 py-2 sm:px-4 sm:py-3 transition-colors hover:border-white/20 hover:bg-white/[0.035]">
+                            <SettingInfoLabel label="Buy Extra Mission" className="text-[12px] sm:text-[14px]" />
+                            <Checkbox checked={buyExtraMission} onChange={setBuyExtraMission} />
+                        </label>
+                    </section>
+
+                    <section className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-[1fr_220px_220px]">
+                        <div className="rounded-lg border border-white/10 bg-bg-inset/70 p-4">
+                            <div className="mb-2">
+                                <SettingInfoLabel label="Send Mail to Player" className="text-[12px] font-black uppercase tracking-[0.14em] text-text-muted" />
+                            </div>
+                            <input
+                                type="text"
+                                value={mailPlayer}
+                                onChange={(event) => setMailPlayer(event.target.value)}
+                                placeholder="Player name"
+                                className="input-field w-full text-[14px]"
+                            />
+                        </div>
+                        <div className="rounded-lg border border-accent-1/20 bg-accent-1/10 p-4">
+                            <div className="text-[10px] font-black uppercase tracking-[0.18em] text-accent-1">Selected</div>
+                            <div className="mt-1 font-orbitron text-2xl font-black text-accent-1">{enabledCount}</div>
+                        </div>
+                        <div className="rounded-lg border border-accent-gold/20 bg-accent-gold/10 p-4">
+                            <div className="text-[10px] font-black uppercase tracking-[0.18em] text-accent-gold">Mode</div>
+                            <div className="mt-2 text-[13px] font-black uppercase text-accent-gold">{mode === 'complete' ? 'Complete' : 'Delete'}</div>
+                        </div>
+                    </section>
+
+                    <section className="space-y-4 border-t border-white/10 pt-5">
+                        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                            <div>
+                                <h2>
+                                    <SettingInfoLabel label="Guild Missions" className="text-[17px] font-black text-text-primary" />
+                                </h2>
+                                <p className="mt-1 text-[12px] text-text-muted">Choose missions and set their point thresholds for each mission pool.</p>
+                            </div>
+
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                                <div className="grid grid-cols-2 rounded-lg border border-white/10 bg-bg-inset p-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => setMode('complete')}
+                                        className={`flex min-h-[38px] items-center justify-center gap-2 rounded-md px-4 text-[12px] font-black transition-colors ${mode === 'complete'
+                                            ? 'bg-accent-1/15 text-accent-1 shadow-[inset_0_0_0_1px_rgba(33,243,177,0.26)]'
+                                            : 'text-text-muted hover:text-text-primary'
+                                            }`}
+                                    >
+                                        <Check className="h-3.5 w-3.5" />
+                                        Complete
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setMode('delete')}
+                                        className={`flex min-h-[38px] items-center justify-center gap-2 rounded-md px-4 text-[12px] font-black transition-colors ${mode === 'delete'
+                                            ? 'bg-accent-3/15 text-accent-3 shadow-[inset_0_0_0_1px_rgba(255,77,109,0.26)]'
+                                            : 'text-text-muted hover:text-text-primary'
+                                            }`}
+                                    >
+                                        <X className="h-3.5 w-3.5" />
+                                        Delete
+                                    </button>
                                 </div>
-                            ) : (
-                                <div className="max-w-7xl space-y-6">
-                                    {activeTab === 'guild' && (
-                                        <>
-                                            {/* Settings Section */}
-                                            <div className="space-y-4">
-                                                <h3 className="text-base sm:text-lg font-bold text-white">Settings</h3>
+                                <TacticalSelect
+                                    value={subTab}
+                                    onChange={(value) => setSubTab(value as GuildFestSubTab)}
+                                    options={SUB_TAB_OPTIONS}
+                                    className="w-full sm:w-[220px]"
+                                />
+                            </div>
+                        </div>
 
-                                                <div className="space-y-3">
-                                                    {/* Row 1: Collect Rewards */}
-                                                    <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer w-fit">
-                                                        <label className="flex items-center gap-2 cursor-pointer">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={collectRewards}
-                                                                onChange={(e) => setCollectRewards(e.target.checked)}
-                                                                className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                            />
-                                                            <span className="text-sm text-white">Collect Rewards (Randomly Selected)</span>
-                                                        </label>
-                                                    </div>
+                        <div className="grid grid-cols-1 gap-2 lg:gap-3">
+                            {missions.map((mission, index) => {
+                                const state = getMissionState(mission)
+                                const disabledPointInputs = mode === 'delete' && state.checked
 
-                                                    {/* Row 2: Complete Missions and Send Mail */}
-                                                    <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] items-center gap-3 md:gap-4">
-                                                        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                            <label className="flex items-center gap-2 cursor-pointer">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={completeMissions}
-                                                                    onChange={(e) => setCompleteMissions(e.target.checked)}
-                                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                                />
-                                                                <span className="text-sm text-white">Complete Missions?</span>
-                                                            </label>
-                                                        </div>
-
-                                                        <div className="flex flex-col md:flex-row md:items-center gap-2">
-                                                            <label className="text-sm text-gray-300 whitespace-nowrap">Send Mail to Player:</label>
-                                                            <input
-                                                                type="text"
-                                                                value={sendMailToPlayer}
-                                                                onChange={(e) => setSendMailToPlayer(e.target.value)}
-                                                                className="w-full md:flex-1 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                                placeholder="Player name"
-                                                            />
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Row 3: Buy Extra Mission */}
-                                                    <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer w-fit">
-                                                        <label className="flex items-center gap-2 cursor-pointer">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={buyExtraMission}
-                                                                onChange={(e) => setBuyExtraMission(e.target.checked)}
-                                                                className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                            />
-                                                            <span className="text-sm text-white">Buy Extra Mission?</span>
-                                                        </label>
-                                                    </div>
-                                                </div>
+                                return (
+                                    <div
+                                        key={mission.id}
+                                        className={`rounded-lg border p-4 transition-colors ${state.checked
+                                            ? mode === 'complete'
+                                                ? 'border-accent-1/25 bg-accent-1/[0.045]'
+                                                : 'border-accent-3/25 bg-accent-3/[0.05]'
+                                            : 'border-white/10 bg-bg-inset/70 hover:border-white/15'
+                                            }`}
+                                    >
+                                        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                                            <div className="flex min-w-0 items-center gap-3 text-left">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => toggleMission(index)}
+                                                    aria-label={`${state.checked ? 'Disable' : 'Enable'} ${mission.name}`}
+                                                    className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border transition-colors ${state.checked
+                                                        ? mode === 'complete'
+                                                            ? 'border-accent-1 bg-accent-1 text-bg-base'
+                                                            : 'border-accent-3 bg-accent-3 text-bg-base'
+                                                        : 'border-white/15 bg-bg-base text-transparent'
+                                                        }`}
+                                                >
+                                                    {mode === 'complete' ? <Check className="h-4 w-4" strokeWidth={4} /> : <X className="h-4 w-4" strokeWidth={4} />}
+                                                </button>
+                                                <SettingInfoLabel
+                                                    label={mission.name}
+                                                    helpText={mode === 'complete'
+                                                        ? 'Selects this Guild Fest mission for automatic completion using the configured point thresholds.'
+                                                        : 'Selects this Guild Fest mission for automatic removal using the configured point thresholds.'
+                                                    }
+                                                    className={`min-w-0 text-[14px] font-black leading-snug ${state.checked
+                                                        ? mode === 'complete' ? 'text-accent-1' : 'text-accent-3'
+                                                        : 'text-text-primary'
+                                                        }`}
+                                                />
                                             </div>
 
-                                            {/* Guild Missions Table */}
-                                            <div className="space-y-4">
-                                                <h3 className="text-base sm:text-lg font-bold text-white">Guild Missions</h3>
-                                                <div className="hidden md:block overflow-x-auto rounded-xl border border-white/10">
-                                                    <table className="w-full">
-                                                        <thead className="bg-surface/50">
-                                                            <tr>
-                                                                <th className="px-4 py-3 text-center text-sm font-medium text-gray-300 w-12"></th>
-                                                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Mission Name</th>
-                                                                <th className="px-4 py-3 text-center text-sm font-medium text-gray-300">Min Points</th>
-                                                                <th className="px-4 py-3 text-center text-sm font-medium text-gray-300">Max Points</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody className="divide-y divide-white/10">
-                                                            {missions.map((mission, index) => (
-                                                                <tr key={index} className="hover:bg-surface/30 transition-colors">
-                                                                    <td className="px-4 py-3 text-center">
-                                                                        <input
-                                                                            type="checkbox"
-                                                                            checked={mission.enabled}
-                                                                            onChange={(e) => updateMission(index, 'enabled', e.target.checked)}
-                                                                            className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                                        />
-                                                                    </td>
-                                                                    <td className="px-4 py-3 text-sm text-white">{mission.name}</td>
-                                                                    <td className="px-4 py-3 text-center">
-                                                                        <input
-                                                                            type="number"
-                                                                            value={mission.minPoints}
-                                                                            min={0}
-                                                                            max={355}
-                                                                            onChange={(e) => updateMission(index, 'minPoints', parseInt(e.target.value) || 0)}
-                                                                            onKeyDown={(e) => {
-                                                                                if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
-                                                                                    e.preventDefault();
-                                                                                }
-                                                                            }}
-                                                                            className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
-                                                                        />
-                                                                    </td>
-                                                                    <td className="px-4 py-3 text-center">
-                                                                        <input
-                                                                            type="number"
-                                                                            min={0}
-                                                                            max={355}
-                                                                            value={mission.maxPoints}
-                                                                            onChange={(e) => updateMission(index, 'maxPoints', parseInt(e.target.value) || 0)}
-                                                                            onKeyDown={(e) => {
-                                                                                if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
-                                                                                    e.preventDefault();
-                                                                                }
-                                                                            }}
-                                                                            className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                                        />
-                                                                    </td>
-                                                                </tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-
-                                                {/* Mobile Card View for Guild */}
-                                                <div className="md:hidden space-y-4">
-                                                    {missions.map((mission, index) => (
-                                                        <div key={index} className="glass-card p-4 space-y-4">
-                                                            <div className="flex items-start gap-3">
-                                                                <label className="flex items-center gap-2 cursor-pointer pt-1">
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        checked={mission.enabled}
-                                                                        onChange={(e) => updateMission(index, 'enabled', e.target.checked)}
-                                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                                    />
-                                                                </label>
-                                                                <span className="text-sm text-white font-medium flex-1">{mission.name}</span>
-                                                            </div>
-
-                                                            <div className="grid grid-cols-2 gap-3">
-                                                                <div className="space-y-1">
-                                                                    <label className="text-xs text-gray-400">Min Points</label>
-                                                                    <input
-                                                                        type="number"
-                                                                        min={0}
-                                                                        max={355}
-                                                                        value={mission.minPoints}
-                                                                        onChange={(e) => updateMission(index, 'minPoints', parseInt(e.target.value) || 0)}
-                                                                        onKeyDown={(e) => {
-                                                                            if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
-                                                                                e.preventDefault();
-                                                                            }
-                                                                        }}
-                                                                        className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                                    />
-                                                                </div>
-                                                                <div className="space-y-1">
-                                                                    <label className="text-xs text-gray-400">Max Points</label>
-                                                                    <input
-                                                                        type="number"
-                                                                        min={0}
-                                                                        max={355}
-                                                                        value={mission.maxPoints}
-                                                                        onChange={(e) => updateMission(index, 'maxPoints', parseInt(e.target.value) || 0)}
-                                                                        onKeyDown={(e) => {
-                                                                            if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
-                                                                                e.preventDefault();
-                                                                            }
-                                                                        }}
-                                                                        className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </>
-                                    )}
-
-                                    {activeTab === 'personal' && (
-                                        <div className="space-y-4">
-                                            <h3 className="text-base sm:text-lg font-bold text-white">Personal (Solo) Missions</h3>
-                                            <div className="hidden md:block overflow-x-auto rounded-xl border border-white/10">
-                                                <table className="w-full min-w-[800px]">
-                                                    <thead className="bg-surface/50">
-                                                        <tr>
-                                                            <th className="px-3 py-3 text-left text-sm font-medium text-gray-300">Mission Name</th>
-                                                            <th className="px-3 py-3 text-center text-sm font-medium text-gray-300">120%</th>
-                                                            <th className="px-3 py-3 text-center text-sm font-medium text-gray-300">120% Min Points</th>
-                                                            <th className="px-3 py-3 text-center text-sm font-medium text-gray-300">120% Max Points</th>
-                                                            <th className="px-3 py-3 text-center text-sm font-medium text-gray-300">200%</th>
-                                                            <th className="px-3 py-3 text-center text-sm font-medium text-gray-300">200% Min Points</th>
-                                                            <th className="px-3 py-3 text-center text-sm font-medium text-gray-300">200% Max Points</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="divide-y divide-white/10">
-                                                        {missions.map((mission, index) => (
-                                                            <tr key={index} className="hover:bg-surface/30 transition-colors">
-                                                                <td className="px-3 py-3 text-sm text-white">{mission.name}</td>
-                                                                <td className="px-3 py-3 text-center">
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        checked={mission.solo120Enabled}
-                                                                        onChange={(e) => updateMission(index, 'solo120Enabled', e.target.checked)}
-                                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                                    />
-                                                                </td>
-                                                                <td className="px-3 py-3 text-center">
-                                                                    <input
-                                                                        type="number"
-                                                                        value={mission.solo120MinPoints === 0 ? '' : mission.solo120MinPoints}
-                                                                        min={0}
-                                                                        max={400}
-                                                                        placeholder="0"
-                                                                        onChange={(e) => updateMission(index, 'solo120MinPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
-                                                                        onKeyDown={(e) => {
-                                                                            if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
-                                                                                e.preventDefault();
-                                                                            }
-                                                                        }}
-                                                                        className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                                    />
-                                                                </td>
-                                                                <td className="px-3 py-3 text-center">
-                                                                    <input
-                                                                        type="number"
-                                                                        value={mission.solo120MaxPoints === 0 ? '' : mission.solo120MaxPoints}
-                                                                        min={0}
-                                                                        max={400}
-                                                                        placeholder="0"
-                                                                        onChange={(e) => updateMission(index, 'solo120MaxPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
-                                                                        onKeyDown={(e) => {
-                                                                            if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
-                                                                                e.preventDefault();
-                                                                            }
-                                                                        }}
-                                                                        className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                                    />
-                                                                </td>
-                                                                <td className="px-3 py-3 text-center">
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        checked={mission.solo200Enabled}
-                                                                        onChange={(e) => updateMission(index, 'solo200Enabled', e.target.checked)}
-                                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                                    />
-                                                                </td>
-                                                                <td className="px-3 py-3 text-center">
-                                                                    <input
-                                                                        type="number"
-                                                                        value={mission.solo200MinPoints === 0 ? '' : mission.solo200MinPoints}
-                                                                        min={0}
-                                                                        max={650}
-                                                                        placeholder="0"
-                                                                        onChange={(e) => updateMission(index, 'solo200MinPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
-                                                                        onKeyDown={(e) => {
-                                                                            if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
-                                                                                e.preventDefault();
-                                                                            }
-                                                                        }}
-                                                                        className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                                    />
-                                                                </td>
-                                                                <td className="px-3 py-3 text-center">
-                                                                    <input
-                                                                        type="number"
-                                                                        value={mission.solo200MaxPoints === 0 ? '' : mission.solo200MaxPoints}
-                                                                        min={0}
-                                                                        max={650}
-                                                                        placeholder="0"
-                                                                        onChange={(e) => updateMission(index, 'solo200MaxPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
-                                                                        onKeyDown={(e) => {
-                                                                            if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
-                                                                                e.preventDefault();
-                                                                            }
-                                                                        }}
-                                                                        className="w-20 px-2 py-1 bg-background-tertiary border border-white/10 rounded text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                                    />
-                                                                </td>
-                                                            </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-
-                                            {/* Mobile Card View for Personal */}
-                                            <div className="md:hidden space-y-4">
-                                                {missions.map((mission, index) => (
-                                                    <div key={index} className="glass-card p-4 space-y-4">
-                                                        <div className="flex items-start gap-3">
-                                                            <span className="text-sm text-white font-medium flex-1">{mission.name}</span>
-                                                        </div>
-
-                                                        {/* Solo 120 */}
-                                                        <div className="space-y-2">
-                                                            <div className="flex items-center gap-2">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={mission.solo120Enabled}
-                                                                    onChange={(e) => updateMission(index, 'solo120Enabled', e.target.checked)}
-                                                                    className="w-4 h-4 rounded bg-background-tertiary border-white/10 text-primary-500"
-                                                                />
-                                                                <span className="text-xs text-gray-400">Solo 120%</span>
-                                                            </div>
-                                                            <div className="grid grid-cols-2 gap-2">
-                                                                <input
-                                                                    type="number"
-                                                                    value={mission.solo120MinPoints === 0 ? '' : mission.solo120MinPoints}
-                                                                    onChange={(e) => updateMission(index, 'solo120MinPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
-                                                                    onKeyDown={(e) => {
-                                                                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
-                                                                            e.preventDefault();
-                                                                        }
-                                                                    }}
-                                                                    placeholder="Min"
-                                                                    className="w-full px-2 py-1 bg-background-tertiary border border-white/10 rounded text-xs text-white"
-                                                                />
-                                                                <input
-                                                                    type="number"
-                                                                    value={mission.solo120MaxPoints === 0 ? '' : mission.solo120MaxPoints}
-                                                                    onChange={(e) => updateMission(index, 'solo120MaxPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
-                                                                    onKeyDown={(e) => {
-                                                                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
-                                                                            e.preventDefault();
-                                                                        }
-                                                                    }}
-                                                                    placeholder="Max"
-                                                                    className="w-full px-2 py-1 bg-background-tertiary border border-white/10 rounded text-xs text-white"
-                                                                />
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Solo 200 */}
-                                                        <div className="space-y-2">
-                                                            <div className="flex items-center gap-2">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={mission.solo200Enabled}
-                                                                    onChange={(e) => updateMission(index, 'solo200Enabled', e.target.checked)}
-                                                                    className="w-4 h-4 rounded bg-background-tertiary border-white/10 text-primary-500"
-                                                                />
-                                                                <span className="text-xs text-gray-400">Solo 200%</span>
-                                                            </div>
-                                                            <div className="grid grid-cols-2 gap-2">
-                                                                <input
-                                                                    type="number"
-                                                                    value={mission.solo200MinPoints === 0 ? '' : mission.solo200MinPoints}
-                                                                    onChange={(e) => updateMission(index, 'solo200MinPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
-                                                                    onKeyDown={(e) => {
-                                                                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
-                                                                            e.preventDefault();
-                                                                        }
-                                                                    }}
-                                                                    placeholder="Min"
-                                                                    className="w-full px-2 py-1 bg-background-tertiary border border-white/10 rounded text-xs text-white"
-                                                                />
-                                                                <input
-                                                                    type="number"
-                                                                    value={mission.solo200MaxPoints === 0 ? '' : mission.solo200MaxPoints}
-                                                                    onChange={(e) => updateMission(index, 'solo200MaxPoints', e.target.value === '' ? 0 : parseInt(e.target.value))}
-                                                                    onKeyDown={(e) => {
-                                                                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
-                                                                            e.preventDefault();
-                                                                        }
-                                                                    }}
-                                                                    placeholder="Max"
-                                                                    className="w-full px-2 py-1 bg-background-tertiary border border-white/10 rounded text-xs text-white"
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
+                                            <div className="grid w-full grid-cols-2 gap-2 md:w-[360px] md:gap-3">
+                                                <label className="space-y-1.5">
+                                                    <SettingInfoLabel label="Min Points" className="block text-[11px] font-bold uppercase tracking-[0.12em] text-text-muted" />
+                                                    <input
+                                                        type="number"
+                                                        value={state.min}
+                                                        onChange={(event) => updateMissionValue(index, 'min', event.target.value)}
+                                                        disabled={disabledPointInputs}
+                                                        className="input-field h-10 w-full font-mono text-[13px] font-black text-accent-cyan disabled:cursor-not-allowed disabled:opacity-45"
+                                                    />
+                                                </label>
+                                                <label className="space-y-1.5">
+                                                    <SettingInfoLabel label="Max Points" className="block text-[11px] font-bold uppercase tracking-[0.12em] text-text-muted" />
+                                                    <input
+                                                        type="number"
+                                                        value={state.max}
+                                                        onChange={(event) => updateMissionValue(index, 'max', event.target.value)}
+                                                        disabled={disabledPointInputs}
+                                                        className="input-field h-10 w-full font-mono text-[13px] font-black text-accent-cyan disabled:cursor-not-allowed disabled:opacity-45"
+                                                    />
+                                                </label>
                                             </div>
                                         </div>
-                                    )}
-                                </div>
-                            )}
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </section>
+                </div>
+            )}
         </KonohaModal>
     )
 }

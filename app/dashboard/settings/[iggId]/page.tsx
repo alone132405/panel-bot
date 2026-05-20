@@ -5,6 +5,8 @@ import { useSession } from 'next-auth/react'
 import { useRouter, useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
+import { TacticalSelect } from '@/components/ui/TacticalSelect'
+import { ToggleSwitch } from '@/components/ui/ToggleSwitch'
 import { Settings, Shield, Package, Globe, Sprout, Moon, Ship, Gem, Target, Users, Building, FlaskConical, Swords, ChevronRight, LogOut } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 
@@ -195,9 +197,11 @@ export default function SettingsDetailPage() {
 
                                 <div className="mb-4">
                                     <label className="text-sm text-gray-300 mb-2 block">Choose Account</label>
-                                    <select className="input-field w-full max-w-md">
-                                        <option>{iggId} - Contact provider</option>
-                                    </select>
+                                    <TacticalSelect
+        value={iggId}
+        onChange={() => {}}
+        options={[{ value: iggId, label: `${iggId} - Contact provider` }]}
+    />
                                 </div>
                             </div>
 
@@ -314,16 +318,7 @@ function SettingToggle({
                 )}
             </div>
 
-            <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={(e) => onChange(e.target.checked)}
-                    disabled={disabled}
-                    className="sr-only peer"
-                />
-                <div className={`w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}></div>
-            </label>
+            <ToggleSwitch checked={checked} onChange={onChange} disabled={disabled} />
         </div>
     )
 }

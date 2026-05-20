@@ -1,11 +1,14 @@
 'use client'
 
-import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Loader2, Sword, Save } from 'lucide-react'
+import { Flame, HeartPulse, Loader2, Sword } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import KonohaModal from './KonohaModal'
+import { ModalSummaryGrid } from '@/components/ui/ModalSummaryGrid'
+import { Checkbox } from '@/components/ui/Checkbox'
+import { TacticalSelect } from '@/components/ui/TacticalSelect'
+import { SettingInfoLabel } from '@/components/ui/SettingInfoLabel'
+import { useAutoSaveSettings } from '@/hooks/useAutoSaveSettings'
 
 interface MilitaryModalProps {
     isOpen: boolean
@@ -23,8 +26,6 @@ export default function MilitaryModal({ isOpen, onClose, iggId }: MilitaryModalP
     const [settings, setSettings] = useState<any>(null)
     const [loading, setLoading] = useState(true)
 
-    // Prevent background scroll when modal is open
-    useBodyScrollLock(isOpen)
     const [saving, setSaving] = useState(false)
 
     // Military settings
@@ -174,8 +175,6 @@ export default function MilitaryModal({ isOpen, onClose, iggId }: MilitaryModalP
             })
 
             if (res.ok) {
-                toast.success('Settings saved successfully')
-                onClose()
                 setSettings(updatedSettings)
             } else {
                 toast.error('Failed to save settings')
@@ -198,6 +197,24 @@ export default function MilitaryModal({ isOpen, onClose, iggId }: MilitaryModalP
         updatedTroops[index].amount = Math.min(999999999, Math.max(0, amount))
         setTroops(updatedTroops)
     }
+
+    useAutoSaveSettings(
+        isOpen && !loading && Boolean(iggId && settings),
+        saveSettings,
+        [
+            trainTroops,
+            rotateTroopTraining,
+            healTroops,
+            healSanctuary,
+            selectedChapter,
+            craftLuminousGear,
+            attackSkirmishLevels,
+            attackTrailByFire,
+            recallTroopsForSkirmish,
+            attackSkirmishWhenTroopsAt,
+            troops,
+        ]
+    )
 
     if (!iggId) {
         return (
@@ -227,17 +244,25 @@ export default function MilitaryModal({ isOpen, onClose, iggId }: MilitaryModalP
             iconBg="rgba(239,68,68,0.15)"
             iconBorder="rgba(239,68,68,0.3)"
             saving={saving}
-            onSave={saveSettings}
+            statusLabel={saving ? 'Syncing...' : 'Auto-sync. Use Protocol Apply Changes to deploy.'}
             maxWidth="860px"
         >
             {loading ? (
                                 <div className="flex items-center justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-primary-400" />
+                                    <Loader2 className="w-8 h-8 animate-spin text-[#00FFB2]" />
                                 </div>
                             ) : (
                                 <div className="w-full space-y-6">
+                                    <ModalSummaryGrid
+                                        items={[
+                                            { label: 'Training', value: trainTroops ? 'On' : 'Off', icon: Sword, tone: 'rose' },
+                                            { label: 'Healing', value: healTroops || healSanctuary ? 'On' : 'Off', icon: HeartPulse, tone: 'mint' },
+                                            { label: 'Skirmish', value: attackSkirmishLevels ? selectedChapter : 'Off', icon: Flame, tone: 'gold' },
+                                        ]}
+                                    />
+
                                     {/* Main Options */}
-                                    <div className="flex flex-wrap gap-3">
+                                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:flex md:flex-wrap md:gap-3">
                                         {[
                                             { label: 'Train Troops', value: trainTroops, setter: setTrainTroops },
                                             { label: 'Rotate Troop Training', value: rotateTroopTraining, setter: setRotateTroopTraining },
@@ -245,20 +270,11 @@ export default function MilitaryModal({ isOpen, onClose, iggId }: MilitaryModalP
                                             { label: 'Heal Sanctuary', value: healSanctuary, setter: setHealSanctuary },
                                             { label: 'Craft Luminous Gear', value: craftLuminousGear, setter: setCraftLuminousGear },
                                         ].map((option, index) => (
-                                            <label key={index} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={option.value}
-                                                    onChange={(e) => option.setter(e.target.checked)}
-                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                                <span className="text-sm text-white">{option.label}</span>
+                                            <label key={index} className="flex min-h-[48px] md:min-h-0 items-center justify-between md:justify-start gap-4 md:gap-2 px-3 py-2 md:px-4 md:py-2 rounded-lg md:rounded-xl bg-bg-inset/70 md:bg-[#0F0F1A] border border-white/10 md:border-[rgba(123,94,255,0.08)] hover:bg-white/[0.035] md:hover:bg-[#161626] transition-colors cursor-pointer">
+                                                <SettingInfoLabel label={option.label} className="text-[13px] sm:text-[14px] md:text-sm text-white" />
+                                                <Checkbox checked={option.value} onChange={option.setter} />
                                             </label>
                                         ))}
-                                    </div>
-
-                                    {/* Reset Troop Data Button */}
-                                    <div className="flex justify-start">
                                         <button
                                             onClick={handleResetTroops}
                                             className="px-6 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-300 font-medium transition-colors"
@@ -268,57 +284,44 @@ export default function MilitaryModal({ isOpen, onClose, iggId }: MilitaryModalP
                                     </div>
 
                                     {/* Skirmish / Chapter Section */}
-                                    <div className="space-y-4 pt-6 border-t border-white/10">
-                                        <h3 className="text-base sm:text-lg font-bold text-white">Skirmish / Chapter</h3>
+                                    <div className="space-y-4 pt-6 border-t border-[rgba(123,94,255,0.2)]">
+                                        <h3>
+                                            <SettingInfoLabel label="Skirmish / Chapter" className="text-base sm:text-lg font-bold text-white" />
+                                        </h3>
 
                                         {/* Selected Chapter */}
-                                        <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                            <label className="block text-xs sm:text-sm text-gray-300 mb-2">Selected Chapter:</label>
-                                            <select
+                                        <div className="p-3 sm:p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)]">
+                                            <div className="mb-2">
+                                                <SettingInfoLabel label="Selected Chapter" className="text-xs sm:text-sm text-gray-300" />
+                                            </div>
+                                            <TacticalSelect
                                                 value={selectedChapter}
-                                                onChange={(e) => setSelectedChapter(e.target.value)}
-                                                className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                            >
-                                                {Array.from({ length: 9 }, (_, i) => i + 1).map(num => (
-                                                    <option key={num} value={`Chapter ${num}`}>Chapter {num}</option>
-                                                ))}
-                                            </select>
+                                                onChange={setSelectedChapter}
+                                                options={Array.from({ length: 9 }, (_, i) => ({ value: `Chapter ${i + 1}`, label: `Chapter ${i + 1}` }))}
+                                            />
                                         </div>
 
-                                        <div className="flex flex-wrap gap-3">
-                                            <label className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={attackSkirmishLevels}
-                                                    onChange={(e) => setAttackSkirmishLevels(e.target.checked)}
-                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                                <span className="text-sm text-white">Attack Skirmish Levels</span>
+                                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:flex md:flex-wrap md:gap-3">
+                                            <label className="flex min-h-[48px] md:min-h-0 items-center justify-between md:justify-start gap-4 md:gap-2 px-3 py-2 md:px-4 md:py-2 rounded-lg md:rounded-xl bg-bg-inset/70 md:bg-[#0F0F1A] border border-white/10 md:border-[rgba(123,94,255,0.08)] hover:bg-white/[0.035] md:hover:bg-[#161626] transition-colors cursor-pointer">
+                                                <SettingInfoLabel label="Attack Skirmish Levels" className="text-[13px] sm:text-[14px] md:text-sm text-white" />
+                                                <Checkbox checked={attackSkirmishLevels} onChange={setAttackSkirmishLevels} />
                                             </label>
 
-                                            <label className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={attackTrailByFire}
-                                                    onChange={(e) => setAttackTrailByFire(e.target.checked)}
-                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                                <span className="text-sm text-white">Attack Trail By Fire</span>
+                                            <label className="flex min-h-[48px] md:min-h-0 items-center justify-between md:justify-start gap-4 md:gap-2 px-3 py-2 md:px-4 md:py-2 rounded-lg md:rounded-xl bg-bg-inset/70 md:bg-[#0F0F1A] border border-white/10 md:border-[rgba(123,94,255,0.08)] hover:bg-white/[0.035] md:hover:bg-[#161626] transition-colors cursor-pointer">
+                                                <SettingInfoLabel label="Attack Trail By Fire" className="text-[13px] sm:text-[14px] md:text-sm text-white" />
+                                                <Checkbox checked={attackTrailByFire} onChange={setAttackTrailByFire} />
                                             </label>
 
-                                            <label className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={recallTroopsForSkirmish}
-                                                    onChange={(e) => setRecallTroopsForSkirmish(e.target.checked)}
-                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                                <span className="text-sm text-white">Recall Troops for Skirmish</span>
+                                            <label className="flex min-h-[48px] md:min-h-0 items-center justify-between md:justify-start gap-4 md:gap-2 px-3 py-2 md:px-4 md:py-2 rounded-lg md:rounded-xl bg-bg-inset/70 md:bg-[#0F0F1A] border border-white/10 md:border-[rgba(123,94,255,0.08)] hover:bg-white/[0.035] md:hover:bg-[#161626] transition-colors cursor-pointer">
+                                                <SettingInfoLabel label="Recall Troops for Skirmish" className="text-[13px] sm:text-[14px] md:text-sm text-white" />
+                                                <Checkbox checked={recallTroopsForSkirmish} onChange={setRecallTroopsForSkirmish} />
                                             </label>
                                         </div>
 
-                                        <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                            <label className="block text-xs sm:text-sm text-gray-300 mb-2">Attack Skirmish When Troops At:</label>
+                                        <div className="p-3 sm:p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)]">
+                                            <div className="mb-2">
+                                                <SettingInfoLabel label="Attack Skirmish When Troops At" className="text-xs sm:text-sm text-gray-300" />
+                                            </div>
                                             <div className="flex items-center gap-2">
                                                 <input
                                                     type="number"
@@ -328,7 +331,7 @@ export default function MilitaryModal({ isOpen, onClose, iggId }: MilitaryModalP
                                                     step="1"
                                                     onChange={(e) => setAttackSkirmishWhenTroopsAt(Math.floor(Number(e.target.value)))}
                                                     onBlur={(e) => setAttackSkirmishWhenTroopsAt(Math.min(100, Math.max(0, Math.floor(Number(e.target.value)))))}
-                                                    className="w-24 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                    className="w-24 px-3 py-2 bg-[#07070E]/50 border border-[rgba(123,94,255,0.2)] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#7B5EFF]/50"
                                                 />
                                                 <span className="text-sm text-gray-400">%</span>
                                             </div>
@@ -336,21 +339,29 @@ export default function MilitaryModal({ isOpen, onClose, iggId }: MilitaryModalP
                                     </div>
 
                                     {/* Troop Table */}
-                                    <div className="space-y-4 pt-6 border-t border-white/10">
-                                        <h3 className="text-base sm:text-lg font-bold text-white">Troop Training</h3>
+                                    <div className="space-y-4 pt-6 border-t border-[rgba(123,94,255,0.2)]">
+                                        <h3>
+                                            <SettingInfoLabel label="Troop Training" className="text-base sm:text-lg font-bold text-white" />
+                                        </h3>
 
                                         <div className="overflow-x-auto">
                                             <table className="w-full">
                                                 <thead>
-                                                    <tr className="border-b border-white/10">
-                                                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Troop Name</th>
-                                                        <th className="text-center py-3 px-4 text-sm font-medium text-gray-300">Tier</th>
-                                                        <th className="text-center py-3 px-4 text-sm font-medium text-gray-300">Amount to Train</th>
+                                                    <tr className="border-b border-[rgba(123,94,255,0.2)]">
+                                                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">
+                                                            <SettingInfoLabel label="Troop Name" className="text-sm font-medium text-gray-300" />
+                                                        </th>
+                                                        <th className="text-center py-3 px-4 text-sm font-medium text-gray-300">
+                                                            <SettingInfoLabel label="Tier" className="text-sm font-medium text-gray-300" />
+                                                        </th>
+                                                        <th className="text-center py-3 px-4 text-sm font-medium text-gray-300">
+                                                            <SettingInfoLabel label="Amount to Train" className="text-sm font-medium text-gray-300" />
+                                                        </th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {troops.map((troop, index) => (
-                                                        <tr key={index} className="border-b border-white/5 hover:bg-surface/30 transition-colors">
+                                                        <tr key={index} className="border-b border-white/5 hover:bg-[#161626]/30 transition-colors">
                                                             <td className="py-3 px-4 text-sm text-white">{troop.name}</td>
                                                             <td className="py-3 px-4 text-sm text-center text-gray-400">{troop.tier}</td>
                                                             <td className="py-3 px-4 text-center">
@@ -368,7 +379,7 @@ export default function MilitaryModal({ isOpen, onClose, iggId }: MilitaryModalP
                                                                         const val = e.target.value === '' ? 0 : Math.min(999999999, Math.floor(Number(e.target.value)))
                                                                         updateTroopAmount(index, val)
                                                                     }}
-                                                                    className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
+                                                                    className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-[#07070E]/50 border border-[rgba(123,94,255,0.2)] rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-[#7B5EFF]/50 disabled:opacity-50"
                                                                 />
                                                             </td>
                                                         </tr>

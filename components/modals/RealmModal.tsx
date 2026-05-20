@@ -1,11 +1,13 @@
 'use client'
 
-import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Loader2, Globe, Save } from 'lucide-react'
+import { Globe, Loader2, Mountain, Target } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import KonohaModal from './KonohaModal'
+import { ModalSummaryGrid } from '@/components/ui/ModalSummaryGrid'
+import { Checkbox } from '@/components/ui/Checkbox'
+import { SettingInfoLabel } from '@/components/ui/SettingInfoLabel'
+import { useAutoSaveSettings } from '@/hooks/useAutoSaveSettings'
 
 interface RealmModalProps {
     isOpen: boolean
@@ -17,8 +19,6 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
     const [fullSettings, setFullSettings] = useState<any>(null)
     const [loading, setLoading] = useState(true)
 
-    // Prevent background scroll when modal is open
-    useBodyScrollLock(isOpen)
     const [saving, setSaving] = useState(false)
 
     // Gathering settings
@@ -86,6 +86,7 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                     setHuntMonsters(data.realmMonsterSettings.autoHunting || false)
                     setUseEnergyItems(data.realmMonsterSettings.useEnergyItems || false)
                     setKillsPerDay(data.realmMonsterSettings.autoHuntCount || 1)
+                    setMonsterLevel(data.realmMonsterSettings.monsterLevel || 1)
                 }
             } else {
                 toast.error('Failed to load settings')
@@ -118,6 +119,7 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                     autoHunting: huntMonsters,
                     useEnergyItems,
                     autoHuntCount: killsPerDay,
+                    monsterLevel,
                 }
             }
 
@@ -128,8 +130,6 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
             })
 
             if (res.ok) {
-                toast.success('Settings saved successfully')
-                onClose()
                 setFullSettings(updatedSettings)
             } else {
                 toast.error('Failed to save settings')
@@ -140,6 +140,30 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
             setSaving(false)
         }
     }
+
+    useAutoSaveSettings(
+        isOpen && !loading && Boolean(iggId && fullSettings),
+        saveSettings,
+        [
+            gatherResources,
+            maxArmies,
+            leaveSpareArmy,
+            spareArmyAmount,
+            useHighTierTroops,
+            gatherFood,
+            gatherStone,
+            gatherWood,
+            gatherOre,
+            gatherGold,
+            gatherLunite,
+            huntMonsters,
+            useEnergyItems,
+            killsPerDay,
+            monsterLevel,
+        ]
+    )
+
+    const selectedResourceCount = [gatherFood, gatherStone, gatherWood, gatherOre, gatherGold, gatherLunite].filter(Boolean).length
 
     if (!iggId) {
         return (
@@ -169,41 +193,41 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
             iconBg="rgba(139,92,246,0.15)"
             iconBorder="rgba(139,92,246,0.3)"
             saving={saving}
-            onSave={saveSettings}
-            maxWidth="860px"
+            statusLabel={saving ? 'Syncing...' : 'Auto-sync. Use Protocol Apply Changes to deploy.'}
+            maxWidth="980px"
         >
             {loading ? (
                                 <div className="flex items-center justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-primary-400" />
+                                    <Loader2 className="w-8 h-8 animate-spin text-accent-1" />
                                 </div>
                             ) : (
                                 <div className="w-full space-y-6">
+                                    <ModalSummaryGrid
+                                        items={[
+                                            { label: 'Gather', value: gatherResources ? 'On' : 'Off', icon: Globe, tone: 'mint' },
+                                            { label: 'Resources', value: `${selectedResourceCount}/6`, icon: Mountain, tone: 'violet' },
+                                            { label: 'Hunt', value: huntMonsters ? `${killsPerDay}/day` : 'Off', icon: Target, tone: 'gold' },
+                                        ]}
+                                    />
+
                                     {/* Gathering Section */}
                                     <div className="space-y-4">
-                                        <div className="flex items-center justify-between p-4 rounded-xl bg-primary-500/10 border border-primary-500/20">
+                                        <div className="flex items-center justify-between rounded-md border border-accent-1/20 bg-accent-1/10 p-4">
                                             <div>
                                                 <label className="flex items-center gap-3 cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={gatherResources}
-                                                        onChange={(e) => {
-                                                            setGatherResources(e.target.checked)
-
-                                                        }}
-                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                    />
-                                                    <span className="text-sm font-medium text-primary-300">Gather Resources</span>
+                                                    <Checkbox checked={gatherResources} onChange={setGatherResources} />
+                                                    <SettingInfoLabel label="Gather Resources" />
                                                 </label>
-                                                <p className="text-xs text-gray-400 ml-8">(This will disable normal gathering mode)</p>
+                                                <p className="ml-8 text-xs text-text-muted">This will disable normal gathering mode.</p>
                                             </div>
                                         </div>
 
                                         {/* Gathering Options */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                                <label className="block text-xs sm:text-sm text-gray-300 mb-2">
-                                                    Max Amount of Armies to Gather: <span className="text-xs text-gray-400">(0 For All Armies)</span>
-                                                </label>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                                            <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
+                                                <div className="mb-2">
+                                                    <SettingInfoLabel label="Max Armies to Gather (0 for all)" className="text-[12px] font-bold text-text-muted" />
+                                                </div>
                                                 <input
                                                     type="number"
                                                     min={0}
@@ -217,26 +241,20 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                                                         }
                                                     }}
                                                     onBlur={(e) => setMaxArmies(Math.max(0, Math.min(8, Math.floor(Number(e.target.value)))))}
-                                                    className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                    className="input-field min-h-[42px] w-full text-[13px]"
                                                 />
                                             </div>
 
-                                            <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
+                                            <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
                                                 <div className="flex items-center justify-between mb-3">
                                                     <label className="flex items-center gap-2 cursor-pointer">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={leaveSpareArmy}
-                                                            onChange={(e) => {
-                                                                setLeaveSpareArmy(e.target.checked)
-
-                                                            }}
-                                                            className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                        />
-                                                        <span className="text-sm text-gray-300">Leave Spare Army(s)?</span>
+                                                        <Checkbox checked={leaveSpareArmy} onChange={setLeaveSpareArmy} />
+                                                        <SettingInfoLabel label="Leave Spare Army" />
                                                     </label>
                                                 </div>
-                                                <label className="block text-xs sm:text-sm text-gray-300 mb-2">Amount:</label>
+                                                <div className="mb-2">
+                                                    <SettingInfoLabel label="Spare Army Amount" className="text-[12px] font-bold text-text-muted" />
+                                                </div>
                                                 <input
                                                     type="number"
                                                     min={0}
@@ -250,29 +268,23 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                                                         }
                                                     }}
                                                     onBlur={(e) => setSpareArmyAmount(Math.max(0, Math.min(7, Math.floor(Number(e.target.value)))))}
-                                                    className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                    className="input-field min-h-[42px] w-full text-[13px]"
                                                 />
                                             </div>
                                         </div>
 
                                         {/* Use High Tier Troops */}
-                                        <label className="flex items-center justify-between p-4 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                            <span className="text-sm text-gray-300">Use High Tier Troops</span>
-                                            <input
-                                                type="checkbox"
-                                                checked={useHighTierTroops}
-                                                onChange={(e) => {
-                                                    setUseHighTierTroops(e.target.checked)
-
-                                                }}
-                                                className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                            />
+                                        <label className="flex items-center justify-between rounded-md border border-border bg-bg-inset/70 p-4 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
+                                            <SettingInfoLabel label="Use High Tier Troops" />
+                                            <Checkbox checked={useHighTierTroops} onChange={setUseHighTierTroops} />
                                         </label>
 
                                         {/* Resource Types */}
                                         <div>
-                                            <h4 className="text-sm font-medium text-gray-300 mb-3">Types:</h4>
-                                            <div className="flex flex-wrap gap-3">
+                                            <h4 className="mb-3">
+                                                <SettingInfoLabel label="Resource Types" className="text-[11px] font-black uppercase tracking-[0.18em] text-text-muted" />
+                                            </h4>
+                                            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:flex md:flex-wrap md:gap-3">
                                                 {[
                                                     { label: 'Food', value: gatherFood, setter: setGatherFood, index: 0 },
                                                     { label: 'Stone', value: gatherStone, setter: setGatherStone, index: 1 },
@@ -281,17 +293,9 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                                                     { label: 'Gold', value: gatherGold, setter: setGatherGold, index: 4 },
                                                     { label: 'Lunite', value: gatherLunite, setter: setGatherLunite, index: 5 },
                                                 ].map((resource) => (
-                                                    <label key={resource.index} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={resource.value}
-                                                            onChange={(e) => {
-                                                                resource.setter(e.target.checked)
-
-                                                            }}
-                                                            className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                        />
-                                                        <span className="text-sm text-white">{resource.label}</span>
+                                                    <label key={resource.index} className="flex items-center justify-between gap-4 md:gap-2 rounded-md border border-border bg-bg-inset/70 px-4 py-3 md:py-2 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
+                                                        <SettingInfoLabel label={resource.label} />
+                                                        <Checkbox checked={resource.value} onChange={resource.setter} />
                                                     </label>
                                                 ))}
                                             </div>
@@ -299,42 +303,28 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                                     </div>
 
                                     {/* Hunting Section */}
-                                    <div className="space-y-4 pt-6 border-t border-white/10">
-                                        <div className="flex items-center justify-between p-4 rounded-xl bg-green-500/10 border border-green-500/20">
+                                    <div className="space-y-4 border-t border-border pt-6">
+                                        <div className="flex items-center justify-between rounded-md border border-accent-1/20 bg-accent-1/10 p-4">
                                             <div>
                                                 <label className="flex items-center gap-3 cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={huntMonsters}
-                                                        onChange={(e) => {
-                                                            setHuntMonsters(e.target.checked)
-
-                                                        }}
-                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-green-500 focus:ring-2 focus:ring-green-500/50"
-                                                    />
-                                                    <span className="text-sm font-medium text-green-300">Hunt Monsters</span>
+                                                    <Checkbox checked={huntMonsters} onChange={setHuntMonsters} />
+                                                    <SettingInfoLabel label="Hunt Monsters" />
                                                 </label>
-                                                <p className="text-xs text-gray-400 ml-8">(This will disable normal hunting mode)</p>
+                                                <p className="ml-8 text-xs text-text-muted">This will disable normal hunting mode.</p>
                                             </div>
                                         </div>
 
                                         {/* Hunting Options */}
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            <label className="flex items-center justify-between p-4 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                <span className="text-sm text-gray-300">Use Energy Items</span>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={useEnergyItems}
-                                                    onChange={(e) => {
-                                                        setUseEnergyItems(e.target.checked)
-
-                                                    }}
-                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                />
+                                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 md:gap-4">
+                                            <label className="flex items-center justify-between rounded-md border border-border bg-bg-inset/70 p-4 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
+                                                <SettingInfoLabel label="Use Energy Items" />
+                                                <Checkbox checked={useEnergyItems} onChange={setUseEnergyItems} />
                                             </label>
 
-                                            <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                                <label className="block text-xs sm:text-sm text-gray-300 mb-2">Kills Per Day:</label>
+                                            <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
+                                                <div className="mb-2">
+                                                    <SettingInfoLabel label="Kills Per Day" className="text-[12px] font-bold text-text-muted" />
+                                                </div>
                                                 <input
                                                     type="number"
                                                     min={0}
@@ -348,12 +338,14 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                                                         }
                                                     }}
                                                     onBlur={(e) => setKillsPerDay(Math.max(0, Math.min(100, Math.floor(Number(e.target.value)))))}
-                                                    className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                    className="input-field min-h-[42px] w-full text-[13px]"
                                                 />
                                             </div>
 
-                                            <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                                <label className="block text-xs sm:text-sm text-gray-300 mb-2">Level:</label>
+                                            <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
+                                                <div className="mb-2">
+                                                    <SettingInfoLabel label="Level" helpText="Monster level to hunt in realm mode." className="text-[12px] font-bold text-text-muted" />
+                                                </div>
                                                 <input
                                                     type="number"
                                                     min={1}
@@ -367,7 +359,7 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                                                         }
                                                     }}
                                                     onBlur={(e) => setMonsterLevel(Math.max(1, Math.min(5, Math.floor(Number(e.target.value)))))}
-                                                    className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                    className="input-field min-h-[42px] w-full text-[13px]"
                                                 />
                                             </div>
                                         </div>

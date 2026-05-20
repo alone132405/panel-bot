@@ -582,18 +582,27 @@ export function getNestedValue(obj: any, path: string): any {
     return path.split('.').reduce((current, key) => current?.[key], obj)
 }
 
+function isArrayIndexKey(key: string): boolean {
+    return /^\d+$/.test(key)
+}
+
 /**
  * Set value in nested object using dot notation path
  */
 export function setNestedValue(obj: any, path: string, value: any): void {
     const keys = path.split('.')
     const lastKey = keys.pop()!
-    const target = keys.reduce((current, key) => {
-        if (!(key in current)) {
-            current[key] = {}
+
+    const target = keys.reduce((current, key, index) => {
+        const nextKey = keys[index + 1] || lastKey
+
+        if (current[key] === undefined || current[key] === null || typeof current[key] !== 'object') {
+            current[key] = isArrayIndexKey(nextKey) ? [] : {}
         }
+
         return current[key]
     }, obj)
+
     target[lastKey] = value
 }
 

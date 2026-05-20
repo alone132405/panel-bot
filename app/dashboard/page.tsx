@@ -123,15 +123,15 @@ export default function DashboardPage() {
                         </h1>
                         
                         <p className="font-sans text-[16px] text-text-muted mb-8 max-w-[480px]">
-                            Seamlessly interact with your bot infrastructure through our high-performance liquid interface.
+                            Manage bot configuration, bank controls, and exported reports from one dark operations workspace.
                         </p>
 
                         <div className="flex flex-wrap gap-4">
-                            <button onClick={() => router.push('/dashboard/settings')} className="group px-7 py-3 rounded-[10px] bg-gradient-to-br from-accent-1 to-accent-2 text-[#07070E] font-sans text-[14px] font-bold flex items-center gap-2 hover:shadow-[0_0_20px_rgba(0,255,178,0.4)] hover:brightness-110 hover:-translate-y-[2px] transition-all duration-250">
+                            <button onClick={() => router.push('/dashboard/settings')} className="group flex items-center gap-2 rounded-lg bg-gradient-to-br from-accent-1 to-accent-cyan px-7 py-3 font-sans text-[14px] font-bold text-[#031017] transition-all duration-200 hover:-translate-y-[2px] hover:brightness-110 hover:shadow-glow-mint">
                                 <span>Initialize Setup</span>
                                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </button>
-                            <button onClick={() => router.push('/dashboard/reports')} className="px-7 py-3 rounded-[10px] border border-border bg-transparent text-text-primary font-sans text-[14px] hover:bg-accent-2/10 hover:border-accent-2 transition-all duration-200">
+                            <button onClick={() => router.push('/dashboard/reports')} className="rounded-lg border border-border bg-transparent px-7 py-3 font-sans text-[14px] text-text-primary transition-all duration-200 hover:border-accent-2 hover:bg-accent-2/10">
                                 View Logs
                             </button>
                         </div>
@@ -139,19 +139,19 @@ export default function DashboardPage() {
 
                     {/* Right side floating chips */}
                     <div className="hidden lg:flex flex-col gap-4 mt-8 md:mt-0 relative w-[240px] h-[200px]">
-                        <div className="absolute top-0 right-0 px-4 py-3 rounded-xl bg-bg-surface border border-accent-1/20 animate-[float_3s_ease-in-out_infinite]">
-                            <span className="font-sans text-sm font-medium text-text-primary flex items-center gap-2">
-                                ⚡ Bot Status: <span className="text-accent-1">RUNNING</span>
+                        <div className="absolute top-0 right-0 rounded-lg border border-accent-1/20 bg-bg-surface px-4 py-3 animate-[float_3s_ease-in-out_infinite]">
+                            <span className="flex items-center gap-2 font-sans text-sm font-medium text-text-primary">
+                                <Activity className="h-4 w-4 text-accent-1" /> Bot Status: <span className="text-accent-1">RUNNING</span>
                             </span>
                         </div>
-                        <div className="absolute top-[70px] right-[40px] px-4 py-3 rounded-xl bg-bg-surface border border-accent-1/20 animate-[float_3.5s_ease-in-out_infinite_0.5s]">
-                            <span className="font-sans text-sm font-medium text-text-primary flex items-center gap-2">
-                                🕐 Uptime: <span className="text-accent-2">99.8%</span>
+                        <div className="absolute right-[40px] top-[70px] rounded-lg border border-accent-2/20 bg-bg-surface px-4 py-3 animate-[float_3.5s_ease-in-out_infinite_0.5s]">
+                            <span className="flex items-center gap-2 font-sans text-sm font-medium text-text-primary">
+                                <Settings2 className="h-4 w-4 text-accent-2" /> Uptime: <span className="text-accent-2">99.8%</span>
                             </span>
                         </div>
-                        <div className="absolute top-[140px] right-[20px] px-4 py-3 rounded-xl bg-bg-surface border border-accent-1/20 animate-[float_4s_ease-in-out_infinite_1s]">
-                            <span className="font-sans text-sm font-medium text-text-primary flex items-center gap-2">
-                                📡 Sync: <span className="text-accent-1">Live</span>
+                        <div className="absolute right-[20px] top-[140px] rounded-lg border border-accent-cyan/20 bg-bg-surface px-4 py-3 animate-[float_4s_ease-in-out_infinite_1s]">
+                            <span className="flex items-center gap-2 font-sans text-sm font-medium text-text-primary">
+                                <Database className="h-4 w-4 text-accent-cyan" /> Sync: <span className="text-accent-1">Live</span>
                             </span>
                         </div>
                     </div>
@@ -165,12 +165,12 @@ export default function DashboardPage() {
                         variants={itemVariants}
                         key={i}
                         onClick={() => router.push(card.href)}
-                        className="group relative bg-bg-surface border border-border rounded-[14px] p-7 cursor-pointer hover:-translate-y-[6px] hover:border-accent-1/50 transition-all duration-250 hover:shadow-glow-mint overflow-hidden"
+                        className="group relative cursor-pointer overflow-hidden rounded-lg border border-border bg-bg-surface p-7 transition-all duration-200 hover:-translate-y-[6px] hover:border-accent-1/50 hover:shadow-glow-mint"
                     >
                         {/* Top Accent Bar */}
                         <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${card.gradientStart} ${card.gradientEnd} opacity-50 group-hover:opacity-100 transition-opacity`} />
                         
-                        <div className={`w-[44px] h-[44px] rounded-[10px] flex items-center justify-center mb-5 ${card.accentClass}`}>
+                        <div className={`mb-5 flex h-[44px] w-[44px] items-center justify-center rounded-lg ${card.accentClass}`}>
                             <card.icon className="w-5 h-5" />
                         </div>
 
@@ -183,7 +183,7 @@ export default function DashboardPage() {
                         </p>
 
                         <div className="mt-auto flex items-center justify-between">
-                            <span className={`font-sans text-[13px] font-bold flex items-center gap-1 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-250 ${card.accentClass.split(' ')[0]}`}>
+                            <span className={`flex -translate-x-2 items-center gap-1 font-sans text-[13px] font-bold opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 ${card.accentClass.split(' ')[0]}`}>
                                 Configure <ArrowRight className="w-3 h-3" />
                             </span>
                             

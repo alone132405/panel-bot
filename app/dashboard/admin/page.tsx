@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Users, Shield, Activity, Search, Plus, Trash2, Clock, Check, X, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
+import { TacticalSelect } from '@/components/ui/TacticalSelect'
 import UserManagementModal from '@/components/modals/UserManagementModal'
 
 interface User {
@@ -269,19 +270,55 @@ export default function AdminPage() {
         }
     }
 
-    // Filter users based on search and tab
     const filteredUsers = users.filter((user) => {
         const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email.toLowerCase().includes(searchTerm.toLowerCase())
 
         if (activeTab === 'pending') return matchesSearch && user.accountStatus === 'PENDING'
         if (activeTab === 'approved') return matchesSearch && user.accountStatus === 'APPROVED'
+        if (activeTab === 'adminRequests') return false
         return matchesSearch
+    })
+
+    const filteredAdminRequests = adminRequests.filter((request) => {
+        const query = searchTerm.toLowerCase()
+        if (!query) return true
+
+        return request.iggId.toLowerCase().includes(query) ||
+            request.adminName.toLowerCase().includes(query) ||
+            request.adminUserId.toLowerCase().includes(query)
     })
 
     const pendingCount = users.filter(u => u.accountStatus === 'PENDING').length
     const approvedCount = users.filter(u => u.accountStatus === 'APPROVED').length
     const unassignedIggIds = availableIggIds.filter((igg) => !igg.isAssigned)
+    const assignedCount = availableIggIds.length - unassignedIggIds.length
+
+    const adminMetrics = [
+        { label: 'Pending', value: pendingCount, icon: Clock, tone: 'text-accent-gold', iconClass: 'border-accent-gold/25 bg-accent-gold/10 text-accent-gold' },
+        { label: 'Approved', value: approvedCount, icon: Check, tone: 'text-accent-1', iconClass: 'border-accent-1/25 bg-accent-1/10 text-accent-1' },
+        { label: 'Assigned IGG', value: assignedCount, icon: Shield, tone: 'text-accent-cyan', iconClass: 'border-accent-cyan/25 bg-accent-cyan/10 text-accent-cyan' },
+        { label: 'Unassigned', value: unassignedIggIds.length, icon: Activity, tone: 'text-primary-300', iconClass: 'border-primary-500/25 bg-primary-500/10 text-primary-300' },
+    ]
+
+    const adminTabs = [
+        { id: 'pending' as const, label: 'Pending', count: pendingCount, icon: Clock },
+        { id: 'approved' as const, label: 'Approved', count: approvedCount, icon: Check },
+        { id: 'all' as const, label: 'All Users', count: users.length, icon: Users },
+        { id: 'adminRequests' as const, label: 'Admin Requests', count: adminRequests.length, icon: UserPlus },
+    ]
+
+    const statusClass: Record<User['accountStatus'], string> = {
+        PENDING: 'border-accent-gold/25 bg-accent-gold/10 text-accent-gold',
+        APPROVED: 'border-accent-1/25 bg-accent-1/10 text-accent-1',
+        REJECTED: 'border-accent-3/25 bg-accent-3/10 text-accent-3',
+    }
+
+    const contactClass = (contactType: User['contactType']) => {
+        if (contactType === 'WHATSAPP') return 'border-[#25D366]/30 bg-[#25D366]/10 text-[#25D366]'
+        if (contactType === 'LINE') return 'border-[#00C300]/30 bg-[#00C300]/10 text-[#00C300]'
+        return 'border-[#0088CC]/30 bg-[#0088CC]/10 text-[#0088CC]'
+    }
 
     if (loading) {
         return (
@@ -292,354 +329,360 @@ export default function AdminPage() {
     }
 
     return (
-        <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
-            {/* Header */}
-            <div>
-                <h1 className="font-orbitron tracking-wide text-xl sm:text-3xl font-bold text-text-primary mb-1 sm:mb-2">SYSTEM ADMINISTRATION</h1>
-                <p className="font-sans text-sm sm:text-base text-text-muted">Manage users, approvals, and global system operations</p>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-bg-surface border border-border rounded-[14px] p-6 relative overflow-hidden group">
-                    <div className="absolute bottom-0 left-0 w-full h-1/2 opacity-10 bg-gradient-to-t from-yellow-400 to-transparent"></div>
-                    <div className="relative z-10">
-                        <p className="font-sans text-text-muted text-sm uppercase tracking-wider mb-2">Pending</p>
-                        <p className="font-orbitron text-4xl text-yellow-400">{pendingCount}</p>
+        <div className="space-y-4 p-2.5 sm:space-y-5 sm:p-6">
+            <div className="overflow-hidden rounded-xl border border-border bg-bg-surface shadow-panel">
+                <div className="border-b border-border bg-[linear-gradient(135deg,rgba(33,243,177,0.08),rgba(88,101,242,0.04))] px-4 py-3 sm:px-6 sm:py-5">
+                    <div className="w-fit rounded-full border border-accent-1/20 bg-accent-1/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-accent-1 sm:text-[11px]">
+                        Control Center
                     </div>
-                </div>
-
-                <div className="bg-bg-surface border border-border rounded-[14px] p-6 relative overflow-hidden group">
-                    <div className="absolute bottom-0 left-0 w-full h-1/2 opacity-10 bg-gradient-to-t from-accent-1 to-transparent"></div>
-                    <div className="relative z-10">
-                        <p className="font-sans text-text-muted text-sm uppercase tracking-wider mb-2">Approved Users</p>
-                        <p className="font-orbitron text-4xl text-accent-1">{approvedCount}</p>
-                    </div>
-                </div>
-
-                <div className="bg-bg-surface border border-border rounded-[14px] p-6 relative overflow-hidden group">
-                    <div className="absolute bottom-0 left-0 w-full h-1/2 opacity-10 bg-gradient-to-t from-accent-2 to-transparent"></div>
-                    <div className="relative z-10">
-                        <p className="font-sans text-text-muted text-sm uppercase tracking-wider mb-2">Total IGG IDs</p>
-                        <p className="font-orbitron text-4xl text-accent-2">{availableIggIds.length}</p>
-                    </div>
-                </div>
-
-                <div className="bg-bg-surface border border-border rounded-[14px] p-6 relative overflow-hidden group">
-                    <div className="absolute bottom-0 left-0 w-full h-1/2 opacity-10 bg-gradient-to-t from-accent-3 to-transparent"></div>
-                    <div className="relative z-10">
-                        <p className="font-sans text-text-muted text-sm uppercase tracking-wider mb-2">Unassigned</p>
-                        <p className="font-orbitron text-4xl text-accent-3">{unassignedIggIds.length}</p>
-                    </div>
+                    <h1 className="mt-3 font-orbitron text-lg font-bold tracking-[0.08em] text-text-primary sm:text-3xl sm:tracking-wide">SYSTEM ADMINISTRATION</h1>
+                    <p className="mt-1 max-w-2xl font-sans text-[13px] leading-6 text-text-muted sm:text-base">
+                        Manage users, approvals, IGG assignments, and global operations.
+                    </p>
                 </div>
             </div>
 
-            {/* Tabs */}
-            <div className="flex gap-2 flex-wrap">
-                <button
-                    onClick={() => setActiveTab('pending')}
-                    className={`px-5 py-2.5 rounded-full font-sans text-[14px] transition-all flex items-center gap-2 ${activeTab === 'pending'
-                        ? 'bg-gradient-to-r from-accent-1 to-accent-2 text-[#07070E] font-bold shadow-glow-mint'
-                        : 'bg-bg-elevated text-text-muted hover:text-text-primary hover:bg-bg-elevated/80'
-                        }`}
-                >
-                    <Clock className="w-4 h-4" />
-                    Pending
-                    <span className={`ml-1 px-2 py-0.5 rounded-full text-[11px] ${activeTab === 'pending' ? 'bg-[#07070E]/20' : 'bg-bg-surface'}`}>{pendingCount}</span>
-                </button>
-                <button
-                    onClick={() => setActiveTab('approved')}
-                    className={`px-5 py-2.5 rounded-full font-sans text-[14px] transition-all flex items-center gap-2 ${activeTab === 'approved'
-                        ? 'bg-gradient-to-r from-accent-1 to-accent-2 text-[#07070E] font-bold shadow-glow-mint'
-                        : 'bg-bg-elevated text-text-muted hover:text-text-primary hover:bg-bg-elevated/80'
-                        }`}
-                >
-                    <Check className="w-4 h-4" />
-                    Approved
-                    <span className={`ml-1 px-2 py-0.5 rounded-full text-[11px] ${activeTab === 'approved' ? 'bg-[#07070E]/20' : 'bg-bg-surface'}`}>{approvedCount}</span>
-                </button>
-                <button
-                    onClick={() => setActiveTab('all')}
-                    className={`px-5 py-2.5 rounded-full font-sans text-[14px] transition-all flex items-center gap-2 ${activeTab === 'all'
-                        ? 'bg-gradient-to-r from-accent-1 to-accent-2 text-[#07070E] font-bold shadow-glow-mint'
-                        : 'bg-bg-elevated text-text-muted hover:text-text-primary hover:bg-bg-elevated/80'
-                        }`}
-                >
-                    <Users className="w-4 h-4" />
-                    All Users
-                    <span className={`ml-1 px-2 py-0.5 rounded-full text-[11px] ${activeTab === 'all' ? 'bg-[#07070E]/20' : 'bg-bg-surface'}`}>{users.length}</span>
-                </button>
-                <button
-                    onClick={() => setActiveTab('adminRequests')}
-                    className={`px-5 py-2.5 rounded-full font-sans text-[14px] transition-all flex items-center gap-2 ${activeTab === 'adminRequests'
-                        ? 'bg-gradient-to-r from-accent-1 to-accent-2 text-[#07070E] font-bold shadow-glow-mint'
-                        : 'bg-bg-elevated text-text-muted hover:text-text-primary hover:bg-bg-elevated/80'
-                        }`}
-                >
-                    <UserPlus className="w-4 h-4" />
-                    Admin Requests
-                    <span className={`ml-1 px-2 py-0.5 rounded-full text-[11px] ${activeTab === 'adminRequests' ? 'bg-[#07070E]/20' : 'bg-bg-surface'}`}>{adminRequests.length}</span>
-                </button>
-            </div>
+            <section className="grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
+                {adminMetrics.map((metric) => {
+                    const Icon = metric.icon
+                    return (
+                        <div key={metric.label} className="rounded-lg border border-border bg-bg-surface p-3 shadow-panel sm:p-4">
+                            <div className="mb-3 flex items-start justify-between gap-2 sm:mb-4 sm:items-center sm:gap-3">
+                                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted sm:text-[11px] sm:tracking-[0.16em]">{metric.label}</p>
+                                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border sm:h-9 sm:w-9 ${metric.iconClass}`}>
+                                    <Icon className="h-4 w-4" />
+                                </div>
+                            </div>
+                            <p className={`font-orbitron text-[28px] leading-none sm:text-3xl ${metric.tone}`}>{metric.value}</p>
+                        </div>
+                    )
+                })}
+            </section>
 
-            {/* Search */}
-            <div className="bg-bg-surface border border-border rounded-[14px] p-4">
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
-                    <input
-                        type="text"
-                        placeholder="Search users by name or email..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-bg-elevated border border-border rounded-xl text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-2 focus:shadow-glow-violet transition-all"
-                    />
+            <section className="rounded-lg border border-border bg-bg-surface shadow-panel">
+                <div className="grid grid-cols-2 gap-2 border-b border-border bg-bg-elevated/55 p-2.5 sm:p-3 xl:grid-cols-4">
+                    {adminTabs.map((tab) => {
+                        const Icon = tab.icon
+                        const isActive = activeTab === tab.id
+                        return (
+                            <button
+                                key={tab.id}
+                                type="button"
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`flex min-h-[54px] items-center justify-between gap-2 rounded-md border px-2.5 text-left transition-all sm:min-h-[48px] sm:gap-3 sm:px-3 ${isActive
+                                    ? 'border-accent-1/35 bg-accent-1/10 text-accent-1 shadow-glow-mint'
+                                    : 'border-border bg-bg-inset text-text-muted hover:border-accent-2/30 hover:text-text-primary'
+                                    }`}
+                            >
+                                <span className="flex min-w-0 items-center gap-2">
+                                    <Icon className="h-4 w-4 shrink-0" />
+                                    <span className="truncate text-[12px] font-bold sm:text-[13px]">{tab.label}</span>
+                                </span>
+                                <span className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[10px] sm:text-[11px] ${isActive ? 'border-accent-1/20 bg-accent-1/10' : 'border-border bg-bg-surface'}`}>
+                                    {tab.count}
+                                </span>
+                            </button>
+                        )
+                    })}
                 </div>
-            </div>
 
-            {/* Users Table */}
-            <div className="bg-bg-surface border border-border rounded-[14px] overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="bg-bg-elevated border-b border-border">
-                            <tr>
-                                <th className="px-6 py-4 text-left font-orbitron text-[10px] tracking-[0.15em] text-text-muted uppercase">User</th>
-                                <th className="px-6 py-4 text-left font-orbitron text-[10px] tracking-[0.15em] text-text-muted uppercase">Contact</th>
-                                <th className="px-6 py-4 text-left font-orbitron text-[10px] tracking-[0.15em] text-text-muted uppercase">IGG IDs</th>
-                                <th className="px-6 py-4 text-left font-orbitron text-[10px] tracking-[0.15em] text-text-muted uppercase">Subscription</th>
-                                <th className="px-6 py-4 text-left font-orbitron text-[10px] tracking-[0.15em] text-text-muted uppercase">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border">
-                            {filteredUsers.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center text-gray-400">
-                                        No users found
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredUsers.map((user) => (
-                                    <tr
+                <div className="grid gap-2.5 p-3 sm:gap-3 sm:p-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+                        <input
+                            type="text"
+                            placeholder={activeTab === 'adminRequests' ? 'Search requests by IGG, admin name, or ID...' : 'Search users by name or email...'}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="h-11 w-full rounded-md border border-border bg-bg-inset px-4 pl-10 text-sm text-text-primary placeholder-text-muted transition-all focus:border-accent-2 focus:outline-none focus:shadow-glow-violet"
+                        />
+                    </div>
+                    <span className="w-fit rounded-full border border-border bg-bg-inset px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted sm:text-[11px]">
+                        {activeTab === 'adminRequests' ? `${filteredAdminRequests.length} requests` : `${filteredUsers.length} users`}
+                    </span>
+                </div>
+            </section>
+
+            {activeTab === 'adminRequests' ? (
+                <section className="overflow-hidden rounded-lg border border-border bg-bg-surface shadow-panel">
+                    <div className="flex flex-col gap-2 border-b border-border bg-bg-elevated/55 p-3 sm:p-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h2 className="text-[15px] font-bold text-text-primary">Admin Requests</h2>
+                            <p className="text-[12px] text-text-muted">Review pending admin access changes.</p>
+                        </div>
+                        <span className="w-fit rounded-full border border-accent-gold/20 bg-accent-gold/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-accent-gold">
+                            Pending Queue
+                        </span>
+                    </div>
+
+                    {filteredAdminRequests.length === 0 ? (
+                        <div className="p-8 text-center sm:p-12">
+                            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-md border border-border bg-bg-inset text-text-muted">
+                                <UserPlus className="h-6 w-6" />
+                            </div>
+                            <p className="font-bold text-text-primary">No pending admin requests</p>
+                            <p className="mt-1 text-sm text-text-muted">Matching admin requests will appear here.</p>
+                        </div>
+                    ) : (
+                        <div>
+                            <div className="hidden grid-cols-[minmax(110px,0.8fr)_minmax(180px,1fr)_110px_minmax(180px,1fr)_180px] gap-3 border-b border-border bg-bg-elevated/35 px-4 py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-text-muted xl:grid">
+                                <span>IGG ID</span>
+                                <span>Requested Admin</span>
+                                <span>Type</span>
+                                <span>Requested At</span>
+                                <span className="text-right">Actions</span>
+                            </div>
+                            <div className="space-y-3 p-3 sm:space-y-0 sm:p-0 sm:divide-y sm:divide-border">
+                                {filteredAdminRequests.map((request) => (
+                                    <div
+                                        key={request.id}
+                                        className="grid gap-3 rounded-lg border border-border bg-bg-inset/50 p-3 transition-colors hover:bg-white/[0.025] sm:rounded-none sm:border-0 sm:bg-transparent sm:p-4 xl:grid-cols-[minmax(110px,0.8fr)_minmax(180px,1fr)_110px_minmax(180px,1fr)_180px] xl:items-center"
+                                    >
+                                        <div>
+                                            <span className="mb-1 block text-[11px] font-bold uppercase tracking-[0.14em] text-text-muted xl:hidden">IGG ID</span>
+                                            <span className="font-mono text-[13px] font-bold text-text-primary">{request.iggId}</span>
+                                        </div>
+                                        <div className="min-w-0">
+                                            <span className="mb-1 block text-[11px] font-bold uppercase tracking-[0.14em] text-text-muted xl:hidden">Requested Admin</span>
+                                            <p className="truncate text-[14px] font-bold text-text-primary">{request.adminName}</p>
+                                            <p className="truncate font-mono text-[12px] text-text-muted">{request.adminUserId}</p>
+                                        </div>
+                                        <div>
+                                            <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] ${request.requestType === 'DELETE'
+                                                ? 'border-accent-3/25 bg-accent-3/10 text-accent-3'
+                                                : 'border-accent-2/25 bg-accent-2/10 text-accent-2'
+                                                }`}>
+                                                {request.requestType || 'ADD'}
+                                            </span>
+                                        </div>
+                                        <div className="text-[13px] text-text-muted">
+                                            <span className="mb-1 block text-[11px] font-bold uppercase tracking-[0.14em] text-text-muted xl:hidden">Requested At</span>
+                                            {new Date(request.createdAt).toLocaleString()}
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleApproveAdminRequest(request.id)}
+                                                className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-accent-1/30 bg-accent-1/10 px-3 text-[12px] font-bold text-accent-1 transition-colors hover:bg-accent-1/20"
+                                            >
+                                                <Check className="h-4 w-4" />
+                                                Approve
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRejectAdminRequest(request.id)}
+                                                className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-accent-3/30 bg-accent-3/10 px-3 text-[12px] font-bold text-accent-3 transition-colors hover:bg-accent-3/20"
+                                            >
+                                                <X className="h-4 w-4" />
+                                                Reject
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </section>
+            ) : (
+                <section className="overflow-hidden rounded-lg border border-border bg-bg-surface shadow-panel">
+                    <div className="flex flex-col gap-2 border-b border-border bg-bg-elevated/55 p-3 sm:p-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h2 className="text-[15px] font-bold text-text-primary">User Accounts</h2>
+                            <p className="text-[12px] text-text-muted">Open a row to review profile details and account controls.</p>
+                        </div>
+                        <span className="w-fit rounded-full border border-accent-1/20 bg-accent-1/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-accent-1">
+                            {activeTab === 'pending' ? 'Approval Queue' : activeTab === 'approved' ? 'Active Users' : 'All Accounts'}
+                        </span>
+                    </div>
+
+                    {filteredUsers.length === 0 ? (
+                        <div className="p-8 text-center sm:p-12">
+                            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-md border border-border bg-bg-inset text-text-muted">
+                                <Users className="h-6 w-6" />
+                            </div>
+                            <p className="font-bold text-text-primary">No users found</p>
+                            <p className="mt-1 text-sm text-text-muted">Change the tab or search term to widen the result set.</p>
+                        </div>
+                    ) : (
+                        <div>
+                            <div className="hidden grid-cols-[minmax(220px,1.25fr)_minmax(190px,1fr)_minmax(220px,1.15fr)_minmax(170px,0.95fr)_minmax(180px,0.95fr)] gap-3 border-b border-border bg-bg-elevated/35 px-4 py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-text-muted 2xl:grid">
+                                <span>User</span>
+                                <span>Contact</span>
+                                <span>IGG IDs</span>
+                                <span>Subscription</span>
+                                <span className="text-right">Actions</span>
+                            </div>
+                            <div className="space-y-3 p-3 sm:space-y-0 sm:p-0 sm:divide-y sm:divide-border">
+                                {filteredUsers.map((user) => (
+                                    <div
                                         key={user.id}
-                                        className="hover:bg-[#7B5EFF0D] transition-colors cursor-pointer group"
+                                        role="button"
+                                        tabIndex={0}
                                         onClick={() => {
                                             setSelectedUserForModal(user)
                                             setIsUserModalOpen(true)
                                         }}
+                                        onKeyDown={(event) => {
+                                            if (event.key === 'Enter' || event.key === ' ') {
+                                                event.preventDefault()
+                                                setSelectedUserForModal(user)
+                                                setIsUserModalOpen(true)
+                                            }
+                                        }}
+                                        className="grid cursor-pointer gap-3 rounded-lg border border-border bg-bg-inset/50 p-3 transition-colors hover:bg-white/[0.025] sm:gap-4 sm:rounded-none sm:border-0 sm:bg-transparent sm:p-4 2xl:grid-cols-[minmax(220px,1.25fr)_minmax(190px,1fr)_minmax(220px,1.15fr)_minmax(170px,0.95fr)_minmax(180px,0.95fr)] 2xl:items-center"
                                     >
-                                        <td className="px-6 py-4">
-                                            <div>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent-2/20 to-accent-1/20 border border-border flex items-center justify-center font-orbitron text-accent-1">
-                                                        {user.name.charAt(0).toUpperCase()}
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-sans text-[14px] font-bold text-text-primary">{user.name}</p>
-                                                        <p className="font-sans text-[12px] text-text-muted">{user.email}</p>
-                                                        <span className="inline-block mt-1 px-2 py-0.5 bg-bg-elevated rounded-full font-sans text-[11px] text-text-muted">
-                                                            {new Date(user.createdAt).toLocaleDateString()}
-                                                        </span>
-                                                    </div>
-                                                </div>
+                                        <div className="flex min-w-0 items-start gap-3">
+                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-accent-1/20 bg-accent-1/10 font-orbitron text-[14px] text-accent-1">
+                                                {user.name.charAt(0).toUpperCase()}
                                             </div>
-                                        </td>
-                                        <td className="px-6 py-4">
+                                            <div className="min-w-0">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <p className="truncate text-[14px] font-bold text-text-primary">{user.name}</p>
+                                                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${statusClass[user.accountStatus]}`}>
+                                                        {user.accountStatus}
+                                                    </span>
+                                                </div>
+                                                <p className="truncate text-[12px] text-text-muted">{user.email}</p>
+                                                <p className="mt-1 text-[11px] text-text-muted">Joined {new Date(user.createdAt).toLocaleDateString()}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="min-w-0">
+                                            <span className="mb-1 block text-[11px] font-bold uppercase tracking-[0.14em] text-text-muted 2xl:hidden">Contact</span>
                                             {user.contactType && user.contactValue ? (
-                                                <div className="flex items-center gap-2">
-                                                    <span className={`px-2 py-1 rounded-full text-[11px] font-sans font-bold border ${user.contactType === 'WHATSAPP' ? 'bg-[#25D366]/10 text-[#25D366] border-[#25D366]/30' :
-                                                        user.contactType === 'LINE' ? 'bg-[#00C300]/10 text-[#00C300] border-[#00C300]/30' :
-                                                            'bg-[#0088CC]/10 text-[#0088CC] border-[#0088CC]/30'
-                                                        }`}>
+                                                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                                                    <span className={`rounded-full border px-2 py-1 text-[11px] font-bold ${contactClass(user.contactType)}`}>
                                                         {user.contactType}
                                                     </span>
-                                                    <span className="font-mono text-[12px] text-text-muted">{user.contactValue}</span>
+                                                    <span className="min-w-0 truncate font-mono text-[12px] text-text-muted">{user.contactValue}</span>
                                                 </div>
                                             ) : (
-                                                <span className="text-gray-500 text-sm">Not set</span>
+                                                <span className="text-sm text-text-muted">Not set</span>
                                             )}
-                                        </td>
-                                        <td className="px-6 py-4">
+                                        </div>
+
+                                        <div className="min-w-0">
+                                            <span className="mb-1 block text-[11px] font-bold uppercase tracking-[0.14em] text-text-muted 2xl:hidden">IGG IDs</span>
                                             <div className="flex flex-wrap gap-2">
                                                 {user.iggIds.length > 0 ? (
                                                     user.iggIds.map((igg) => (
                                                         <div
                                                             key={igg.id}
-                                                            className="flex items-center gap-2 px-3 py-1 bg-accent-emerald/10 text-accent-emerald rounded-lg text-sm"
+                                                            className="flex max-w-full items-center gap-2 rounded-md border border-accent-1/20 bg-accent-1/10 px-2.5 py-1 text-[12px] font-bold text-accent-1"
                                                         >
-                                                            <span>{igg.iggId}</span>
+                                                            <span className="truncate font-mono">{igg.iggId}</span>
                                                             <button
-                                                                onClick={() => handleRevokeIggId(user.id, igg.iggId)}
-                                                                className="hover:text-red-400 transition-colors"
+                                                                type="button"
+                                                                onClick={(event) => {
+                                                                    event.stopPropagation()
+                                                                    handleRevokeIggId(user.id, igg.iggId)
+                                                                }}
+                                                                className="shrink-0 text-text-muted transition-colors hover:text-accent-3"
                                                             >
-                                                                <Trash2 className="w-3 h-3" />
+                                                                <Trash2 className="h-3.5 w-3.5" />
                                                             </button>
                                                         </div>
                                                     ))
                                                 ) : (
-                                                    <span className="text-gray-500 text-sm">None</span>
+                                                    <span className="text-sm text-text-muted">None</span>
                                                 )}
                                             </div>
-                                        </td>
-                                        <td className="px-6 py-4">
+                                        </div>
+
+                                        <div className="min-w-0">
+                                            <span className="mb-1 block text-[11px] font-bold uppercase tracking-[0.14em] text-text-muted 2xl:hidden">Subscription</span>
                                             {user.iggIds.some(igg => igg.subscription) ? (
                                                 <div className="space-y-1">
                                                     {user.iggIds.filter(igg => igg.subscription).map((igg) => (
-                                                        <div key={igg.id} className="flex items-center gap-2">
-                                                            <span className="text-gray-400 text-xs font-mono">{igg.iggId}:</span>
-                                                            <span className="text-white text-xs">
+                                                        <div key={igg.id} className="flex min-w-0 items-center gap-2">
+                                                            <span className="shrink-0 font-mono text-[11px] text-text-muted">{igg.iggId}:</span>
+                                                            <span className="truncate text-[12px] text-text-primary">
                                                                 {new Date(igg.subscription!.expiresAt).toLocaleDateString()}
                                                             </span>
                                                         </div>
                                                     ))}
                                                 </div>
                                             ) : (
-                                                <span className="text-gray-500 text-sm">None</span>
+                                                <span className="text-sm text-text-muted">None</span>
                                             )}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                {user.accountStatus === 'PENDING' ? (
-                                                    <>
-                                                        <button
-                                                            onClick={() => {
-                                                                setSelectedUser(user)
-                                                                setShowApprovalModal(true)
-                                                            }}
-                                                            className="flex items-center gap-1 px-3 py-2 bg-[#10B981]/10 border border-[#10B981]/30 text-[#10B981] rounded-[8px] hover:bg-[#10B981]/20 hover:shadow-glow-mint transition-all duration-150 font-sans text-[13px] font-bold"
-                                                        >
-                                                            <Check className="w-4 h-4" />
-                                                            Approve
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleRejectUser(user)}
-                                                            className="flex items-center gap-1 px-3 py-2 bg-[#FF4D6D]/10 border border-[#FF4D6D]/30 text-[#FF4D6D] rounded-[8px] hover:bg-[#FF4D6D]/20 hover:shadow-glow-red transition-all duration-150 font-sans text-[13px] font-bold"
-                                                        >
-                                                            <X className="w-4 h-4" />
-                                                            Reject
-                                                        </button>
-                                                    </>
-                                                ) : user.accountStatus === 'APPROVED' ? (
-                                                    <button
-                                                        onClick={() => {
-                                                            setSelectedUser(user)
-                                                            setShowAssignModal(true)
-                                                        }}
-                                                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-accent-1/10 to-accent-2/10 border border-accent-1/30 text-accent-1 rounded-[8px] hover:brightness-125 transition-all duration-150 font-sans text-[13px] font-bold"
-                                                    >
-                                                        <Plus className="w-4 h-4" />
-                                                        Assign IGG ID
-                                                    </button>
-                                                ) : (
-                                                    <span className="text-gray-500 text-sm">Rejected</span>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                        </div>
 
-            {/* Admin Requests Table - Only show when adminRequests tab is active */}
-            {activeTab === 'adminRequests' && (
-                <div className="bg-bg-surface border border-border rounded-[14px] overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-bg-elevated border-b border-border">
-                                <tr>
-                                    <th className="px-6 py-4 text-left font-orbitron text-[10px] tracking-[0.15em] text-text-muted uppercase">For IGG ID</th>
-                                    <th className="px-6 py-4 text-left font-orbitron text-[10px] tracking-[0.15em] text-text-muted uppercase">Requested Admin</th>
-                                    <th className="px-6 py-4 text-center font-orbitron text-[10px] tracking-[0.15em] text-text-muted uppercase">Type</th>
-                                    <th className="px-6 py-4 text-left font-orbitron text-[10px] tracking-[0.15em] text-text-muted uppercase">Requested At</th>
-                                    <th className="px-6 py-4 text-left font-orbitron text-[10px] tracking-[0.15em] text-text-muted uppercase">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-border">
-                                {adminRequests.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={5} className="px-6 py-12 text-center text-gray-400">
-                                            No pending admin requests
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    adminRequests.map((request) => (
-                                        <tr key={request.id} className="hover:bg-[#7B5EFF0D] transition-colors">
-                                            <td className="px-6 py-4">
-                                                <span className="text-white font-mono">{request.iggId}</span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div>
-                                                    <p className="text-white font-medium">{request.adminName}</p>
-                                                    <p className="text-gray-400 text-sm font-mono">{request.adminUserId}</p>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${request.requestType === 'DELETE'
-                                                    ? 'bg-red-500/20 text-red-400'
-                                                    : 'bg-blue-500/20 text-blue-400'
-                                                    }`}>
-                                                    {request.requestType || 'ADD'}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="text-gray-400 text-sm">
-                                                    {new Date(request.createdAt).toLocaleString()}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-2">
+                                        <div className="flex flex-wrap items-center gap-2 2xl:justify-end">
+                                            {user.accountStatus === 'PENDING' ? (
+                                                <>
                                                     <button
-                                                        onClick={() => handleApproveAdminRequest(request.id)}
-                                                        className="flex items-center gap-1 px-3 py-2 bg-[#10B981]/10 border border-[#10B981]/30 text-[#10B981] rounded-[8px] hover:bg-[#10B981]/20 hover:shadow-glow-mint transition-all duration-150 font-sans text-[13px] font-bold"
+                                                        type="button"
+                                                        onClick={(event) => {
+                                                            event.stopPropagation()
+                                                            setSelectedUser(user)
+                                                            setShowApprovalModal(true)
+                                                        }}
+                                                        className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-accent-1/30 bg-accent-1/10 px-3 text-[12px] font-bold text-accent-1 transition-colors hover:bg-accent-1/20"
                                                     >
-                                                        <Check className="w-4 h-4" />
+                                                        <Check className="h-4 w-4" />
                                                         Approve
                                                     </button>
                                                     <button
-                                                        onClick={() => handleRejectAdminRequest(request.id)}
-                                                        className="flex items-center gap-1 px-3 py-2 bg-[#FF4D6D]/10 border border-[#FF4D6D]/30 text-[#FF4D6D] rounded-[8px] hover:bg-[#FF4D6D]/20 hover:shadow-glow-red transition-all duration-150 font-sans text-[13px] font-bold"
+                                                        type="button"
+                                                        onClick={(event) => {
+                                                            event.stopPropagation()
+                                                            handleRejectUser(user)
+                                                        }}
+                                                        className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-accent-3/30 bg-accent-3/10 px-3 text-[12px] font-bold text-accent-3 transition-colors hover:bg-accent-3/20"
                                                     >
-                                                        <X className="w-4 h-4" />
+                                                        <X className="h-4 w-4" />
                                                         Reject
                                                     </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                                                </>
+                                            ) : user.accountStatus === 'APPROVED' ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={(event) => {
+                                                        event.stopPropagation()
+                                                        setSelectedUser(user)
+                                                        setShowAssignModal(true)
+                                                    }}
+                                                    className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-accent-2/30 bg-accent-2/10 px-3 text-[12px] font-bold text-accent-2 transition-colors hover:bg-accent-2/20"
+                                                >
+                                                    <Plus className="h-4 w-4" />
+                                                    Assign IGG
+                                                </button>
+                                            ) : (
+                                                <span className="text-sm text-text-muted">Rejected</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </section>
             )}
 
-            
-            {/* Global Operations Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                {/* GLOBAL AUTOMATION CARD */}
-                <div className="bg-bg-elevated border border-accent-3 rounded-[14px] p-6 relative overflow-hidden shadow-glow-red">
-                    <div className="flex items-center gap-4 mb-6">
-                        <div className="w-4 h-4 bg-accent-3 rounded-full animate-pulse shadow-[0_0_15px_rgba(255,77,109,0.8)]"></div>
-                        <h3 className="font-orbitron text-xl text-accent-3">CRITICAL OPERATIONS</h3>
+            <section className="grid gap-3 sm:gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+                <div className="rounded-lg border border-accent-3/25 bg-bg-surface p-3 shadow-panel sm:p-4">
+                    <div className="mb-4 flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-md border border-accent-3/25 bg-accent-3/10 text-accent-3">
+                            <Activity className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <h3 className="text-[15px] font-bold text-text-primary">Critical Operations</h3>
+                            <p className="text-[12px] text-text-muted">Stop all active proxy servers and bot instances.</p>
+                        </div>
                     </div>
-                    <p className="font-sans text-sm text-text-muted mb-6">
-                        Warning: Terminating all automation will immediately halt all active proxy servers and bot instances.
-                    </p>
-                    <button className="w-full py-4 bg-accent-3 text-white font-orbitron text-lg font-bold rounded-[10px] hover:brightness-125 hover:shadow-[0_0_30px_rgba(255,77,109,0.6)] transition-all active:scale-95">
-                        EMERGENCY STOP
+                    <button className="inline-flex min-h-[42px] w-full items-center justify-center rounded-md border border-accent-3/35 bg-accent-3/10 px-4 text-[13px] font-bold text-accent-3 transition-colors hover:bg-accent-3/20 active:scale-[0.99]">
+                        Emergency Stop
                     </button>
                 </div>
 
-                {/* LOGS TERMINAL */}
-                <div className="bg-[#000000] border border-border rounded-[14px] p-0 flex flex-col h-[220px]">
-                    <div className="px-4 py-3 border-b border-border flex items-center justify-between bg-bg-surface rounded-t-[14px]">
-                        <h3 className="font-orbitron text-sm text-text-primary tracking-widest flex items-center gap-2">
-                            <span className="w-2 h-2 bg-accent-1 rounded-full animate-pulse"></span>
-                            REAL-TIME TELEMETRY
+                <div className="flex h-[200px] flex-col overflow-hidden rounded-lg border border-border bg-bg-surface shadow-panel sm:h-[220px]">
+                    <div className="flex items-center justify-between border-b border-border bg-bg-elevated/55 px-3 py-3 sm:px-4">
+                        <h3 className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-[0.16em] text-text-primary">
+                            <span className="h-2 w-2 rounded-full bg-accent-1 shadow-glow-mint" />
+                            Real-Time Telemetry
                         </h3>
                     </div>
-                    <div className="p-4 flex-1 overflow-auto font-mono text-[11px] text-text-muted space-y-1">
+                    <div className="flex-1 space-y-1 overflow-auto bg-[#030507] p-3 font-mono text-[11px] text-text-muted scrollbar-thin sm:p-4">
                         <p className="text-accent-1">[SYS] Telemetry stream initialized...</p>
                         <p>[NET] Proxy connection established on port 8080</p>
                         <p>[AUT] Instance #142 reported status OK</p>
@@ -648,7 +691,7 @@ export default function AdminPage() {
                         <p className="animate-pulse">_</p>
                     </div>
                 </div>
-            </div>
+            </section>
 
             {/* Approval Modal */}
             {showApprovalModal && selectedUser && (
@@ -702,14 +745,14 @@ export default function AdminPage() {
                             {/* Subscription Plan */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-300">Subscription Plan</label>
-                                <select
-                                    value={approvalFormData.plan}
-                                    onChange={(e) => setApprovalFormData(prev => ({ ...prev, plan: e.target.value as any }))}
-                                    className="w-full px-4 py-3 bg-surface border border-border rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                >
-                                    <option value="BANK_BOT">Bank Bot</option>
-                                    <option value="BANK_BOT_WHATSAPP">Bank Bot + WhatsApp Bot</option>
-                                </select>
+                                <TacticalSelect
+        value={approvalFormData.plan}
+        onChange={(v) => setApprovalFormData(prev => ({ ...prev, plan: v as any }))}
+        options={[
+            { value: 'BANK_BOT', label: 'Bank Bot' },
+            { value: 'BANK_BOT_WHATSAPP', label: 'Bank Bot + WhatsApp Bot' }
+        ]}
+    />
                             </div>
 
                             {/* Subscription Duration */}

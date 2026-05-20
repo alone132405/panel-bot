@@ -43,6 +43,28 @@ export default function SignupPage() {
 
     const prevStep = () => setStep(prev => Math.max(prev - 1, 1))
 
+    const hasValidContact = () => {
+        if (!formData.contactType) {
+            toast.error('Please select a contact method')
+            return false
+        }
+
+        if (formData.contactType === 'WHATSAPP') {
+            if (!formData.countryCode.trim() || !formData.contactValue.trim()) {
+                toast.error('Please enter your WhatsApp country code and number')
+                return false
+            }
+            return true
+        }
+
+        if (!formData.contactValue.trim()) {
+            toast.error('Please enter your contact information')
+            return false
+        }
+
+        return true
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
@@ -56,10 +78,14 @@ export default function SignupPage() {
             return
         }
 
+        if (!hasValidContact()) {
+            return
+        }
+
         setIsLoading(true)
 
         try {
-            let contactValue = formData.contactValue || undefined
+            let contactValue = formData.contactValue.trim()
             if (formData.contactType === 'WHATSAPP' && formData.countryCode && formData.contactValue) {
                 contactValue = `+${formData.countryCode}${formData.contactValue}`
             }
@@ -72,7 +98,7 @@ export default function SignupPage() {
                     email: formData.email,
                     password: formData.password,
                     confirmPassword: formData.confirmPassword,
-                    contactType: formData.contactType || undefined,
+                    contactType: formData.contactType,
                     contactValue: contactValue,
                 }),
             })
@@ -110,11 +136,10 @@ export default function SignupPage() {
     }
 
     return (
-        <div className="min-h-screen flex bg-bg-base relative overflow-hidden">
-            {/* Global Animated Mesh Background */}
-            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-accent-1/5 mix-blend-screen filter blur-[100px] animate-blob" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-accent-2/5 mix-blend-screen filter blur-[100px] animate-blob animation-delay-2000" />
+        <div className="app-frame flex min-h-screen overflow-hidden bg-bg-base">
+            <div className="pointer-events-none absolute inset-0 z-0">
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.028)_1px,transparent_1px),linear-gradient(rgba(255,255,255,0.028)_1px,transparent_1px)] bg-[size:48px_48px]" />
+                <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-accent-1/10 to-transparent" />
             </div>
 
             <div className="w-full flex flex-col items-center justify-center relative z-10 p-6 sm:p-12">
@@ -124,11 +149,11 @@ export default function SignupPage() {
                     transition={{ duration: 0.5 }}
                     className="w-full max-w-md"
                 >
-                    <div className="bg-bg-surface border border-border rounded-[24px] p-8 shadow-[0_0_50px_rgba(123,94,255,0.05)] overflow-hidden">
+                    <div className="panel-solid overflow-hidden rounded-lg p-8">
                         
                         {/* Header */}
                         <div className="flex flex-col items-center mb-8">
-                            <Image src="/logo.png" alt="Konoha Logo" width={64} height={64} className="object-contain drop-shadow-[0_0_15px_rgba(0,255,178,0.5)] mb-4" />
+                            <Image src="/logo.png" alt="Konoha Logo" width={64} height={64} className="mb-4 object-contain drop-shadow-[0_0_15px_rgba(33,243,177,0.38)]" />
                             <h2 className="font-orbitron text-2xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-accent-1 to-accent-2">
                                 REQUEST ACCESS
                             </h2>
@@ -172,7 +197,7 @@ export default function SignupPage() {
                                                 id="name"
                                                 value={formData.name}
                                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                                className="peer w-full h-14 pl-12 pr-4 bg-bg-elevated border border-border rounded-[12px] text-text-primary placeholder-transparent focus:outline-none focus:border-accent-1 focus:shadow-[0_0_15px_rgba(0,255,178,0.15)] transition-all pt-2"
+                                                className="peer h-14 w-full rounded-lg border border-border bg-bg-elevated pl-12 pr-4 pt-2 text-text-primary placeholder-transparent transition-all focus:border-accent-1 focus:outline-none focus:shadow-[0_0_15px_rgba(33,243,177,0.15)]"
                                                 placeholder="Full Name"
                                                 required
                                             />
@@ -192,7 +217,7 @@ export default function SignupPage() {
                                                 id="email"
                                                 value={formData.email}
                                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                                className="peer w-full h-14 pl-12 pr-4 bg-bg-elevated border border-border rounded-[12px] text-text-primary placeholder-transparent focus:outline-none focus:border-accent-1 focus:shadow-[0_0_15px_rgba(0,255,178,0.15)] transition-all pt-2"
+                                                className="peer h-14 w-full rounded-lg border border-border bg-bg-elevated pl-12 pr-4 pt-2 text-text-primary placeholder-transparent transition-all focus:border-accent-1 focus:outline-none focus:shadow-[0_0_15px_rgba(33,243,177,0.15)]"
                                                 placeholder="Email Address"
                                                 required
                                             />
@@ -224,7 +249,7 @@ export default function SignupPage() {
                                                 id="password"
                                                 value={formData.password}
                                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                                className="peer w-full h-14 pl-12 pr-12 bg-bg-elevated border border-border rounded-[12px] text-text-primary placeholder-transparent focus:outline-none focus:border-accent-1 focus:shadow-[0_0_15px_rgba(0,255,178,0.15)] transition-all pt-2"
+                                                className="peer h-14 w-full rounded-lg border border-border bg-bg-elevated pl-12 pr-12 pt-2 text-text-primary placeholder-transparent transition-all focus:border-accent-1 focus:outline-none focus:shadow-[0_0_15px_rgba(33,243,177,0.15)]"
                                                 placeholder="Password"
                                                 required
                                             />
@@ -264,7 +289,7 @@ export default function SignupPage() {
                                                 id="confirmPassword"
                                                 value={formData.confirmPassword}
                                                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                                className="peer w-full h-14 pl-12 pr-4 bg-bg-elevated border border-border rounded-[12px] text-text-primary placeholder-transparent focus:outline-none focus:border-accent-1 focus:shadow-[0_0_15px_rgba(0,255,178,0.15)] transition-all pt-2"
+                                                className="peer h-14 w-full rounded-lg border border-border bg-bg-elevated pl-12 pr-4 pt-2 text-text-primary placeholder-transparent transition-all focus:border-accent-1 focus:outline-none focus:shadow-[0_0_15px_rgba(33,243,177,0.15)]"
                                                 placeholder="Confirm Password"
                                                 required
                                             />
@@ -331,7 +356,7 @@ export default function SignupPage() {
                                                         type="tel"
                                                         value={formData.countryCode}
                                                         onChange={(e) => setFormData({ ...formData, countryCode: e.target.value.replace(/\D/g, '') })}
-                                                        className="w-full h-14 pl-8 pr-2 bg-bg-elevated border border-border rounded-[12px] text-text-primary text-center focus:outline-none focus:border-[#25D366] transition-all"
+                                                        className="h-14 w-full rounded-lg border border-border bg-bg-elevated pl-8 pr-2 text-center text-text-primary transition-all focus:border-[#25D366] focus:outline-none"
                                                         placeholder="91"
                                                         maxLength={4}
                                                     />
@@ -341,7 +366,7 @@ export default function SignupPage() {
                                                         type="tel"
                                                         value={formData.contactValue}
                                                         onChange={(e) => setFormData({ ...formData, contactValue: e.target.value.replace(/\D/g, '') })}
-                                                        className="w-full h-14 px-4 bg-bg-elevated border border-border rounded-[12px] text-text-primary focus:outline-none focus:border-[#25D366] transition-all"
+                                                        className="h-14 w-full rounded-lg border border-border bg-bg-elevated px-4 text-text-primary transition-all focus:border-[#25D366] focus:outline-none"
                                                         placeholder="Phone number"
                                                     />
                                                 </div>
@@ -353,7 +378,7 @@ export default function SignupPage() {
                                                 type="text"
                                                 value={formData.contactValue}
                                                 onChange={(e) => setFormData({ ...formData, contactValue: e.target.value })}
-                                                className="w-full h-14 px-4 bg-bg-elevated border border-border rounded-[12px] text-text-primary focus:outline-none focus:border-[#00C300] transition-all"
+                                                className="h-14 w-full rounded-lg border border-border bg-bg-elevated px-4 text-text-primary transition-all focus:border-[#00C300] focus:outline-none"
                                                 placeholder="Enter Line ID"
                                             />
                                         )}
@@ -363,10 +388,14 @@ export default function SignupPage() {
                                                 type="text"
                                                 value={formData.contactValue}
                                                 onChange={(e) => setFormData({ ...formData, contactValue: e.target.value })}
-                                                className="w-full h-14 px-4 bg-bg-elevated border border-border rounded-[12px] text-text-primary focus:outline-none focus:border-[#0088CC] transition-all"
+                                                className="h-14 w-full rounded-lg border border-border bg-bg-elevated px-4 text-text-primary transition-all focus:border-[#0088CC] focus:outline-none"
                                                 placeholder="Enter Telegram Handle (e.g. @username)"
                                             />
                                         )}
+
+                                        <p className="text-[12px] text-text-muted">
+                                            Contact information is required for approval and account follow-up.
+                                        </p>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -378,7 +407,7 @@ export default function SignupPage() {
                                 <button
                                     type="button"
                                     onClick={prevStep}
-                                    className="px-4 py-4 rounded-[12px] bg-bg-elevated border border-border text-text-muted hover:text-text-primary hover:bg-bg-elevated/80 transition-all flex items-center justify-center"
+                                    className="flex items-center justify-center rounded-lg border border-border bg-bg-elevated px-4 py-4 text-text-muted transition-all hover:bg-bg-elevated/80 hover:text-text-primary"
                                 >
                                     <ArrowLeft className="w-5 h-5" />
                                 </button>
@@ -388,7 +417,7 @@ export default function SignupPage() {
                                 type={step === 3 ? "submit" : "button"}
                                 onClick={step === 3 ? handleSubmit : nextStep}
                                 disabled={isLoading}
-                                className="flex-1 h-14 bg-gradient-to-r from-accent-1 to-accent-2 text-[#07070E] font-orbitron font-bold text-[16px] rounded-[12px] flex items-center justify-center gap-2 hover:brightness-110 hover:shadow-[0_0_25px_rgba(0,255,178,0.3)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-[0.98]"
+                                className="flex h-14 flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-accent-1 to-accent-cyan font-orbitron text-[15px] font-bold text-[#031017] transition-all duration-300 hover:brightness-110 hover:shadow-glow-mint disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
                             >
                                 {isLoading ? (
                                     <>
@@ -418,7 +447,7 @@ export default function SignupPage() {
                 </motion.div>
                 
                 <div className="absolute bottom-6 font-mono text-[11px] text-text-muted/50 tracking-widest uppercase text-center w-full">
-                    © Copyright Konoha Bazaar
+                    Copyright Konoha Bazaar
                 </div>
             </div>
         </div>

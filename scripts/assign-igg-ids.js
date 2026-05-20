@@ -12,7 +12,7 @@ async function assignIggIds() {
             return
         }
 
-        console.log(`Found user: ${user.email} (${user.id})`)
+        // console.log(`Found user: ${user.email} (${user.id})`)
 
         // IGG IDs from the config directory
         const iggIdsToAssign = ['1221923663', '987303841']
@@ -24,7 +24,7 @@ async function assignIggIds() {
             })
 
             if (existing) {
-                console.log(`IGG ID ${iggId} already assigned`)
+                // console.log(`IGG ID ${iggId} already assigned`)
                 continue
             }
 
@@ -39,10 +39,10 @@ async function assignIggIds() {
                 },
             })
 
-            console.log(`✅ Assigned IGG ID ${iggId} to user ${user.email}`)
+            // console.log(`✅ Assigned IGG ID ${iggId} to user ${user.email}`)
         }
 
-        console.log('\n✅ IGG ID assignment complete!')
+        // console.log('\n✅ IGG ID assignment complete!')
     } catch (error) {
         console.error('Error assigning IGG IDs:', error)
     } finally {

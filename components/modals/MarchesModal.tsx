@@ -1,11 +1,15 @@
 'use client'
 
-import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Loader2, Users, Save } from 'lucide-react'
+import { FlaskConical, Loader2, Swords, Users } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import KonohaModal from './KonohaModal'
+import { ModalSummaryGrid } from '@/components/ui/ModalSummaryGrid'
+import { Checkbox } from '@/components/ui/Checkbox'
+import { TacticalRadioGroup } from '@/components/ui/TacticalRadioGroup'
+import { TacticalSelect } from '@/components/ui/TacticalSelect'
+import { SettingInfoLabel } from '@/components/ui/SettingInfoLabel'
+import { useAutoSaveSettings } from '@/hooks/useAutoSaveSettings'
 
 interface MarchesModalProps {
     isOpen: boolean
@@ -17,8 +21,6 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
     const [fullSettings, setFullSettings] = useState<any>(null)
     const [loading, setLoading] = useState(true)
 
-    // Prevent background scroll when modal is open
-    useBodyScrollLock(isOpen)
     const [saving, setSaving] = useState(false)
 
     // Main settings
@@ -165,8 +167,6 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
             })
 
             if (res.ok) {
-                toast.success('Settings saved successfully')
-                onClose()
                 setFullSettings(updatedSettings)
             } else {
                 toast.error('Failed to save settings')
@@ -177,6 +177,32 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
             setSaving(false)
         }
     }
+
+    useAutoSaveSettings(
+        isOpen && !loading && Boolean(iggId && fullSettings),
+        saveSettings,
+        [
+            joinRallies,
+            rallyLimit,
+            maxTravelTime,
+            darkestLevels,
+            dontJoinIfLabFull,
+            dontFillRally,
+            dontSendSiege,
+            dontSendT5,
+            sendOneType,
+            addBuffers,
+            maxRallyTime,
+            leaveExtraSpace,
+            timeToWait,
+            rallyTroopType,
+            transmuteDarkEssences,
+            keepOneSlotFree,
+            deleteEssencesLowerThan,
+        ]
+    )
+
+    const enabledDarknestLevels = Object.values(darkestLevels).filter(Boolean).length
 
     if (!iggId) {
         return (
@@ -206,32 +232,37 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
             iconBg="rgba(239,68,68,0.15)"
             iconBorder="rgba(239,68,68,0.3)"
             saving={saving}
-            onSave={saveSettings}
-            maxWidth="860px"
+            statusLabel={saving ? 'Syncing...' : 'Auto-sync. Use Protocol Apply Changes to deploy.'}
+            maxWidth="980px"
         >
             {loading ? (
                                 <div className="flex items-center justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-primary-400" />
+                                    <Loader2 className="w-8 h-8 animate-spin text-accent-1" />
                                 </div>
                             ) : (
                                 <div className="w-full space-y-6">
+                                    <ModalSummaryGrid
+                                        items={[
+                                            { label: 'Rallies', value: joinRallies ? 'On' : 'Off', icon: Swords, tone: 'rose' },
+                                            { label: 'Limit', value: rallyLimit, icon: Users, tone: 'cyan' },
+                                            { label: 'Darknest', value: `${enabledDarknestLevels}/10`, icon: FlaskConical, tone: 'gold' },
+                                        ]}
+                                    />
+
                                     {/* Main Toggle */}
-                                    <div className="flex items-center justify-between p-4 rounded-xl bg-primary-500/10 border border-primary-500/20">
-                                        <label className="flex items-center gap-3 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={joinRallies}
-                                                onChange={(e) => setJoinRallies(e.target.checked)}
-                                                className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                            />
-                                            <span className="text-sm font-medium text-primary-300">Join Rallies (Darknest Only)</span>
+                                    <div className="flex items-center justify-between rounded-md border border-accent-1/20 bg-accent-1/10 p-4">
+                                        <label className="flex items-center justify-between w-full cursor-pointer">
+                                            <SettingInfoLabel label="Join Rallies (Darknest Only)" />
+                                            <Checkbox checked={joinRallies} onChange={setJoinRallies} />
                                         </label>
                                     </div>
 
                                     {/* Rally Settings */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                            <label className="block text-xs sm:text-sm text-gray-300 mb-2">Rally Limit:</label>
+                                    <div className="grid grid-cols-2 gap-3 md:gap-4">
+                                        <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
+                                            <div className="mb-2">
+                                                <SettingInfoLabel label="Rally Limit" className="text-[12px] font-bold text-text-muted" />
+                                            </div>
                                             <input
                                                 type="number"
                                                 min="1"
@@ -244,12 +275,14 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                                         e.preventDefault();
                                                     }
                                                 }}
-                                                className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                className="input-field min-h-[42px] w-full text-[13px]"
                                             />
                                         </div>
 
-                                        <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                            <label className="block text-xs sm:text-sm text-gray-300 mb-2">Max Travel Time (Minutes):</label>
+                                        <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
+                                            <div className="mb-2">
+                                                <SettingInfoLabel label="Max Travel Time (Minutes)" className="text-[12px] font-bold text-text-muted" />
+                                            </div>
                                             <input
                                                 type="number"
                                                 min={1}
@@ -263,30 +296,27 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                                     }
                                                 }}
                                                 onBlur={(e) => setMaxTravelTime(Math.max(1, Math.min(120, Math.floor(Number(e.target.value)))))}
-                                                className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                className="input-field min-h-[42px] w-full text-[13px]"
                                             />
                                         </div>
                                     </div>
 
                                     {/* Darkest Levels */}
                                     <div className="space-y-4">
-                                        <h3 className="text-base sm:text-lg font-bold text-white border-b border-white/10 pb-2">Darknest Levels to Join:</h3>
-                                        <div className="flex flex-wrap gap-3">
+                                        <h3 className="border-b border-border pb-2">
+                                            <SettingInfoLabel label="Darknest Levels to Join" className="text-[11px] font-black uppercase tracking-[0.18em] text-text-muted" />
+                                        </h3>
+                                        <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:gap-3">
                                             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((level) => (
-                                                <label key={level} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
+                                                <label key={level} className="flex items-center justify-between w-full gap-2 rounded-md border border-border bg-bg-inset/70 px-4 py-2 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
+                                                    <SettingInfoLabel label={`Level ${level}`} helpText={`Allows joining level ${level} Darknest rallies.`} />
+                                                    <Checkbox
                                                         checked={darkestLevels[`level${level}` as keyof typeof darkestLevels]}
-                                                        onChange={(e) => {
-                                                            const updated = { ...darkestLevels, [`level${level}`]: e.target.checked }
+                                                        onChange={(v: boolean) => {
+                                                            const updated = { ...darkestLevels, [`level${level}`]: v }
                                                             setDarkestLevels(updated)
-                                                            // Convert object to array for levelToAttack
-                                                            const levelsArray = Object.values(updated)
-
                                                         }}
-                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
                                                     />
-                                                    <span className="text-sm text-white">{level}</span>
                                                 </label>
                                             ))}
                                         </div>
@@ -294,8 +324,10 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
 
                                     {/* Rally Options */}
                                     <div className="space-y-4">
-                                        <h3 className="text-base sm:text-lg font-bold text-white border-b border-white/10 pb-2">Rally Options</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <h3 className="border-b border-border pb-2">
+                                            <SettingInfoLabel label="Rally Options" className="text-[11px] font-black uppercase tracking-[0.18em] text-text-muted" />
+                                        </h3>
+                                        <div className="grid grid-cols-2 gap-3">
                                             {[
                                                 { label: 'Dont Join if lab is full?', value: dontJoinIfLabFull, setter: setDontJoinIfLabFull, key: 'dontJoinIfLabFull' },
                                                 { label: 'Dont Fill Rally', value: dontFillRally, setter: setDontFillRally, key: 'dontFillRally' },
@@ -304,37 +336,37 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                                 { label: 'Send One Type', value: sendOneType, setter: setSendOneType, key: 'sendOneType' },
                                                 { label: 'Add Buffers', value: addBuffers, setter: setAddBuffers, key: 'addBuffers' },
                                             ].map((option) => (
-                                                <label key={option.key} className="flex items-center justify-between p-4 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                    <span className="text-sm text-gray-300">{option.label}</span>
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={option.value}
-                                                        onChange={(e) => option.setter(e.target.checked)}
-                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                    />
+                                                <label key={option.key} className="flex items-center justify-between rounded-md border border-border bg-bg-inset/70 p-4 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
+                                                    <SettingInfoLabel label={option.label} />
+                                                    <Checkbox checked={option.value} onChange={option.setter} />
                                                 </label>
                                             ))}
                                         </div>
                                     </div>
 
+
                                     {/* Additional Settings */}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                            <label className="block text-xs sm:text-sm text-gray-300 mb-2">Maximum Rally Time:</label>
-                                            <select
+                                    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
+                                        <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
+                                            <div className="mb-2">
+                                                <SettingInfoLabel label="Maximum Rally Time" className="text-[12px] font-bold text-text-muted" />
+                                            </div>
+                                            <TacticalSelect
                                                 value={maxRallyTime}
-                                                onChange={(e) => setMaxRallyTime(e.target.value)}
-                                                className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                            >
-                                                <option value="0">5 Minutes</option>
-                                                <option value="1">10 Minutes</option>
-                                                <option value="2">1 Hour</option>
-                                                <option value="3">8 Hours</option>
-                                            </select>
+                                                onChange={setMaxRallyTime}
+                                                options={[
+                                                    { value: '0', label: '5 Minutes' },
+                                                    { value: '1', label: '10 Minutes' },
+                                                    { value: '2', label: '1 Hour' },
+                                                    { value: '3', label: '8 Hours' },
+                                                ]}
+                                            />
                                         </div>
 
-                                        <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                            <label className="block text-xs sm:text-sm text-gray-300 mb-2">Leave Extra Space:</label>
+                                        <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
+                                            <div className="mb-2">
+                                                <SettingInfoLabel label="Leave Extra Space" className="text-[12px] font-bold text-text-muted" />
+                                            </div>
                                             <input
                                                 type="number"
                                                 min={0}
@@ -348,12 +380,14 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                                     }
                                                 }}
                                                 onBlur={(e) => setLeaveExtraSpace(Math.max(0, Math.min(200000, Math.floor(Number(e.target.value)))))}
-                                                className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                className="input-field min-h-[42px] w-full text-[13px]"
                                             />
                                         </div>
 
-                                        <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                            <label className="block text-xs sm:text-sm text-gray-300 mb-2">Time to wait before rejoining if kicked (In Minutes):</label>
+                                        <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
+                                            <div className="mb-2">
+                                                <SettingInfoLabel label="Wait Before Rejoining (Minutes)" className="text-[12px] font-bold text-text-muted" />
+                                            </div>
                                             <input
                                                 type="number"
                                                 min={1}
@@ -367,70 +401,47 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                                     }
                                                 }}
                                                 onBlur={(e) => setTimeToWait(Math.max(1, Math.min(120, Math.floor(Number(e.target.value)))))}
-                                                className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                className="input-field min-h-[42px] w-full text-[13px]"
                                             />
                                         </div>
                                     </div>
 
                                     {/* Troops to Send */}
                                     <div className="space-y-4">
-                                        <h3 className="text-base sm:text-lg font-bold text-white border-b border-white/10 pb-2">Troops to Send:</h3>
-                                        <div className="flex flex-wrap gap-4">
-                                            <label className="flex items-center gap-2 px-4 py-3 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                <input
-                                                    type="radio"
-                                                    name="troopsToSend"
-                                                    checked={rallyTroopType === 0}
-                                                    onChange={() => setRallyTroopType(0)}
-                                                    className="w-5 h-5 bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                                <span className="text-sm text-white">Send One Troop</span>
-                                            </label>
-                                            <label className="flex items-center gap-2 px-4 py-3 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                <input
-                                                    type="radio"
-                                                    name="troopsToSend"
-                                                    checked={rallyTroopType === 2}
-                                                    onChange={() => setRallyTroopType(2)}
-                                                    className="w-5 h-5 bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                                <span className="text-sm text-white">Send Max Troops (with priority)</span>
-                                            </label>
-                                        </div>
+                                        <h3 className="border-b border-border pb-2">
+                                            <SettingInfoLabel label="Troops to Send" className="text-[11px] font-black uppercase tracking-[0.18em] text-text-muted" />
+                                        </h3>
+                                        <TacticalRadioGroup
+                                            name="troopsToSend"
+                                            value={rallyTroopType}
+                                            onChange={setRallyTroopType}
+                                            options={[
+                                                { value: 0, label: 'Send One Troop' },
+                                                { value: 2, label: 'Send Max Troops (with priority)' },
+                                            ]}
+                                        />
                                     </div>
 
                                     {/* Essence Options */}
                                     <div className="space-y-4">
-                                        <h3 className="text-base sm:text-lg font-bold text-white border-b border-white/10 pb-2">Essence Options</h3>
-                                        <div className="space-y-3">
-                                            <label className="flex items-center justify-between p-4 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                <span className="text-sm text-gray-300">Transmute Dark Essences</span>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={transmuteDarkEssences}
-                                                    onChange={(e) => {
-                                                        setTransmuteDarkEssences(e.target.checked)
-
-                                                    }}
-                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                />
+                                        <h3 className="border-b border-border pb-2">
+                                            <SettingInfoLabel label="Essence Options" className="text-[11px] font-black uppercase tracking-[0.18em] text-text-muted" />
+                                        </h3>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <label className="flex items-center justify-between rounded-md border border-border bg-bg-inset/70 p-4 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
+                                                <SettingInfoLabel label="Transmute Dark Essences" />
+                                                <Checkbox checked={transmuteDarkEssences} onChange={setTransmuteDarkEssences} />
                                             </label>
 
-                                            <label className="flex items-center justify-between p-4 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                <span className="text-sm text-gray-300">Keep One Slot Free</span>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={keepOneSlotFree}
-                                                    onChange={(e) => {
-                                                        setKeepOneSlotFree(e.target.checked)
-
-                                                    }}
-                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                />
+                                            <label className="flex items-center justify-between rounded-md border border-border bg-bg-inset/70 p-4 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
+                                                <SettingInfoLabel label="Keep One Slot Free" />
+                                                <Checkbox checked={keepOneSlotFree} onChange={setKeepOneSlotFree} />
                                             </label>
 
-                                            <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                                <label className="block text-xs sm:text-sm text-gray-300 mb-2">Delete essences that are lower level than:</label>
+                                            <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
+                                                <div className="mb-2">
+                                                    <SettingInfoLabel label="Delete Essences Lower Than" className="text-[12px] font-bold text-text-muted" />
+                                                </div>
                                                 <input
                                                     type="number"
                                                     min="0"
@@ -443,7 +454,7 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                                             e.preventDefault();
                                                         }
                                                     }}
-                                                    className="w-full px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                    className="input-field min-h-[42px] w-full text-[13px]"
                                                 />
                                             </div>
                                         </div>

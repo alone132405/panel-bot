@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/authOptions'
+import { getConfigDir, getConfigFilePath } from '@/lib/fileSync'
 import fs from 'fs/promises'
 import path from 'path'
 
@@ -14,17 +15,11 @@ export async function GET(
     }
 
     try {
-        let exportedPath: string
-
-        if (process.env.EXTERNAL_CONFIG_ROOT) {
-            exportedPath = path.join(process.env.EXTERNAL_CONFIG_ROOT, params.iggId, 'stats', 'exported')
-        } else {
-            exportedPath = path.join(process.cwd(), 'config', params.iggId, 'stats', 'exported')
-        }
+        let exportedPath = path.join(getConfigDir(), params.iggId, 'stats', 'exported')
 
         // Try to read settings.json for custom reports path
         try {
-            const settingsPath = path.join(process.cwd(), 'config', params.iggId, 'settings.json')
+            const settingsPath = getConfigFilePath(params.iggId, 'settings.json')
             const settingsContent = await fs.readFile(settingsPath, 'utf-8')
             const settings = JSON.parse(settingsContent)
 

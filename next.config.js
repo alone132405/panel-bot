@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    distDir: process.env.NEXT_DIST_DIR || '.next',
+
     // output: 'standalone', // Removed to allow custom server.js wrapper to run
 
     async rewrites() {

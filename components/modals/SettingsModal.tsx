@@ -1,47 +1,36 @@
 'use client'
 
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Save, Loader2, Settings, ChevronRight } from 'lucide-react'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
-import KonohaModal from './KonohaModal'
+import { Settings, Zap, Target, Scroll, Swords, Users, TrendingUp, CheckSquare } from 'lucide-react'
 import { useDebounce } from '@/hooks/useDebounce'
-import { useWebSocket } from '@/hooks/useWebSocket'
-import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
-import { SETTINGS_FIELD_MAP, setNestedValue, getNestedValue } from '@/lib/settingsMapper'
+import { SETTINGS_FIELD_MAP, getNestedValue, setNestedValue } from '@/lib/settingsMapper'
+import { ResponsiveModalShell, ToggleControl, StepperControl, InputControl, TabDef } from '@/components/ui/ResponsiveModalShell'
 
 interface SettingsModalProps {
     isOpen: boolean
     onClose: () => void
-    categoryName: string
     iggId: string | null
 }
 
-export default function SettingsModal({ isOpen, onClose, categoryName, iggId }: SettingsModalProps) {
-    const [activeTab, setActiveTab] = useState('Basic')
+const TABS: TabDef[] = [
+    { id: 'basic', label: 'Basic', icon: Settings },
+    { id: 'quests', label: 'Quests', icon: Scroll },
+    { id: 'speedups', label: 'Speed-ups', icon: Zap },
+    { id: 'labyrinth', label: 'Labyrinth', icon: Target },
+    { id: 'tycoon', label: 'Tycoon', icon: TrendingUp },
+    { id: 'guild', label: 'Guild', icon: Users },
+    { id: 'turf-boosts', label: 'Turf Boosts', icon: Swords },
+    { id: 'daily-missions', label: 'Daily Missions', icon: CheckSquare },
+]
+
+export default function SettingsModal({ isOpen, onClose, iggId }: SettingsModalProps) {
     const [settings, setSettings] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
-    const [applying, setApplying] = useState(false)
-    const [useSpeedUps, setUseSpeedUps] = useState(false)
-    const tabsContainerRef = useRef<HTMLDivElement>(null)
 
-    useBodyScrollLock(isOpen)
-
-    const tabs = ['Basic', 'Quests', 'Speed-ups', 'Labyrinth', 'Tycoon', 'Guild', 'Turf Boosts', 'Daily Missions']
-
-    useEffect(() => {
-        if (isOpen && iggId) {
-            loadSettings()
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOpen, iggId])
-
-    const loadSettings = async () => {
-        if (!iggId) {
-            toast.error('Please select an IGG ID first')
-            return
-        }
+    const loadSettings = useCallback(async () => {
+        if (!iggId) return
 
         setLoading(true)
         try {
@@ -49,71 +38,60 @@ export default function SettingsModal({ isOpen, onClose, categoryName, iggId }: 
             if (res.ok) {
                 const data = await res.json()
                 setSettings(data)
-                setUseSpeedUps(data.speedUpSettings?.useSpeedUps || false)
             } else {
                 toast.error('Failed to load settings')
             }
-        } catch (error) {
+        } catch {
             toast.error('Error loading settings')
         } finally {
             setLoading(false)
         }
-    }
+    }, [iggId])
 
-    const handleSettingChange = (path: string, value: any) => {
-        const updatedSettings = { ...settings }
-        setNestedValue(updatedSettings, path, value)
-        setSettings(updatedSettings)
+    useEffect(() => {
+        if (isOpen) loadSettings()
+    }, [isOpen, loadSettings])
 
-        if (path === 'speedUpSettings.useSpeedUps') {
-            setUseSpeedUps(value)
-        }
-    }
-
-    const handleSave = async () => {
-        if (!iggId || !settings) return
-
+    const saveSetting = async (path: string, value: any) => {
+        if (!iggId) return
         setSaving(true)
         try {
             const res = await fetch(`/api/settings/${iggId}`, {
-                method: 'PUT',
+                method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(settings),
+                body: JSON.stringify({ path, value }),
             })
-
             if (res.ok) {
-                toast.success('Settings saved successfully!')
-                onClose()
+                const updatedSettings = { ...settings }
+                setNestedValue(updatedSettings, path, value)
+                setSettings(updatedSettings)
             } else {
-                toast.error('Failed to save settings')
+                toast.error('Failed to save setting')
             }
-        } catch (error) {
-            toast.error('Error saving settings')
+        } catch {
+            toast.error('Error saving setting')
         } finally {
             setSaving(false)
         }
     }
 
-    const getCurrentTabSettings = () => {
-        if (!settings) return []
+    const debouncedSave = useDebounce(saveSetting, 500)
 
-        const tabMap: Record<string, string> = {
-            'Basic': 'basic',
-            'Quests': 'quests',
-            'Speed-ups': 'speedups',
-            'Labyrinth': 'labyrinth',
-            'Tycoon': 'tycoon',
-            'Guild': 'guild',
-            'Turf Boosts': 'turf-boosts',
-            'Daily Missions': 'daily-missions',
-        }
+    const handleSettingChange = (path: string, value: any) => {
+        const updatedSettings = { ...settings }
+        setNestedValue(updatedSettings, path, value)
+        setSettings(updatedSettings)
+        debouncedSave(path, value)
+    }
 
-        const subcategory = tabMap[activeTab]
+    const renderSectionContent = (tabId: string, isMobile: boolean, isTablet: boolean) => {
+        if (!settings) return null
+
         const mappings = SETTINGS_FIELD_MAP.filter(
-            (m) => m.category === 'general' && m.subcategory === subcategory
+            (m) => m.category === 'general' && m.subcategory === tabId
         )
 
-        return mappings.map((mapping) => ({
+        const currentSettings = mappings.map((mapping) => ({
             label: mapping.uiField,
             type: mapping.type,
             value: getNestedValue(settings, mapping.jsonPath),
@@ -122,167 +100,122 @@ export default function SettingsModal({ isOpen, onClose, categoryName, iggId }: 
             min: mapping.min,
             max: mapping.max,
         }))
-    }
 
-    const currentSettings = getCurrentTabSettings()
+        const useSpeedUps = settings?.speedUpSettings?.useSpeedUps
 
-    if (!iggId) {
+        const gridClass = isMobile
+            ? 'grid grid-cols-1 gap-1.5'
+            : isTablet
+                ? 'grid grid-cols-2 gap-2'
+                : 'grid grid-cols-2 gap-3'
+        const booleanCount = currentSettings.filter((setting) => setting.type === 'boolean').length
+        const enabledCount = currentSettings.filter((setting) => setting.type === 'boolean' && !!setting.value).length
+        const inputCount = currentSettings.length - booleanCount
+
+        if (currentSettings.length === 0) {
+            return (
+                <div className="rounded-lg border border-white/10 bg-bg-inset/70 py-12 text-center">
+                    <Settings className="mx-auto mb-3 h-10 w-10 text-text-muted" />
+                    <p className="text-[13px] text-text-muted">No settings available for this category</p>
+                </div>
+            )
+        }
+
+        const controlsList = (
+            <div className={gridClass}>
+                {currentSettings.map((s, index) => {
+                    const isDisabled = tabId === 'speedups' && s.dependent && !useSpeedUps
+
+                    return (
+                        <div key={s.path + index}>
+                            {s.type === 'boolean' && (
+                                <ToggleControl
+                                    label={s.label}
+                                    checked={!!s.value}
+                                    onChange={(v) => handleSettingChange(s.path, v)}
+                                    isMobile={isMobile}
+                                    disabled={isDisabled}
+                                />
+                            )}
+                            {s.type === 'number' && (
+                                <StepperControl
+                                    label={s.label}
+                                    val={Number(s.value || 0)}
+                                    min={Number(s.min || 0)}
+                                    max={Number(s.max || 9999)}
+                                    onChange={(v) => handleSettingChange(s.path, v)}
+                                    isMobile={isMobile}
+                                    disabled={isDisabled}
+                                />
+                            )}
+                            {s.type === 'string' && (
+                                <InputControl
+                                    label={s.label}
+                                    val={String(s.value || '')}
+                                    onChange={(v) => handleSettingChange(s.path, v)}
+                                    isMobile={isMobile}
+                                    disabled={isDisabled}
+                                />
+                            )}
+                            {s.type === 'time' && (
+                                <InputControl
+                                    label={s.label}
+                                    val={String(s.value || '')}
+                                    onChange={(v) => {
+                                        const formattedTime = v.length === 5 ? `${v}:00` : v
+                                        handleSettingChange(s.path, formattedTime)
+                                    }}
+                                    isMobile={isMobile}
+                                    disabled={isDisabled}
+                                    type="time"
+                                />
+                            )}
+                        </div>
+                    )
+                })}
+            </div>
+        )
+
+        if (isMobile) {
+            return controlsList
+        }
+
         return (
-            <KonohaModal
-                isOpen={isOpen}
-                onClose={onClose}
-                title=""
-                iggId={iggId}
-                icon={Settings}
-                iconColor="#64748b"
-                iconBg="rgba(100,116,139,0.15)"
-                iconBorder="rgba(100,116,139,0.3)"
-            >
-                <div />
-            </KonohaModal>
+            <div className="space-y-4">
+                <div className="grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-lg border border-white/10 bg-bg-inset/70 p-3">
+                        <div className="text-[10px] font-black uppercase tracking-[0.18em] text-text-muted">Controls</div>
+                        <div className="mt-1 font-orbitron text-xl font-black text-text-primary">{currentSettings.length}</div>
+                    </div>
+                    <div className="rounded-lg border border-accent-1/20 bg-accent-1/10 p-3">
+                        <div className="text-[10px] font-black uppercase tracking-[0.18em] text-accent-1">Enabled</div>
+                        <div className="mt-1 font-orbitron text-xl font-black text-accent-1">{enabledCount}</div>
+                    </div>
+                    <div className="rounded-lg border border-accent-cyan/20 bg-accent-cyan/10 p-3">
+                        <div className="text-[10px] font-black uppercase tracking-[0.18em] text-accent-cyan">Inputs</div>
+                        <div className="mt-1 font-orbitron text-xl font-black text-accent-cyan">{inputCount}</div>
+                    </div>
+                </div>
+
+                {controlsList}
+            </div>
         )
     }
 
     return (
-        <KonohaModal
+        <ResponsiveModalShell
             isOpen={isOpen}
             onClose={onClose}
-            title=""
+            title="General Settings"
             iggId={iggId}
-            icon={Settings}
-            iconColor="#64748b"
-            iconBg="rgba(100,116,139,0.15)"
-            iconBorder="rgba(100,116,139,0.3)"
+            headerIcon={Settings}
+            tabs={TABS}
+            loading={loading}
             saving={saving}
-            onSave={handleSave}
-            maxWidth="860px"
-        >
-            {loading ? (
-                                <div className="flex items-center justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-primary-400" />
-                                </div>
-                            ) : (
-                                <div className="w-full">
-                                    {currentSettings.length > 0 ? (
-                                        <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 md:gap-3">
-                                            {currentSettings.map((setting: any, index) => {
-                                                const isDisabled = activeTab === 'Speed-ups' && setting.dependent && !useSpeedUps
-
-                                                return (
-                                                    <div
-                                                        key={index}
-                                                        className={`flex items-center justify-between p-3 md:p-4 transition-all
-                                                            glass-card md:bg-none md:rounded-xl md:border-none md:shadow-none md:backdrop-blur-none
-                                                            ${isDisabled
-                                                                ? 'opacity-60 md:bg-surface/20 md:opacity-50 cursor-not-allowed'
-                                                                : 'md:bg-surface/50 md:hover:bg-surface'
-                                                            }`}
-                                                    >
-                                                        {/* Label */}
-                                                        <label className={`flex items-center gap-2 md:gap-3 flex-1 ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
-                                                            {/* Desktop checkbox */}
-                                                            {setting.type === 'boolean' && (
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={setting.value || false}
-                                                                    disabled={isDisabled}
-                                                                    onChange={(e) => handleSettingChange(setting.path, e.target.checked)}
-                                                                    className="hidden md:block w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
-                                                                />
-                                                            )}
-                                                            <span className={`text-xs md:text-sm flex-1 pr-2 ${isDisabled ? 'text-gray-500' : 'text-gray-200 md:text-gray-300'
-                                                                }`}>
-                                                                {setting.label}
-                                                            </span>
-                                                        </label>
-
-                                                        {/* Control */}
-                                                        <div className="flex-shrink-0">
-                                                            {/* Mobile toggle switch */}
-                                                            {setting.type === 'boolean' && (
-                                                                <label className="relative inline-flex items-center cursor-pointer md:hidden">
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        checked={setting.value || false}
-                                                                        disabled={isDisabled}
-                                                                        onChange={(e) => handleSettingChange(setting.path, e.target.checked)}
-                                                                        className="sr-only peer"
-                                                                    />
-                                                                    <div className={`w-9 h-5 rounded-full peer transition-colors ${isDisabled ? 'bg-gray-700' : 'bg-gray-600 peer-checked:bg-primary-500'
-                                                                        } peer-focus:ring-2 peer-focus:ring-primary-500/50 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-transform peer-checked:after:translate-x-4`}></div>
-                                                                </label>
-                                                            )}
-
-                                                            {setting.type === 'number' && (
-                                                                <input
-                                                                    type="number"
-                                                                    step="1"
-                                                                    value={setting.value ?? ''}
-                                                                    min={setting.min}
-                                                                    max={setting.max}
-                                                                    disabled={isDisabled}
-                                                                    onChange={(e) => {
-                                                                        const val = e.target.value === '' ? 0 : Math.floor(Number(e.target.value))
-                                                                        handleSettingChange(setting.path, val)
-                                                                    }}
-                                                                    onKeyDown={(e) => {
-                                                                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
-                                                                            e.preventDefault();
-                                                                        }
-                                                                    }}
-                                                                    onBlur={(e) => {
-                                                                        let val = e.target.value === '' ? 0 : Math.floor(Number(e.target.value))
-                                                                        if (setting.min !== undefined && val < Number(setting.min)) val = Number(setting.min)
-                                                                        if (setting.max !== undefined && val > Number(setting.max)) val = Number(setting.max)
-                                                                        if (val !== setting.value) handleSettingChange(setting.path, val)
-                                                                    }}
-                                                                    className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
-                                                                />
-                                                            )}
-
-                                                            {setting.type === 'string' && (
-                                                                <input
-                                                                    type="text"
-                                                                    value={setting.value || ''}
-                                                                    disabled={isDisabled}
-                                                                    onChange={(e) => handleSettingChange(setting.path, e.target.value)}
-                                                                    className="w-24 md:w-40 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
-                                                                />
-                                                            )}
-
-                                                            {setting.type === 'time' && (
-                                                                <input
-                                                                    type="time"
-                                                                    step="1"
-                                                                    value={setting.value || ''}
-                                                                    disabled={isDisabled}
-                                                                    onChange={(e) => handleSettingChange(setting.path, e.target.value)}
-                                                                    placeholder="HH:mm:ss"
-                                                                    onBlur={(e) => {
-                                                                        let val = e.target.value || ''
-                                                                        if (!/^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/.test(val)) {
-                                                                            val = String(setting.min || '00:00:00')
-                                                                        }
-                                                                        if (setting.min !== undefined && val < String(setting.min)) val = String(setting.min)
-                                                                        if (setting.max !== undefined && val > String(setting.max)) val = String(setting.max)
-                                                                        if (val !== setting.value) handleSettingChange(setting.path, val)
-                                                                    }}
-                                                                    className="w-24 md:w-40 px-2 md:px-3 py-1 md:py-2 bg-background-tertiary border border-white/10 rounded md:rounded-lg text-xs md:text-sm text-white focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50"
-                                                                />
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-12">
-                                            <Settings className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-                                            <p className="text-gray-400 text-sm">No settings available for this category</p>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-        </KonohaModal>
+            onSave={onClose}
+            saveLabel="Close"
+            statusLabel={saving ? 'Syncing...' : 'Auto-sync'}
+            renderSectionContent={renderSectionContent}
+        />
     )
 }

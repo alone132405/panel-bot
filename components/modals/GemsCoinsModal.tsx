@@ -1,11 +1,14 @@
 'use client'
 
-import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Loader2, Gem, Save } from 'lucide-react'
+import { Coins, Gem, Loader2, ShieldCheck } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import KonohaModal from './KonohaModal'
+import { ModalSummaryGrid } from '@/components/ui/ModalSummaryGrid'
+import { Checkbox } from '@/components/ui/Checkbox'
+import { TacticalSelect } from '@/components/ui/TacticalSelect'
+import { SettingInfoLabel } from '@/components/ui/SettingInfoLabel'
+import { useAutoSaveSettings } from '@/hooks/useAutoSaveSettings'
 
 interface GemsCoinsModalProps {
     isOpen: boolean
@@ -13,12 +16,24 @@ interface GemsCoinsModalProps {
     iggId: string | null
 }
 
+const SHIELD_VALUE_BY_LABEL: Record<string, number> = {
+    '8 Hours': 0,
+    '24 Hours': 1,
+    '3 Days': 2,
+    '7 Days': 3,
+    '14 Days': 4,
+    '12 Hours': 5,
+}
+
+function clampWholeNumber(value: number, min: number, max: number) {
+    if (Number.isNaN(value)) return min
+    return Math.max(min, Math.min(max, Math.floor(value)))
+}
+
 export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModalProps) {
     const [settings, setSettings] = useState<any>(null)
     const [loading, setLoading] = useState(true)
 
-    // Prevent background scroll when modal is open
-    useBodyScrollLock(isOpen)
     const [saving, setSaving] = useState(false)
 
     // Gems settings
@@ -118,15 +133,50 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
 
         setSaving(true)
         try {
+            const updatedSettings = {
+                ...settings,
+                spendingSettings: {
+                    ...(settings.spendingSettings || {}),
+                    spendGems: useGems,
+                    spendGC: useGuildCoins,
+                    gemSettings: {
+                        ...(settings.spendingSettings?.gemSettings || {}),
+                        buyShield,
+                        shieldToBuy: SHIELD_VALUE_BY_LABEL[withdrawSquadShield] ?? 1,
+                        buyWithdrawSquad,
+                        buyWarTome: warTome,
+                        buyCrystalPickAxe: crystalPickaxe,
+                        buyGoldHammer: goldHammer,
+                        buyArchaicTome: archaicTome,
+                        buySoulCrystal: soulCrystal,
+                        buySteelCuffs: steelCuffs,
+                        buyReducedUpKeep: reduceUpkeep,
+                        buyVIP_Points: clampWholeNumber(gemsBuyVIPLevel, 0, 9999999),
+                    },
+                    gcSettings: {
+                        ...(settings.spendingSettings?.gcSettings || {}),
+                        buyShield: shield8h,
+                        buyWithdrawSquad: withdrawSquad,
+                        buyFoodBoost: foodBoost,
+                        buyStoneBoost: stoneBoost,
+                        buyWoodBoost: woodBoost,
+                        buyOreBoost: oreBoost,
+                        buyGoldBoost: goldBoost,
+                        buyGatheringBoost: gatheringBoost,
+                        coinReserve: clampWholeNumber(reserveGuildCoins, 0, 99999999),
+                        buyVIP_Points: clampWholeNumber(guildCoinsBuyVIPLevel, 0, 9999999),
+                    },
+                },
+            }
+
             const res = await fetch(`/api/settings/${iggId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(settings),
+                body: JSON.stringify(updatedSettings),
             })
 
             if (res.ok) {
-                toast.success('Settings saved successfully')
-                onClose()
+                setSettings(updatedSettings)
             } else {
                 toast.error('Failed to save settings')
             }
@@ -136,6 +186,39 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
             setSaving(false)
         }
     }
+
+    useAutoSaveSettings(
+        isOpen && !loading && Boolean(iggId && settings),
+        saveSettings,
+        [
+            useGems,
+            buyShield,
+            buyWithdrawSquad,
+            withdrawSquadShield,
+            goldHammer,
+            steelCuffs,
+            soulCrystal,
+            crystalPickaxe,
+            warTome,
+            archaicTome,
+            reduceUpkeep,
+            gemsBuyVIPLevel,
+            useGuildCoins,
+            shield8h,
+            withdrawSquad,
+            gatheringBoost,
+            foodBoost,
+            stoneBoost,
+            woodBoost,
+            oreBoost,
+            goldBoost,
+            guildCoinsBuyVIPLevel,
+            reserveGuildCoins,
+        ]
+    )
+
+    const enabledGemItems = [buyShield, buyWithdrawSquad, goldHammer, steelCuffs, soulCrystal, crystalPickaxe, warTome, archaicTome, reduceUpkeep].filter(Boolean).length
+    const enabledCoinItems = [shield8h, withdrawSquad, gatheringBoost, foodBoost, stoneBoost, woodBoost, oreBoost, goldBoost].filter(Boolean).length
 
     // Helper function to update settings object
     const updateSettingsObject = (path: string, value: any) => {
@@ -178,71 +261,66 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
             iconBg="rgba(16,185,129,0.15)"
             iconBorder="rgba(16,185,129,0.3)"
             saving={saving}
-            onSave={saveSettings}
+            statusLabel={saving ? 'Syncing...' : 'Auto-sync. Use Protocol Apply Changes to deploy.'}
             maxWidth="860px"
         >
             {loading ? (
                                 <div className="flex items-center justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-primary-400" />
+                                    <Loader2 className="w-8 h-8 animate-spin text-[#00FFB2]" />
                                 </div>
                             ) : (
                                 <div className="w-full space-y-6">
+                                    <ModalSummaryGrid
+                                        items={[
+                                            { label: 'Gems', value: useGems ? 'On' : 'Off', icon: Gem, tone: 'mint' },
+                                            { label: 'Gem Items', value: enabledGemItems, icon: ShieldCheck, tone: 'cyan' },
+                                            { label: 'Coin Items', value: enabledCoinItems, icon: Coins, tone: 'gold' },
+                                        ]}
+                                    />
+
                                     {/* Gems Section */}
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
                                             <label className="flex items-center gap-3 cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={useGems}
-                                                    onChange={(e) => {
-                                                        setUseGems(e.target.checked)
-                                                        updateSettingsObject('spendingSettings.spendGems', e.target.checked)
-                                                    }}
-                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-emerald-500 focus:ring-2 focus:ring-emerald-500/50"
-                                                />
-                                                <span className="text-sm font-medium text-emerald-300">Use Gems</span>
+                                                <Checkbox checked={useGems} onChange={setUseGems} />
+                                                <SettingInfoLabel label="Use Gems" className="text-sm font-medium text-emerald-300" />
                                             </label>
                                         </div>
 
                                         {/* Buy Shield with Duration Selection */}
-                                        <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                            <div className="flex items-center gap-3">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={buyShield}
-                                                    onChange={(e) => {
-                                                        setBuyShield(e.target.checked)
-                                                        updateSettingsObject('spendingSettings.gemSettings.buyShield', e.target.checked)
-                                                    }}
-                                                    className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                />
-                                                <label className="text-sm text-gray-300">Shield</label>
+                                        <div className="p-3 sm:p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)]">
+                                            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                                                <label className="flex items-center gap-3 cursor-pointer shrink-0">
+                                                    <Checkbox checked={buyShield} onChange={setBuyShield} />
+                                                    <SettingInfoLabel label="Shield" className="text-sm text-gray-300" />
+                                                </label>
                                                 {buyShield && (
                                                     <>
                                                         <span className="text-sm text-gray-400">&gt;</span>
-                                                        <select
+                                                        <TacticalSelect
                                                             value={withdrawSquadShield}
-                                                            onChange={(e) => {
-                                                                setWithdrawSquadShield(e.target.value)
+                                                            onChange={(v) => {
+                                                                setWithdrawSquadShield(v)
                                                                 const shieldMap: { [key: string]: number } = { '8 Hours': 0, '24 Hours': 1, '3 Days': 2, '7 Days': 3, '14 Days': 4, '12 Hours': 5 }
-                                                                updateSettingsObject('spendingSettings.gemSettings.shieldToBuy', shieldMap[e.target.value])
+                                                                updateSettingsObject('spendingSettings.gemSettings.shieldToBuy', shieldMap[v])
                                                             }}
-                                                            className="flex-1 px-3 py-1.5 bg-background-tertiary border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                        >
-                                                            <option>8 Hours</option>
-                                                            <option>24 Hours</option>
-                                                            <option>3 Days</option>
-                                                            <option>7 Days</option>
-                                                            <option>14 Days</option>
-                                                            <option>12 Hours</option>
-                                                        </select>
+                                                            options={[
+                                                                { value: '8 Hours', label: '8 Hours' },
+                                                                { value: '24 Hours', label: '24 Hours' },
+                                                                { value: '3 Days', label: '3 Days' },
+                                                                { value: '7 Days', label: '7 Days' },
+                                                                { value: '14 Days', label: '14 Days' },
+                                                                { value: '12 Hours', label: '12 Hours' },
+                                                            ]}
+                                                            className="w-full md:flex-1"
+                                                        />
                                                     </>
                                                 )}
                                             </div>
                                         </div>
 
                                         {/* Gem Items */}
-                                        <div className="flex flex-wrap gap-3">
+                                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:flex md:flex-wrap md:gap-3">
                                             {[
                                                 { label: 'Withdraw Squad', value: buyWithdrawSquad, setter: setBuyWithdrawSquad, key: 'buyWithdrawSquad' },
                                                 { label: 'Gold Hammer', value: goldHammer, setter: setGoldHammer, key: 'buyGoldHammer' },
@@ -253,17 +331,9 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
                                                 { label: 'Archaic Tome', value: archaicTome, setter: setArchaicTome, key: 'buyArchaicTome' },
                                                 { label: 'Reduce Upkeep', value: reduceUpkeep, setter: setReduceUpkeep, key: 'buyReducedUpKeep' },
                                             ].map((item) => (
-                                                <label key={item.key} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={item.value}
-                                                        onChange={(e) => {
-                                                            item.setter(e.target.checked)
-                                                            updateSettingsObject(`spendingSettings.gemSettings.${item.key}`, e.target.checked)
-                                                        }}
-                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                    />
-                                                    <span className="text-sm text-white">{item.label}</span>
+                                                <label key={item.key} className="flex min-h-[48px] md:min-h-0 items-center justify-between md:justify-start gap-4 md:gap-2 px-3 py-2 md:px-4 md:py-2 rounded-lg md:rounded-xl bg-bg-inset/70 md:bg-[#0F0F1A] border border-white/10 md:border-[rgba(123,94,255,0.08)] hover:bg-white/[0.035] md:hover:bg-[#161626] transition-colors cursor-pointer">
+                                                    <SettingInfoLabel label={item.label} className="text-[13px] sm:text-[14px] md:text-sm text-white" />
+                                                    <Checkbox checked={item.value} onChange={item.setter} />
                                                 </label>
                                             ))}
                                         </div>
@@ -271,10 +341,11 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
                                         {/* Reduce Upkeep - Removed standalone version since it's now in the list above */}
 
                                         {/* Buy VIP Points */}
-                                        <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                            <label className="block text-xs sm:text-sm text-gray-300 mb-2">Buy VIP Points Up to Level:</label>
-                                            <input
-                                                type="number"
+                                        <div className="p-3 sm:p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)]">
+                                            <div className="mb-2">
+                                                <SettingInfoLabel label="Buy VIP Points Up to Level" className="text-xs sm:text-sm text-gray-300" />
+                                            </div>
+                                            <input type="number"
                                                 min={0}
                                                 max={9999999}
                                                 step="1"
@@ -287,33 +358,25 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
                                                     setGemsBuyVIPLevel(val)
                                                     updateSettingsObject('spendingSettings.gemSettings.buyVIP_Points', val)
                                                 }}
-                                                className="w-32 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                className="w-32 px-3 py-2 bg-[#07070E]/50 border border-[rgba(123,94,255,0.2)] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#7B5EFF]/50"
                                             />
                                         </div>
                                     </div>
 
                                     {/* Guild Coins Section */}
-                                    <div className="space-y-4 pt-6 border-t border-white/10">
+                                    <div className="space-y-4 pt-6 border-t border-[rgba(123,94,255,0.2)]">
                                         <div className="flex items-center justify-between p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
                                             <div>
                                                 <label className="flex items-center gap-3 cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={useGuildCoins}
-                                                        onChange={(e) => {
-                                                            setUseGuildCoins(e.target.checked)
-                                                            updateSettingsObject('spendingSettings.spendGC', e.target.checked)
-                                                        }}
-                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-amber-500 focus:ring-2 focus:ring-amber-500/50"
-                                                    />
-                                                    <span className="text-sm font-medium text-amber-300">Use Guild Coins</span>
+                                                    <Checkbox checked={useGuildCoins} onChange={setUseGuildCoins} />
+                                                    <SettingInfoLabel label="Use Guild Coins" className="text-sm font-medium text-amber-300" />
                                                 </label>
                                                 <p className="text-xs text-gray-400 ml-8">Guild Coins will be Prioritized over Gems</p>
                                             </div>
                                         </div>
 
                                         {/* Guild Coin Boosts */}
-                                        <div className="flex flex-wrap gap-3">
+                                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:flex md:flex-wrap md:gap-3">
                                             {[
                                                 { label: 'Shield (8h)', value: shield8h, setter: setShield8h, key: 'buyShield' },
                                                 { label: 'Withdraw Squad', value: withdrawSquad, setter: setWithdrawSquad, key: 'buyWithdrawSquad' },
@@ -324,27 +387,20 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
                                                 { label: 'Ore Boost', value: oreBoost, setter: setOreBoost, key: 'buyOreBoost' },
                                                 { label: 'Gold Boost', value: goldBoost, setter: setGoldBoost, key: 'buyGoldBoost' },
                                             ].map((boost) => (
-                                                <label key={boost.key} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={boost.value}
-                                                        onChange={(e) => {
-                                                            boost.setter(e.target.checked)
-                                                            updateSettingsObject(`spendingSettings.gcSettings.${boost.key}`, e.target.checked)
-                                                        }}
-                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                    />
-                                                    <span className="text-sm text-white">{boost.label}</span>
+                                                <label key={boost.key} className="flex min-h-[48px] md:min-h-0 items-center justify-between md:justify-start gap-4 md:gap-2 px-3 py-2 md:px-4 md:py-2 rounded-lg md:rounded-xl bg-bg-inset/70 md:bg-[#0F0F1A] border border-white/10 md:border-[rgba(123,94,255,0.08)] hover:bg-white/[0.035] md:hover:bg-[#161626] transition-colors cursor-pointer">
+                                                    <SettingInfoLabel label={boost.label} className="text-[13px] sm:text-[14px] md:text-sm text-white" />
+                                                    <Checkbox checked={boost.value} onChange={boost.setter} />
                                                 </label>
                                             ))}
                                         </div>
 
                                         {/* Buy VIP Points and Reserve Guild Coins */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                                <label className="block text-xs sm:text-sm text-gray-300 mb-2">Buy VIP Points Up to Level:</label>
-                                                <input
-                                                    type="number"
+                                        <div className="grid grid-cols-2 gap-3 md:gap-4">
+                                            <div className="p-3 sm:p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)]">
+                                                <div className="mb-2">
+                                                    <SettingInfoLabel label="Buy VIP Points Up to Level" className="text-xs sm:text-sm text-gray-300" />
+                                                </div>
+                                                <input type="number"
                                                     min={0}
                                                     max={9999999}
                                                     step="1"
@@ -357,14 +413,15 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
                                                         setGuildCoinsBuyVIPLevel(val)
                                                         updateSettingsObject('spendingSettings.gcSettings.buyVIP_Points', val)
                                                     }}
-                                                    className="w-32 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                    className="w-32 px-3 py-2 bg-[#07070E]/50 border border-[rgba(123,94,255,0.2)] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#7B5EFF]/50"
                                                 />
                                             </div>
 
-                                            <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                                <label className="block text-xs sm:text-sm text-gray-300 mb-2">Reserve Guild Coins:</label>
-                                                <input
-                                                    type="number"
+                                            <div className="p-3 sm:p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)]">
+                                                <div className="mb-2">
+                                                    <SettingInfoLabel label="Reserve Guild Coins" className="text-xs sm:text-sm text-gray-300" />
+                                                </div>
+                                                <input type="number"
                                                     min={0}
                                                     max={99999999}
                                                     step="1"
@@ -377,7 +434,7 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
                                                         setReserveGuildCoins(val)
                                                         updateSettingsObject('spendingSettings.gcSettings.coinReserve', val)
                                                     }}
-                                                    className="w-32 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                    className="w-32 px-3 py-2 bg-[#07070E]/50 border border-[rgba(123,94,255,0.2)] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#7B5EFF]/50"
                                                 />
                                             </div>
                                         </div>

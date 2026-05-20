@@ -95,8 +95,8 @@ export async function PATCH(
         // Update the nested property
         const updatedSettings = updateNestedProperty(settings, path, value)
 
-        // Write back to file
-        await writeSettingsFile(iggId, updatedSettings)
+        // Write back to file and verify the file changed on disk.
+        const sync = await writeSettingsFile(iggId, updatedSettings)
 
         // Update last sync time
         await prisma.iggId.update({
@@ -111,15 +111,19 @@ export async function PATCH(
                 action: 'UPDATE_SETTING',
                 iggId,
                 category: path.split('.')[0],
-                details: { path, value },
+                details: { path, value, filePath: sync.filePath, mtime: sync.mtime },
             },
         })
 
         return NextResponse.json({
             success: true,
+            synced: true,
             message: 'Setting updated successfully',
             path,
             value,
+            filePath: sync.filePath,
+            mtime: sync.mtime,
+            bytes: sync.bytes,
         })
     } catch (error: any) {
         console.error('Error updating setting:', error)
@@ -157,8 +161,8 @@ export async function PUT(
             return NextResponse.json({ error: 'IGG ID not found or unauthorized' }, { status: 404 })
         }
 
-        // Write entire settings object to file
-        await writeSettingsFile(iggId, settings)
+        // Write entire settings object to file and verify the file changed on disk.
+        const sync = await writeSettingsFile(iggId, settings)
 
         // Update last sync time
         await prisma.iggId.update({
@@ -173,13 +177,17 @@ export async function PUT(
                 action: 'SAVE_SETTINGS',
                 iggId,
                 category: 'all',
-                details: { message: 'Saved all settings' },
+                details: { message: 'Saved all settings', filePath: sync.filePath, mtime: sync.mtime },
             },
         })
 
         return NextResponse.json({
             success: true,
+            synced: true,
             message: 'Settings saved successfully',
+            filePath: sync.filePath,
+            mtime: sync.mtime,
+            bytes: sync.bytes,
         })
     } catch (error: any) {
         console.error('Error saving settings:', error)

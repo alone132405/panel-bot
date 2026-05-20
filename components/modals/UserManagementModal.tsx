@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Save, Trash2, User, Key, Mail, Phone, Shield, Loader2 } from 'lucide-react'
+import { createPortal } from 'react-dom'
 import { toast } from 'sonner'
+import { TacticalSelect } from '@/components/ui/TacticalSelect'
 
 interface User {
     id: string
@@ -39,40 +41,43 @@ interface UserManagementModalProps {
 
 export default function UserManagementModal({ isOpen, onClose, user, onUpdate, onRevokeIgg }: UserManagementModalProps) {
     const [activeTab, setActiveTab] = useState<'info' | 'igg'>('info')
+    const [mounted, setMounted] = useState(false)
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         role: 'USER',
-        contactType: 'WHATSAPP',
+        contactType: 'WHATSAPP' as 'WHATSAPP' | 'LINE' | 'TELEGRAM',
         contactValue: '',
     })
     const [saving, setSaving] = useState(false)
-
     const [expiryDates, setExpiryDates] = useState<Record<string, string>>({})
 
     useEffect(() => {
-        if (user) {
-            setFormData({
-                name: user.name || '',
-                email: user.email || '',
-                role: user.role || 'USER',
-                contactType: user.contactType || 'WHATSAPP',
-                contactValue: user.contactValue || '',
-            })
+        setMounted(true)
+    }, [])
 
-            // Initialize expiry dates
-            const dates: Record<string, string> = {}
-            user.iggIds.forEach(igg => {
-                if (igg.subscription?.expiresAt) {
-                    try {
-                        dates[igg.iggId] = new Date(igg.subscription.expiresAt).toISOString().split('T')[0]
-                    } catch (e) {
-                        dates[igg.iggId] = ''
-                    }
+    useEffect(() => {
+        if (!user) return
+
+        setFormData({
+            name: user.name || '',
+            email: user.email || '',
+            role: user.role || 'USER',
+            contactType: user.contactType || 'WHATSAPP',
+            contactValue: user.contactValue || '',
+        })
+
+        const dates: Record<string, string> = {}
+        user.iggIds.forEach((igg) => {
+            if (igg.subscription?.expiresAt) {
+                try {
+                    dates[igg.iggId] = new Date(igg.subscription.expiresAt).toISOString().split('T')[0]
+                } catch {
+                    dates[igg.iggId] = ''
                 }
-            })
-            setExpiryDates(dates)
-        }
+            }
+        })
+        setExpiryDates(dates)
     }, [user])
 
     const handleSave = async () => {
@@ -85,8 +90,8 @@ export default function UserManagementModal({ isOpen, onClose, user, onUpdate, o
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     userId: user.id,
-                    ...formData
-                })
+                    ...formData,
+                }),
             })
 
             if (res.ok) {
@@ -96,7 +101,7 @@ export default function UserManagementModal({ isOpen, onClose, user, onUpdate, o
                 const error = await res.json()
                 toast.error(error.error || 'Failed to update user')
             }
-        } catch (error) {
+        } catch {
             toast.error('Failed to update user')
         } finally {
             setSaving(false)
@@ -110,8 +115,8 @@ export default function UserManagementModal({ isOpen, onClose, user, onUpdate, o
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     iggId,
-                    expiresAt: date
-                })
+                    expiresAt: date,
+                }),
             })
 
             if (res.ok) {
@@ -120,14 +125,14 @@ export default function UserManagementModal({ isOpen, onClose, user, onUpdate, o
             } else {
                 toast.error('Failed to update subscription')
             }
-        } catch (error) {
+        } catch {
             toast.error('Error updating subscription')
         }
     }
 
-    if (!user) return null
+    if (!user || !mounted) return null
 
-    return (
+    return createPortal(
         <AnimatePresence>
             {isOpen && (
                 <>
@@ -136,176 +141,202 @@ export default function UserManagementModal({ isOpen, onClose, user, onUpdate, o
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+                        className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
                     />
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, x: '-50%', y: '-50%' }}
-                        animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
-                        exit={{ opacity: 0, scale: 0.95, x: '-50%', y: '-50%' }}
-                        className="fixed left-1/2 top-1/2 w-full max-w-[600px] max-h-[90vh] bg-background-secondary rounded-2xl border border-white/10 shadow-2xl z-50 flex flex-col"
+                        initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 20, scale: 0.98 }}
+                        className="fixed inset-x-3 bottom-3 top-3 z-50 flex flex-col overflow-hidden rounded-[24px] border border-[rgba(123,94,255,0.2)] bg-background-secondary shadow-2xl md:inset-x-auto md:bottom-auto md:left-1/2 md:top-1/2 md:max-h-[90vh] md:w-full md:max-w-[600px] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-2xl"
                     >
-                        {/* Header */}
-                        <div className="flex items-center justify-between p-6 border-b border-white/10 bg-background-tertiary/50 rounded-t-2xl">
-                            <div>
-                                <h2 className="text-xl font-bold text-white">Manage User</h2>
-                                <p className="text-sm text-gray-400">ID: {user.id}</p>
+                        <div className="border-b border-[rgba(123,94,255,0.2)] bg-[#07070E]/60 px-4 py-4 sm:px-6">
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="min-w-0">
+                                    <div className="mb-2 flex flex-wrap items-center gap-2">
+                                        <span className="rounded-full border border-[#00FFB2]/20 bg-[#00FFB2]/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#00FFB2]">
+                                            User Control
+                                        </span>
+                                        <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-gray-300">
+                                            {user.accountStatus}
+                                        </span>
+                                    </div>
+                                    <h2 className="truncate text-lg font-bold text-white sm:text-xl">Manage User</h2>
+                                    <p className="mt-1 truncate text-[12px] text-gray-400 sm:text-sm">{user.name} | ID: {user.id}</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-surface transition-colors hover:bg-white/10"
+                                >
+                                    <X className="h-5 w-5 text-gray-400" />
+                                </button>
                             </div>
-                            <button
-                                onClick={onClose}
-                                className="w-8 h-8 rounded-lg bg-surface hover:bg-surface-hover flex items-center justify-center transition-colors"
-                            >
-                                <X className="w-5 h-5 text-gray-400" />
-                            </button>
                         </div>
 
-                        {/* Tabs */}
-                        <div className="flex border-b border-white/10">
+                        <div className="grid grid-cols-2 gap-2 border-b border-[rgba(123,94,255,0.2)] bg-[#07070E]/30 p-2">
                             <button
+                                type="button"
                                 onClick={() => setActiveTab('info')}
-                                className={`flex-1 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'info'
-                                    ? 'border-primary-500 text-primary-400 bg-primary-500/5'
-                                    : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5'
+                                className={`flex min-h-[46px] items-center justify-center rounded-xl px-3 text-sm font-medium transition-colors ${activeTab === 'info'
+                                    ? 'border border-primary-500/30 bg-primary-500/10 text-[#00FFB2]'
+                                    : 'border border-transparent text-gray-400 hover:bg-white/5 hover:text-white'
                                     }`}
                             >
                                 <div className="flex items-center justify-center gap-2">
-                                    <User className="w-4 h-4" />
+                                    <User className="h-4 w-4" />
                                     User Info
                                 </div>
                             </button>
                             <button
+                                type="button"
                                 onClick={() => setActiveTab('igg')}
-                                className={`flex-1 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'igg'
-                                    ? 'border-primary-500 text-primary-400 bg-primary-500/5'
-                                    : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5'
+                                className={`flex min-h-[46px] items-center justify-center rounded-xl px-3 text-sm font-medium transition-colors ${activeTab === 'igg'
+                                    ? 'border border-primary-500/30 bg-primary-500/10 text-[#00FFB2]'
+                                    : 'border border-transparent text-gray-400 hover:bg-white/5 hover:text-white'
                                     }`}
                             >
                                 <div className="flex items-center justify-center gap-2">
-                                    <Key className="w-4 h-4" />
+                                    <Key className="h-4 w-4" />
                                     IGG IDs ({user.iggIds.length})
                                 </div>
                             </button>
                         </div>
 
-                        {/* Content */}
-                        <div className="p-6 overflow-y-auto custom-scrollbar">
+                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar sm:p-6">
                             {activeTab === 'info' ? (
                                 <div className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-medium text-gray-400">Name</label>
-                                            <div className="relative">
-                                                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                                                <input
-                                                    type="text"
-                                                    value={formData.name}
-                                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                                    className="w-full pl-10 pr-4 py-2 bg-background-primary border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                />
+                                    <div className="rounded-2xl border border-white/5 bg-background-primary/70 p-4">
+                                        <div className="mb-3">
+                                            <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">Profile</h3>
+                                            <p className="mt-1 text-[12px] text-gray-400">Update identity, role, and contact details.</p>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium text-gray-400">Name</label>
+                                                <div className="relative">
+                                                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                                                    <input
+                                                        type="text"
+                                                        value={formData.name}
+                                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                                        className="h-11 w-full rounded-xl border border-[rgba(123,94,255,0.2)] bg-background-primary py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-[#7B5EFF]/50"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium text-gray-400">Role</label>
+                                                <div className="relative">
+                                                    <Shield className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                                                    <div className="pl-8">
+                                                        <TacticalSelect
+                                                            value={String(formData.role)}
+                                                            onChange={(value) => setFormData({ ...formData, role: value })}
+                                                            options={[
+                                                                { value: 'USER', label: 'User' },
+                                                                { value: 'ADMIN', label: 'Admin' },
+                                                            ]}
+                                                        />
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-medium text-gray-400">Role</label>
-                                            <div className="relative">
-                                                <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                                                <select
-                                                    value={formData.role}
-                                                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                                    className="w-full pl-10 pr-4 py-2 bg-background-primary border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 appearance-none"
-                                                >
-                                                    <option value="USER">User</option>
-                                                    <option value="ADMIN">Admin</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-gray-400">Email</label>
-                                        <div className="relative">
-                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                                            <input
-                                                type="email"
-                                                value={formData.email}
-                                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                                className="w-full pl-10 pr-4 py-2 bg-background-primary border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-medium text-gray-400">Contact Type</label>
-                                            <select
-                                                value={formData.contactType}
-                                                onChange={(e) => setFormData({ ...formData, contactType: e.target.value })}
-                                                className="w-full px-4 py-2 bg-background-primary border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 appearance-none"
-                                            >
-                                                <option value="WHATSAPP">WhatsApp</option>
-                                                <option value="LINE">Line</option>
-                                                <option value="TELEGRAM">Telegram</option>
-                                            </select>
-                                        </div>
-                                        <div className="col-span-2 space-y-2">
-                                            <label className="text-sm font-medium text-gray-400">Contact Value</label>
+                                        <div className="mt-4 space-y-2">
+                                            <label className="text-sm font-medium text-gray-400">Email</label>
                                             <div className="relative">
-                                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                                                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
                                                 <input
-                                                    type="text"
-                                                    value={formData.contactValue}
-                                                    onChange={(e) => setFormData({ ...formData, contactValue: e.target.value })}
-                                                    className="w-full pl-10 pr-4 py-2 bg-background-primary border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                    type="email"
+                                                    value={formData.email}
+                                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                                    className="h-11 w-full rounded-xl border border-[rgba(123,94,255,0.2)] bg-background-primary py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-[#7B5EFF]/50"
                                                 />
                                             </div>
                                         </div>
 
+                                        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium text-gray-400">Contact Type</label>
+                                                <TacticalSelect
+                                                    value={String(formData.contactType)}
+                                                    onChange={(value) => setFormData({ ...formData, contactType: value as 'WHATSAPP' | 'LINE' | 'TELEGRAM' })}
+                                                    options={[
+                                                        { value: 'WHATSAPP', label: 'WhatsApp' },
+                                                        { value: 'LINE', label: 'Line' },
+                                                        { value: 'TELEGRAM', label: 'Telegram' },
+                                                    ]}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2 sm:col-span-2">
+                                                <label className="text-sm font-medium text-gray-400">Contact Value</label>
+                                                <div className="relative">
+                                                    <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                                                    <input
+                                                        type="text"
+                                                        value={formData.contactValue}
+                                                        onChange={(e) => setFormData({ ...formData, contactValue: e.target.value })}
+                                                        className="h-11 w-full rounded-xl border border-[rgba(123,94,255,0.2)] bg-background-primary py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-[#7B5EFF]/50"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
                                     {user.iggIds.length === 0 ? (
-                                        <div className="text-center py-8 text-gray-500">
+                                        <div className="rounded-2xl border border-dashed border-white/10 bg-background-primary/40 py-10 text-center text-gray-500">
                                             No IGG IDs assigned to this user.
                                         </div>
                                     ) : (
                                         <div className="space-y-3">
                                             {user.iggIds.map((igg) => (
-                                                <div key={igg.id} className="flex items-center justify-between p-4 bg-background-primary rounded-xl border border-white/5 hover:border-white/10 transition-colors">
-                                                    <div>
-                                                        <div className="flex items-center gap-2">
-                                                            <Key className="w-4 h-4 text-primary-400" />
-                                                            <span className="font-medium text-white">{igg.iggId}</span>
+                                                <div key={igg.id} className="rounded-2xl border border-white/5 bg-background-primary p-4 transition-colors hover:border-[rgba(123,94,255,0.2)]">
+                                                    <div className="space-y-3">
+                                                        <div className="min-w-0">
+                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                <Key className="mt-0.5 h-4 w-4 shrink-0 text-[#00FFB2]" />
+                                                                <span className="break-all text-lg font-semibold leading-tight text-white sm:text-base">{igg.iggId}</span>
+                                                                <span className={`rounded-lg px-2 py-1 text-xs font-medium ${igg.isActive
+                                                                    ? 'bg-green-500/10 text-green-400'
+                                                                    : 'bg-red-500/10 text-red-400'
+                                                                    }`}>
+                                                                    {igg.isActive ? 'Active' : 'Inactive'}
+                                                                </span>
+                                                            </div>
+                                                            {igg.displayName && (
+                                                                <p className="mt-2 pl-6 text-sm text-gray-400">{igg.displayName}</p>
+                                                            )}
                                                         </div>
-                                                        {igg.displayName && (
-                                                            <p className="text-sm text-gray-400 mt-1 ml-6">{igg.displayName}</p>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="flex flex-col items-end mr-4">
-                                                            <span className="text-xs text-gray-500 mb-1">Expires</span>
-                                                            <input
-                                                                type="date"
-                                                                value={expiryDates[igg.iggId] || ''}
-                                                                onChange={(e) => {
-                                                                    const newDate = e.target.value
-                                                                    setExpiryDates(prev => ({ ...prev, [igg.iggId]: newDate }))
-                                                                    handleUpdateSubscription(igg.iggId, newDate)
-                                                                }}
-                                                                className="px-2 py-1 bg-surface border border-white/10 rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-primary-500/50 [&::-webkit-calendar-picker-indicator]:invert"
-                                                            />
+
+                                                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+                                                            <div className="grid gap-1">
+                                                                <span className="text-xs text-gray-500">Expires</span>
+                                                                <input
+                                                                    type="date"
+                                                                    value={expiryDates[igg.iggId] || ''}
+                                                                    onChange={(e) => {
+                                                                        const newDate = e.target.value
+                                                                        setExpiryDates((prev) => ({ ...prev, [igg.iggId]: newDate }))
+                                                                        handleUpdateSubscription(igg.iggId, newDate)
+                                                                    }}
+                                                                    className="h-11 w-full rounded-lg border border-[rgba(123,94,255,0.2)] bg-surface px-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7B5EFF]/50 [&::-webkit-calendar-picker-indicator]:invert"
+                                                                />
+                                                            </div>
+
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => onRevokeIgg(user.id, igg.iggId)}
+                                                                className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-red-500/10 px-3 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/20 sm:w-auto"
+                                                                title="Revoke Assignment"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                                Revoke
+                                                            </button>
                                                         </div>
-                                                        <div className={`px-2 py-1 rounded-lg text-xs font-medium ${igg.isActive
-                                                            ? 'bg-green-500/10 text-green-400'
-                                                            : 'bg-red-500/10 text-red-400'
-                                                            }`}>
-                                                            {igg.isActive ? 'Active' : 'Inactive'}
-                                                        </div>
-                                                        <button
-                                                            onClick={() => onRevokeIgg(user.id, igg.iggId)}
-                                                            className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors"
-                                                            title="Revoke Assignment"
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </button>
                                                     </div>
                                                 </div>
                                             ))}
@@ -314,9 +345,43 @@ export default function UserManagementModal({ isOpen, onClose, user, onUpdate, o
                                 </div>
                             )}
                         </div>
+
+                        <div className="border-t border-[rgba(123,94,255,0.2)] bg-[#07070E]/45 p-4 sm:px-6">
+                            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="inline-flex h-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-medium text-gray-300 transition-colors hover:bg-white/10"
+                                >
+                                    Close
+                                </button>
+                                {activeTab === 'info' && (
+                                    <button
+                                        type="button"
+                                        onClick={handleSave}
+                                        disabled={saving}
+                                        className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-primary px-4 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        {saving ? (
+                                            <>
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                                Saving...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Save className="h-4 w-4" />
+                                                Save Changes
+                                            </>
+                                        )}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                     </motion.div>
                 </>
             )}
         </AnimatePresence>
+        ,
+        document.body
     )
 }

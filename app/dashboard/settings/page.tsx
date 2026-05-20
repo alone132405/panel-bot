@@ -24,7 +24,8 @@ import {
     Trophy,
     ChevronRight,
     Loader2,
-    Clock
+    Clock,
+    type LucideIcon
 } from 'lucide-react'
 import { useSocket } from '@/hooks/useSocket'
 import SettingsModal from '@/components/modals/SettingsModal'
@@ -52,7 +53,7 @@ interface SettingCategory {
     id: string
     name: string
     description: string
-    icon: any
+    icon: LucideIcon
     color: string
 }
 
@@ -84,7 +85,7 @@ export default function SettingsPage() {
     const { queueStatus, automationStatus, isConnected } = useSocket(selectedIggId || undefined)
 
     useEffect(() => {
-        console.log('SettingsPage: mounted/updated. IGG ID:', selectedIggId, 'Socket Connected:', isConnected)
+        // console.log('SettingsPage: mounted/updated. IGG ID:', selectedIggId, 'Socket Connected:', isConnected)
     }, [selectedIggId, isConnected])
 
     useEffect(() => {
@@ -142,19 +143,19 @@ export default function SettingsPage() {
                 }
             }
         }
-    }, [queueStatus, selectedIggId])
+    }, [queueStatus, selectedIggId, applying, cooldown])
 
     useEffect(() => {
-        console.log('SettingsPage: automationStatus updated:', automationStatus)
+        // console.log('SettingsPage: automationStatus updated:', automationStatus)
         if (automationStatus?.status === 'completed' || automationStatus?.status === 'error') {
-            console.log('SettingsPage: Automation finished with status:', automationStatus.status)
+            // console.log('SettingsPage: Automation finished with status:', automationStatus.status)
             setApplying(false)
             setQueuePosition(0)
             if (automationStatus.status === 'completed') {
-                console.log('SettingsPage: Triggering success toast')
+                // console.log('SettingsPage: Triggering success toast')
                 toast.success('Changes applied successfully!', { duration: 5000 })
             } else {
-                console.log('SettingsPage: Triggering error toast')
+                // console.log('SettingsPage: Triggering error toast')
                 toast.error(automationStatus.message || 'Automation failed')
             }
         }
@@ -191,8 +192,8 @@ export default function SettingsPage() {
                 toast.error(data.error || 'Failed to apply changes')
                 setApplying(false)
             }
-        } catch (error: any) {
-            toast.error(error.message || 'Error applying changes')
+        } catch (error: unknown) {
+            toast.error(error instanceof Error ? error.message : 'Error applying changes')
             setApplying(false)
         }
     }
@@ -381,7 +382,7 @@ export default function SettingsPage() {
         } else if (category.id === 'gears') {
             setIsGearsModalOpen(true)
         } else {
-            console.log('Category clicked:', category.id)
+            // console.log('Category clicked:', category.id)
         }
     }
 
@@ -436,7 +437,7 @@ export default function SettingsPage() {
                 variants={containerVariants}
                 initial="hidden"
                 animate="show"
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+                className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4"
             >
                 {categories.map((category) => {
                     const Icon = category.icon
@@ -447,24 +448,24 @@ export default function SettingsPage() {
                             variants={itemVariants}
                             whileHover={{ y: -4 }}
                             onClick={() => handleCategoryClick(category)}
-                            className="bg-bg-surface border border-border rounded-[14px] p-5 cursor-pointer group relative overflow-hidden transition-all duration-250 hover:border-accent-1/40 hover:shadow-glow-mint"
+                            className="group relative cursor-pointer overflow-hidden rounded-lg border border-border bg-bg-surface p-4 transition-all duration-200 hover:border-accent-1/40 hover:shadow-glow-mint sm:p-5"
                         >
                             <div className="relative">
                                 {/* Icon */}
-                                <div className="w-[44px] h-[44px] rounded-[10px] bg-bg-elevated flex items-center justify-center mb-4 transition-colors duration-300 group-hover:bg-accent-1/10 border border-border group-hover:border-accent-1/20">
+                                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-[10px] border border-border bg-bg-elevated transition-colors duration-300 group-hover:border-accent-1/20 group-hover:bg-accent-1/10 sm:mb-4 sm:h-[44px] sm:w-[44px]">
                                     <Icon className={`w-5 h-5 ${category.color} transition-transform group-hover:scale-110`} />
                                 </div>
 
                                 {/* Content */}
-                                <h3 className="font-orbitron text-[14px] font-bold text-text-primary mb-2 transition-all">
+                                <h3 className="mb-2 truncate font-orbitron text-[13px] font-bold text-text-primary transition-all sm:text-[14px]">
                                     {category.name}
                                 </h3>
-                                <p className="font-sans text-text-muted text-[13px] leading-relaxed mb-4 line-clamp-2">
+                                <p className="mb-4 line-clamp-2 font-sans text-[12px] leading-relaxed text-text-muted sm:text-[13px]">
                                     {category.description}
                                 </p>
 
                                 {/* Arrow */}
-                                <div className="flex items-center gap-1 font-sans text-accent-1 text-[13px] font-bold opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-250">
+                                <div className="flex -translate-x-2 items-center gap-1 font-sans text-[13px] font-bold text-accent-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
                                     <span>Configure</span>
                                     <ChevronRight className="w-3 h-3" />
                                 </div>
@@ -484,7 +485,7 @@ export default function SettingsPage() {
                 <button
                     onClick={handleApplyChanges}
                     disabled={applying || !selectedIggId || cooldown > 0}
-                    className="group px-8 py-4 rounded-[10px] bg-gradient-to-br from-accent-1 to-accent-2 text-[#07070E] font-sans text-[15px] font-bold flex items-center gap-3 hover:shadow-glow-mint hover:brightness-110 transition-all duration-250 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
+                    className="group flex items-center gap-3 rounded-lg bg-gradient-to-br from-accent-1 to-accent-cyan px-8 py-4 font-sans text-[15px] font-bold text-[#031017] transition-all duration-200 hover:brightness-110 hover:shadow-glow-mint disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-none"
                 >
                     {(applying || queuePosition > 0) ? (
                         <>
@@ -514,7 +515,6 @@ export default function SettingsPage() {
                 <SettingsModal
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
-                    categoryName={selectedCategory.name}
                     iggId={selectedIggId}
                 />
             )}

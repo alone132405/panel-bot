@@ -12,24 +12,21 @@ export const signupSchema = z.object({
     password: z.string().min(8, 'Password must be at least 8 characters'),
     confirmPassword: z.string(),
     name: z.string().min(2, 'Name must be at least 2 characters'),
-    contactType: contactTypeEnum.optional(),
-    contactValue: z.string().optional(),
+    contactType: contactTypeEnum,
+    contactValue: z.string().min(1, 'Contact information is required'),
 }).refine(data => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ['confirmPassword'],
 }).refine(data => {
-    // If contactType is set, contactValue must also be set (or both empty)
-    if (data.contactType && !data.contactValue) {
+    if (!data.contactValue.trim()) {
         return false
     }
-    // If WhatsApp, contactValue must be numbers only (allow + prefix for country code)
     if (data.contactType === 'WHATSAPP' && data.contactValue) {
-        // Allow format like +911234567890 or just 1234567890
         return /^\+?\d+$/.test(data.contactValue)
     }
     return true
 }, {
-    message: "Invalid contact value. For WhatsApp, use numbers only (e.g., +911234567890)",
+    message: 'Invalid contact value. For WhatsApp, use numbers only (e.g., +911234567890)',
     path: ['contactValue'],
 })
 

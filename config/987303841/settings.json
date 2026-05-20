@@ -4,7 +4,7 @@
     "isTaiwan": false,
     "resetConnection": false,
     "reconnectTime": 5,
-    "otherLoginTime": 300,
+    "otherLoginTime": 904,
     "workerSpeed": 100,
     "cmdInterval": 2000,
     "resetTime": 60,
@@ -24,16 +24,16 @@
     "troveTime": 3,
     "useVipPoints": false,
     "useExpItems": false,
-    "autoOpenChests": false,
-    "autoAttackSkirmish": false,
+    "autoOpenChests": true,
+    "autoAttackSkirmish": true,
     "autoAttackFireTrial": false,
     "recallTroopsForSkirmish": false,
     "autoClaimKingdomGifts": false,
     "skirmishTroopPercent": 90,
-    "useResourceFromBag": false,
+    "useResourceFromBag": true,
     "autoTreasureTrove": false,
     "useStarScrolls": false,
-    "skirmishChapter": 8,
+    "skirmishChapter": 9,
     "assignedWebhook": 0,
     "giftResetTime": "1.00:00:00",
     "dayGiftResetTime": "00:00:00",
@@ -48,7 +48,8 @@
     "scheduleBuildSpam": false,
     "scheduleBuildSpamHours": 6,
     "scheduleBuildSpamAmount": 20,
-    "scheduleBuildSpamDelay": 7
+    "scheduleBuildSpamDelay": 7,
+    "autoSkirmish": true
   },
   "statSettings": {
     "pointGoalHunt": [
@@ -82,8 +83,8 @@
     "autoFortunePackets": false,
     "joinShowdown": false,
     "autoSlowHelpSpeed": false,
-    "guildCheckDelay": 300,
-    "helpCheckDelay": 30
+    "guildCheckDelay": 301,
+    "helpCheckDelay": 31
   },
   "questSettings": {
     "dailyLoginGift": false,
@@ -102,7 +103,7 @@
     "shelterQuest": false,
     "openAllGuildQuest": false,
     "openAllAdminQuest": false,
-    "questReserve": 10
+    "questReserve": 11
   },
   "speedUpSettings": {
     "useSpeedUps": false,
@@ -121,7 +122,7 @@
     "autoGearSpeedUp": false,
     "autoWallSpeedUp": false,
     "boostingMode": false,
-    "maxSpeedUpExcess": "00:05:00"
+    "maxSpeedUpExcess": "03:05"
   },
   "turfQuests": {
     "attackLabyrinth": false,
@@ -162,52 +163,52 @@
     "useReduceUpkeep25": false
   },
   "cargoShipSettings": {
-    "allowTrading": false,
-    "tradeFood": false,
-    "tradeStone": false,
-    "tradeWood": false,
-    "tradeOre": false,
-    "tradeGold": false,
-    "ignoreFood": false,
-    "ignoreStone": false,
-    "ignoreWood": false,
-    "ignoreOre": false,
-    "ignoreGold": false,
-    "ignoreAnima": false,
-    "ignoreLunite": false,
-    "ignoreSpeedUp": false,
-    "exchangeRssItemOnly": false,
-    "useRssFromBagIfNeeded": false,
-    "exchangeMinQuality": 1
+    "allowTrading": true,
+    "tradeFood": true,
+    "tradeStone": true,
+    "tradeWood": true,
+    "tradeOre": true,
+    "tradeGold": true,
+    "ignoreFood": true,
+    "ignoreStone": true,
+    "ignoreWood": true,
+    "ignoreOre": true,
+    "ignoreGold": true,
+    "ignoreAnima": true,
+    "ignoreLunite": true,
+    "ignoreSpeedUp": true,
+    "exchangeRssItemOnly": true,
+    "useRssFromBagIfNeeded": true,
+    "exchangeMinQuality": 3
   },
   "rallySettings": {
-    "joinRallies": false,
+    "joinRallies": true,
     "craftEssences": false,
-    "dontFillRally": false,
-    "noSiege": false,
-    "noT5": false,
-    "oneType": false,
-    "addBuffers": false,
+    "dontFillRally": true,
+    "noSiege": true,
+    "noT5": true,
+    "oneType": true,
+    "addBuffers": true,
     "minEssenceLevel": 28,
-    "extraSpace": 5,
-    "rallyLimit": 5,
-    "maxWalkTime": 30,
+    "extraSpace": 200000,
+    "rallyLimit": 8,
+    "maxWalkTime": 32,
     "rejoinWaitTime": 10,
-    "rallyTroopType": 0,
-    "maxRallyTime": 2,
+    "rallyTroopType": 2,
+    "maxRallyTime": 3,
     "keepEssSlotFree": false,
-    "checkLab": false,
+    "checkLab": true,
     "levelToAttack": [
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
     ]
   },
   "protectionSettings": {
@@ -224,23 +225,23 @@
     "recallGatherTroopsOnConflict": false,
     "sendTroopsToRegather": false,
     "dontShelterSiege": false,
-    "regatherWaitTime": 30,
-    "shieldRandomTime": 5,
+    "regatherWaitTime": 31,
+    "shieldRandomTime": 1800,
     "ShelterType": 2,
     "AttackShelterType": 1,
-    "shieldRedeployTime": 120,
-    "antiRedeployTime": 5,
+    "shieldRedeployTime": 121,
+    "antiRedeployTime": 6,
     "recallShelterTroopsAfterAttack": false,
-    "preferredShield": 1
+    "preferredShield": 5
   },
   "supplySettings": {
-    "sendResources": false,
-    "useBagResource": false,
+    "sendResources": true,
+    "useBagResource": true,
     "randomizeSpeed": false,
-    "speedGear": false,
-    "supplySpeed": 0.1,
-    "maxTravelTime": 600,
-    "playerToSend": "konoha vault",
+    "speedGear": true,
+    "supplySpeed": 0.16,
+    "maxTravelTime": 601,
+    "playerToSend": "konoha vaul",
     "reservedRss": [
       500000,
       500000,
@@ -263,100 +264,100 @@
       100
     ],
     "typesToSend": [
-      false,
-      false,
-      false,
-      false,
-      false
+      true,
+      true,
+      true,
+      true,
+      true
     ],
     "bagTypesToSend": [
-      false,
-      false,
-      false,
-      false,
-      false
+      true,
+      true,
+      true,
+      true,
+      true
     ]
   },
   "gatherSettings": {
-    "gatherResources": false,
-    "gatherLowestResources": false,
-    "ignoreLevelForGems": false,
-    "clearTiles": false,
-    "targetHigherLevel": false,
-    "leaveSpareArmy": false,
-    "spareArmyAmount": 2,
-    "recallCamps": false,
-    "useGatherGear": false,
-    "useGatherSchedule": false,
+    "gatherResources": true,
+    "gatherLowestResources": true,
+    "ignoreLevelForGems": true,
+    "clearTiles": true,
+    "targetHigherLevel": true,
+    "leaveSpareArmy": true,
+    "spareArmyAmount": 4,
+    "recallCamps": true,
+    "useGatherGear": true,
+    "useGatherSchedule": true,
     "ignoreLevel3GF": false,
-    "gatherStartTime": "12:00:00",
-    "gatherEndTime": "20:00:00",
-    "maxArmysToSend": 0,
-    "maxSearchArea": 2,
-    "maxWalkTime": 20,
-    "tileMinimum": 100000,
-    "sendingDelay": 2,
+    "gatherStartTime": "06:00",
+    "gatherEndTime": "09:55",
+    "maxArmysToSend": 1,
+    "maxSearchArea": 3,
+    "maxWalkTime": 21,
+    "tileMinimum": 100001,
+    "sendingDelay": 3,
     "levelToGather": [
-      false,
-      false,
-      false,
-      false,
-      false,
-      false
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
     ],
     "typesToGather": [
-      false,
-      false,
-      false,
-      false,
-      false,
-      false
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
     ]
   },
   "realmGatherSettings": {
-    "autoGathering": false,
-    "leaveSpareArmy": false,
+    "autoGathering": true,
+    "leaveSpareArmy": true,
     "spareArmyAmount": 1,
-    "maxArmysToSend": 0,
-    "highTier": false,
+    "maxArmysToSend": 7,
+    "highTier": true,
     "typesToGather": [
-      false,
-      false,
-      false,
-      false,
-      false,
-      false
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
     ]
   },
   "monsterSettings": {
-    "autoHunting": false,
-    "sendMonstersToChat": false,
-    "useBoots": false,
-    "useEnergyItems": false,
-    "oneKillHunt": false,
-    "comboPrediction": false,
-    "allowSaberfang": false,
+    "autoHunting": true,
+    "sendMonstersToChat": true,
+    "useBoots": true,
+    "useEnergyItems": true,
+    "oneKillHunt": true,
+    "comboPrediction": true,
+    "allowSaberfang": true,
     "huntSearchArea": 1,
-    "huntSendDelay": 500,
-    "maxWalkTime": 160,
-    "avoidConflict": false,
-    "avoidGuildConflict": false,
+    "huntSendDelay": 5002,
+    "maxWalkTime": 1602,
+    "avoidConflict": true,
+    "avoidGuildConflict": true,
     "energyPercentage": 90,
-    "huntMode": 0,
+    "huntMode": 3,
     "stealPercentage": 50,
     "stealCombo": 2,
     "heroType": 0,
     "huntLevels": [
-      false,
-      false,
-      false,
-      false,
-      false
+      true,
+      true,
+      true,
+      true,
+      true
     ],
     "monsterTypes": [
-      false,
-      false,
-      false
+      true,
+      true,
+      true
     ],
     "selectedHerosMP": [
       0,
@@ -447,11 +448,12 @@
     }
   },
   "realmMonsterSettings": {
-    "autoHunting": false,
-    "useEnergyItems": false,
-    "autoHuntCount": 1,
+    "autoHunting": true,
+    "useEnergyItems": true,
+    "autoHuntCount": 19,
     "lastAutoTime": 0,
-    "autoDelayTime": 86400
+    "autoDelayTime": 86400,
+    "monsterLevel": 5
   },
   "spendingSettings": {
     "spendGems": false,
@@ -483,23 +485,19 @@
     }
   },
   "researchSettings": {
-    "autoResearch": false,
-    "useTargetTable": false,
-    "useTechnolabes": false,
-    "minTechnoMight": 1000000,
+    "autoResearch": true,
+    "useTargetTable": true,
+    "useTechnolabes": true,
+    "minTechnoMight": 1000001,
     "researchPriority": null,
     "researchEnabled": null,
     "researchPriority_": [
-      {
-        "Key": 5,
-        "Enabled": false
-      },
       {
         "Key": 1,
         "Enabled": false
       },
       {
-        "Key": 3,
+        "Key": 7,
         "Enabled": false
       },
       {
@@ -507,7 +505,11 @@
         "Enabled": false
       },
       {
-        "Key": 7,
+        "Key": 5,
+        "Enabled": false
+      },
+      {
+        "Key": 3,
         "Enabled": false
       },
       {
@@ -823,21 +825,21 @@
     ]
   },
   "buildSettingsNew": {
-    "autoBuild": false,
-    "autoUpgrade": false,
-    "ignoreSpamTarget": false,
-    "buildByLowestLevel": false,
-    "autoBuySecondQueue": false,
-    "secondQueueSpamOnly": false,
-    "strictPriority": false,
-    "buildPriority": 0,
-    "newSpamTarget": 0,
-    "maxBuildLevel": 25,
+    "autoBuild": true,
+    "autoUpgrade": true,
+    "ignoreSpamTarget": true,
+    "buildByLowestLevel": true,
+    "autoBuySecondQueue": true,
+    "secondQueueSpamOnly": true,
+    "strictPriority": true,
+    "buildPriority": 7,
+    "newSpamTarget": 3,
+    "maxBuildLevel": 50,
     "BuildingTarget": [
       0,
-      4,
-      4,
-      4,
+      1,
+      1,
+      1,
       4,
       4,
       1,
@@ -878,7 +880,8 @@
       22,
       23,
       23
-    ]
+    ],
+    "spamTargetBuilding": "Barracks"
   },
   "talentSettings": {
     "autoTalents": false,
@@ -1008,12 +1011,12 @@
     }
   ],
   "heroSettings": {
-    "autoHireHeros": false,
-    "autoUpgradeHeros": false,
-    "autoEnhanceHeros": false,
-    "useLevelUpItems": false,
-    "reviveDeadLeader": false,
-    "useBraveheartItems": false,
+    "autoHireHeros": true,
+    "autoUpgradeHeros": true,
+    "autoEnhanceHeros": true,
+    "useLevelUpItems": true,
+    "reviveDeadLeader": true,
+    "useBraveheartItems": true,
     "heroPriority": [
       21,
       20,
@@ -1038,15 +1041,15 @@
     ]
   },
   "arenaSettings": {
-    "attackArena": false,
-    "collectGems": false,
-    "buyExtraAttempts": false,
-    "attackGuildmates": false,
-    "attemptsToBuy": 1,
-    "minWinChance": 60,
-    "maxWinChance": 100,
+    "attackArena": true,
+    "collectGems": true,
+    "buyExtraAttempts": true,
+    "attackGuildmates": true,
+    "attemptsToBuy": 2,
+    "minWinChance": 61,
+    "maxWinChance": 99,
     "arenaHeroType": 2,
-    "arenaDefenderType": 1,
+    "arenaDefenderType": 0,
     "selectedHeros": [
       0,
       0,
@@ -1056,20 +1059,20 @@
     ]
   },
   "heroStageSettings": {
-    "AutoAttackHeroStages": false,
-    "priorityMode": false,
+    "AutoAttackHeroStages": true,
+    "priorityMode": true,
     "attackStageType": 0,
-    "seqAttackStageType": 0,
-    "heroSelection": 2,
+    "seqAttackStageType": 1,
+    "heroSelection": 0,
     "AutoHeroChance": 40,
     "AutoHeroMaxTries": 50,
     "selectedChapter": {
-      "selectedChapterStageType": 0,
+      "selectedChapterStageType": 1,
       "StageChapter": 1,
       "StagePoint": 0,
       "comboIndex": 0,
-      "QuickFightStage": false,
-      "useVipSweep": false
+      "QuickFightStage": true,
+      "useVipSweep": true
     },
     "campaignPoint": 71,
     "campaignPointElite": 1,
@@ -1114,12 +1117,12 @@
       "Exp": 0,
       "Rarity": 1,
       "Enhanced": 0,
-      "allowTraining": false,
-      "allowSkillTraining": false,
-      "allowEnhance": false,
-      "upgradeSkills": false,
-      "useExpItems": false,
-      "useSkills": false,
+      "allowTraining": true,
+      "allowSkillTraining": true,
+      "allowEnhance": true,
+      "upgradeSkills": true,
+      "useExpItems": true,
+      "useSkills": true,
       "shatterRunes": false
     },
     {
@@ -1741,19 +1744,19 @@
   "skillBlacklist": [],
   "eventSettings": {
     "guildFest": {
-      "collectRewards": false,
+      "collectRewards": true,
       "lastExportHash": 0,
       "gfMissionComplete": {
         "missionsToComplete_": {
           "0": {
-            "ToComplete": false,
-            "TakeIfHigherThanPoints": 100,
+            "ToComplete": true,
+            "TakeIfHigherThanPoints": 355,
             "MaxPoints": 355,
             "IsAutomated": 0,
-            "ToCompleteSolo120": true,
+            "ToCompleteSolo120": false,
             "TakeIfHigherThanPointsSolo120": 9,
             "MaxPointsSolo120": 346,
-            "ToCompleteSolo200": true,
+            "ToCompleteSolo200": false,
             "TakeIfHigherThanPointsSolo200": 5,
             "MaxPointsSolo200": 351
           },
@@ -2274,12 +2277,12 @@
             "MaxPointsSolo200": 355
           }
         },
-        "completeMissions": false,
-        "buyExtraMission": false,
+        "completeMissions": true,
+        "buyExtraMission": true,
         "itemToBuy": 1051,
-        "mToMailPlayer": false,
+        "mToMailPlayer": true,
         "mNonAutoOnly": false,
-        "mMailPlayerName": ""
+        "mMailPlayerName": "Mainhhh"
       },
       "gfMissionRemove": {
         "removeMissions": false,
@@ -2288,804 +2291,485 @@
         "missionsToRemove_": {
           "0": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "1": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "2": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 102,
+            "MaxPoints": 352,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "3": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "4": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "5": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "6": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "7": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "8": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "9": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "10": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "11": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "12": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "13": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "14": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "15": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "18": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "19": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "21": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "22": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "24": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "25": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "26": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "27": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "28": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "29": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "30": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "31": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "32": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "33": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "34": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "35": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "36": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "37": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "38": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "41": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "42": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "43": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "44": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "45": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "46": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "52": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "57": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "60": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "61": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "62": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "63": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "64": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "65": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "66": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "67": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "68": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "69": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "70": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "71": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "72": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "73": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "74": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "75": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "76": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
-            "MaxPointsSolo120": 0,
-            "MaxPointsSolo200": 0
-          },
-          "77": {
-            "ToRemove": false,
-            "ToRemoveSolo120": false,
-            "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
-            "RemoveIfLowerThanPointsSolo120": 0,
-            "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "78": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "79": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "80": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "81": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "82": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "83": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "84": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "85": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "86": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "98": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "99": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           },
           "100": {
             "ToRemove": false,
+            "RemoveIfLowerThanPoints": 100,
+            "MaxPoints": 355,
             "ToRemoveSolo120": false,
             "ToRemoveSolo200": false,
-            "RemoveIfLowerThanPoints": 100,
             "RemoveIfLowerThanPointsSolo120": 0,
             "RemoveIfLowerThanPointsSolo200": 0,
-            "MaxPoints": 355,
             "MaxPointsSolo120": 0,
             "MaxPointsSolo200": 0
           }
@@ -3196,24 +2880,27 @@
       }
     },
     "Chaos": {
-      "AutoJoinArena": false,
-      "AutoCompleteMissions": false,
+      "AutoJoinArena": true,
+      "AutoCompleteMissions": true,
       "AutoMission": {
-        "GatherLV3Above": false,
-        "GatherLv4Above": false,
-        "GatherLV5Above": false
+        "GatherLV3Above": true,
+        "GatherLv4Above": true,
+        "GatherLV5Above": true,
+        "HuntLV4Above": true,
+        "HuntLV3Above": true,
+        "HuntLV5Above": true
       }
     }
   },
   "troopSettings": {
-    "autoTrainTroops": false,
-    "autoHealTroops": false,
-    "autoHealSanctuary": false,
-    "autoCraftLunar": false,
+    "autoTrainTroops": true,
+    "autoHealTroops": true,
+    "autoHealSanctuary": true,
+    "autoCraftLunar": true,
     "lunarAmount": -1,
     "barrackTrainingLimit": 0,
     "nowTroopIndex": 0,
-    "rotateTraining": false,
+    "rotateTraining": true,
     "troopData": [
       [
         9999,
@@ -3360,7 +3047,7 @@
         0
       ],
       [
-        0,
+        11,
         0,
         0,
         0,
@@ -3404,13 +3091,13 @@
     ]
   },
   "gearSettings": {
-    "autoSwitchGear": false,
+    "autoSwitchGear": true,
     "needFixHash": false,
     "autoUpgradeGear": false,
     "autoCraftGear": false,
     "useCabinetExpander": false,
-    "idleGearTime": 300,
-    "idleGearSet": 0,
+    "idleGearTime": 3009,
+    "idleGearSet": 6,
     "_upgradeList": [
       {
         "ItemID": 4464,
@@ -3466,28 +3153,28 @@
     "_gearSet": []
   },
   "scheduleSettings": {
-    "enableSchedule": false,
-    "recallTroops": false,
-    "checkShield": false,
-    "checkAnti": false,
-    "checkShelter": false,
-    "randomizeSchedule": false,
-    "randMax": 10,
-    "offlineTime": "22:00:00",
-    "onlineTime": "08:00:00",
-    "offlineTime1": "01:00:00",
+    "enableSchedule": true,
+    "recallTroops": true,
+    "checkShield": true,
+    "checkAnti": true,
+    "checkShelter": true,
+    "randomizeSchedule": true,
+    "randMax": 11,
+    "offlineTime": "20:00:00",
+    "onlineTime": "06:00",
+    "offlineTime1": "06:00",
     "onlineTime1": "00:05:00",
-    "scheduleType": 1
+    "scheduleType": 0
   },
   "prisonSettings": {
     "dontShieldWithPrisoner": false,
     "autoExecute": false
   },
   "artifactSettings": {
-    "collectChest": false,
-    "collectFreeChest": false,
-    "collectWeeklyChallenge": false,
-    "appraiseArtifacts": false
+    "collectChest": true,
+    "collectFreeChest": true,
+    "collectWeeklyChallenge": true,
+    "appraiseArtifacts": true
   },
   "warSettings": {
     "warKey": "",
@@ -3538,5 +3225,126 @@
     "guildFest": false,
     "Arena": false,
     "Schedule": false
+  },
+  "accountData": [
+    {
+      "UserID": 987303841,
+      "AccountName": "Darkvenom24",
+      "highAuth": false,
+      "deferAccountName": "",
+      "DeferID": 0,
+      "accountBalance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "socialID": 0
+    }
+  ],
+  "militarySettings": {
+    "troops": [
+      {
+        "name": "Grunt",
+        "tier": 1,
+        "amount": 11
+      },
+      {
+        "name": "Archer",
+        "tier": 1,
+        "amount": 0
+      },
+      {
+        "name": "Cataphract",
+        "tier": 1,
+        "amount": 0
+      },
+      {
+        "name": "Ballista",
+        "tier": 1,
+        "amount": 0
+      },
+      {
+        "name": "Gladiator",
+        "tier": 2,
+        "amount": 0
+      },
+      {
+        "name": "Sharpshooter",
+        "tier": 2,
+        "amount": 0
+      },
+      {
+        "name": "Reptilian Rider",
+        "tier": 2,
+        "amount": 0
+      },
+      {
+        "name": "Catapult",
+        "tier": 2,
+        "amount": 0
+      },
+      {
+        "name": "Royal Guard",
+        "tier": 3,
+        "amount": 0
+      },
+      {
+        "name": "Stealth Sniper",
+        "tier": 3,
+        "amount": 0
+      },
+      {
+        "name": "Royal Cavalry",
+        "tier": 3,
+        "amount": 0
+      },
+      {
+        "name": "Fire Trebuchet",
+        "tier": 3,
+        "amount": 0
+      },
+      {
+        "name": "Heroic Fighter",
+        "tier": 4,
+        "amount": 0
+      },
+      {
+        "name": "Heroic Cannoneer",
+        "tier": 4,
+        "amount": 0
+      },
+      {
+        "name": "Ancient Drake Rider",
+        "tier": 4,
+        "amount": 0
+      },
+      {
+        "name": "Destroyer",
+        "tier": 4,
+        "amount": 0
+      },
+      {
+        "name": "Luminary Guard",
+        "tier": 5,
+        "amount": 0
+      },
+      {
+        "name": "Luminary Marksman",
+        "tier": 5,
+        "amount": 0
+      },
+      {
+        "name": "Luminary Lion Force",
+        "tier": 5,
+        "amount": 0
+      },
+      {
+        "name": "Luminary Avenger",
+        "tier": 5,
+        "amount": 0
+      }
+    ]
   }
 }

@@ -1,11 +1,13 @@
 'use client'
 
-import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Loader2, PawPrint, Save, ChevronRight, Search } from 'lucide-react'
+import { Loader2, PackageOpen, PawPrint, Search, Sparkles } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import KonohaModal from './KonohaModal'
+import { ModalSummaryGrid } from '@/components/ui/ModalSummaryGrid'
+import { ToggleSwitch } from '@/components/ui/ToggleSwitch'
+import { SettingInfoLabel } from '@/components/ui/SettingInfoLabel'
+import { useAutoSaveSettings } from '@/hooks/useAutoSaveSettings'
 
 interface PetsModalProps {
     isOpen: boolean
@@ -95,8 +97,6 @@ const PACT_LABELS = ['Pact 1A', 'Pact 1B', 'Pact 2A', 'Pact 2B', 'Pact 3', 'Pact
 export default function PetsModal({ isOpen, onClose, iggId }: PetsModalProps) {
     const [loading, setLoading] = useState(true)
 
-    // Prevent background scroll when modal is open
-    useBodyScrollLock(isOpen)
     const [saving, setSaving] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
 
@@ -204,9 +204,7 @@ export default function PetsModal({ isOpen, onClose, iggId }: PetsModalProps) {
             })
 
             if (res.ok) {
-                toast.success('Settings saved successfully')
                 setFullSettings(updatedSettings)
-                onClose()
             } else {
                 toast.error('Failed to save settings')
             }
@@ -242,6 +240,14 @@ export default function PetsModal({ isOpen, onClose, iggId }: PetsModalProps) {
         return name.toLowerCase().includes(searchQuery.toLowerCase())
     })
 
+    useAutoSaveSettings(
+        isOpen && !loading && Boolean(iggId && fullSettings),
+        saveSettings,
+        [pactSettings, familiarData]
+    )
+
+    const unlockedFamiliars = familiarData.filter((pet) => pet.petUnlocked).length
+    const trainingEnabled = familiarData.filter((pet) => pet.allowTraining || pet.allowSkillTraining || pet.allowEnhance || pet.upgradeSkills).length
 
     if (!iggId) {
         return (
@@ -271,57 +277,52 @@ export default function PetsModal({ isOpen, onClose, iggId }: PetsModalProps) {
             iconBg="rgba(236,72,153,0.15)"
             iconBorder="rgba(236,72,153,0.3)"
             saving={saving}
-            onSave={saveSettings}
+            statusLabel={saving ? 'Syncing...' : 'Auto-sync. Use Protocol Apply Changes to deploy.'}
             maxWidth="860px"
         >
             {loading ? (
                                 <div className="flex items-center justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-primary-400" />
+                                    <Loader2 className="w-8 h-8 animate-spin text-[#00FFB2]" />
                                 </div>
                             ) : (
                                 <div className="max-w-7xl space-y-6">
+                                    <ModalSummaryGrid
+                                        items={[
+                                            { label: 'Pacts', value: pactSettings.openPacts ? 'Open' : 'Manual', icon: PackageOpen, tone: 'violet' },
+                                            { label: 'Familiars', value: `${unlockedFamiliars}/${familiarData.length}`, icon: PawPrint, tone: 'mint' },
+                                            { label: 'Training', value: trainingEnabled, icon: Sparkles, tone: 'gold' },
+                                        ]}
+                                    />
+
                                     {/* Pact Settings - Always visible */}
                                     <div className="space-y-4">
-                                        <h3 className="text-base sm:text-lg font-bold text-white">Pact Settings</h3>
+                                        <h3>
+                                            <SettingInfoLabel label="Pact Settings" className="text-base sm:text-lg font-bold text-white" />
+                                        </h3>
 
                                         {/* Open Pacts and Merge Pacts in same row */}
-                                        <div className="flex flex-wrap gap-3">
-                                            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
+                                        <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:gap-3">
+                                            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] hover:bg-[#161626] transition-colors cursor-pointer">
                                                 <label className="flex items-center gap-2 cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={pactSettings.openPacts}
-                                                        onChange={(e) => updatePactSetting('openPacts', e.target.checked)}
-                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                    />
-                                                    <span className="text-sm text-white">Open Pacts</span>
+                                                    <ToggleSwitch checked={pactSettings.openPacts} onChange={(v) => updatePactSetting('openPacts', v)} />
+                                                    <SettingInfoLabel label="Open Pacts" className="text-sm text-white" />
                                                 </label>
                                             </div>
 
-                                            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
+                                            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] hover:bg-[#161626] transition-colors cursor-pointer">
                                                 <label className="flex items-center gap-2 cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={pactSettings.mergePacts}
-                                                        onChange={(e) => updatePactSetting('mergePacts', e.target.checked)}
-                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                    />
-                                                    <span className="text-sm text-white">Merge Pacts &gt;</span>
+                                                    <ToggleSwitch checked={pactSettings.mergePacts} onChange={(v) => updatePactSetting('mergePacts', v)} />
+                                                    <SettingInfoLabel label="Merge Pacts" className="text-sm text-white" />
                                                 </label>
                                             </div>
                                         </div>
 
                                         {/* Pact Checkboxes */}
-                                        <div className="flex flex-wrap gap-3 ml-8">
+                                        <div className="grid grid-cols-2 gap-2 md:ml-8 md:flex md:flex-wrap md:gap-3">
                                             {PACT_LABELS.map((label, index) => (
-                                                <label key={index} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={pactSettings.pactsToMerge[index] ?? false}
-                                                        onChange={(e) => updatePactsToMerge(index, e.target.checked)}
-                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                    />
-                                                    <span className="text-sm text-white">{label}</span>
+                                                <label key={index} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] hover:bg-[#161626] transition-colors cursor-pointer">
+                                                    <ToggleSwitch checked={pactSettings.pactsToMerge[index] ?? false} onChange={(v) => updatePactsToMerge(index, v)} />
+                                                    <SettingInfoLabel label={label} className="text-sm text-white" />
                                                 </label>
                                             ))}
                                         </div>
@@ -330,39 +331,60 @@ export default function PetsModal({ isOpen, onClose, iggId }: PetsModalProps) {
                                     {/* Familiars Table */}
                                     <div className="space-y-4">
                                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                            <h3 className="text-base sm:text-lg font-bold text-white">
-                                                Familiar Data {searchQuery && `(${filteredPetOrder.length})`}
+                                            <h3>
+                                                <SettingInfoLabel
+                                                    label="Familiar Data"
+                                                    className="text-base sm:text-lg font-bold text-white"
+                                                />
+                                                {searchQuery && <span className="ml-1 text-base sm:text-lg font-bold text-white">({filteredPetOrder.length})</span>}
                                             </h3>
 
                                             {/* Search Input - Scoped to Familiar Data */}
                                             <div className="relative w-full sm:w-64">
                                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                                <input
-                                                    type="text"
+                                                <input type="text"
                                                     placeholder="Search familiars..."
                                                     value={searchQuery}
                                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                                    className="w-full pl-10 pr-4 py-1.5 bg-background-primary/50 border border-white/10 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                                    className="w-full pl-10 pr-4 py-1.5 bg-background-primary/50 border border-[rgba(123,94,255,0.2)] rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#7B5EFF]/50"
                                                 />
                                             </div>
                                         </div>
 
                                         {/* Desktop Table View */}
-                                        <div className="hidden md:block relative h-[60vh] rounded-xl border border-white/10 overflow-hidden bg-surface/20">
+                                        <div className="hidden md:block relative h-[60vh] rounded-xl border border-[rgba(123,94,255,0.2)] overflow-hidden bg-surface/20">
                                             {/* Scrollable Container */}
                                             <div className="absolute inset-0 overflow-y-auto scrollbar-thin">
                                                 <table className="w-full border-collapse">
-                                                    <thead className="sticky top-0 z-20 bg-background-secondary/95 backdrop-blur-md border-b border-white/10 shadow-lg">
+                                                    <thead className="sticky top-0 z-20 bg-background-secondary/95 backdrop-blur-md border-b border-[rgba(123,94,255,0.2)] shadow-lg">
                                                         <tr>
-                                                            <th className="px-4 py-4 text-left text-xs font-bold text-primary-400 uppercase tracking-wider sticky left-0 z-30 bg-background-secondary/95 backdrop-blur-md">Name</th>
-                                                            <th className="px-4 py-4 text-center text-xs font-bold text-primary-400 uppercase tracking-wider">Level</th>
-                                                            <th className="px-4 py-4 text-center text-xs font-bold text-primary-400 uppercase tracking-wider border-r border-white/10">Rarity</th>
-                                                            <th className="px-4 py-4 text-center text-xs font-bold text-gray-300 uppercase tracking-wider bg-white/5">Training</th>
-                                                            <th className="px-4 py-4 text-center text-xs font-bold text-gray-300 uppercase tracking-wider bg-white/5">Train Skill</th>
-                                                            <th className="px-4 py-4 text-center text-xs font-bold text-gray-300 uppercase tracking-wider bg-white/5">Enhance</th>
-                                                            <th className="px-4 py-4 text-center text-xs font-bold text-gray-300 uppercase tracking-wider bg-white/5">Upg Skills</th>
-                                                            <th className="px-4 py-4 text-center text-xs font-bold text-gray-300 uppercase tracking-wider bg-white/5">Use Exp</th>
-                                                            <th className="px-4 py-4 text-center text-xs font-bold text-gray-300 uppercase tracking-wider bg-white/5">Use Skill</th>
+                                                            <th className="px-4 py-4 text-left text-xs font-bold text-[#00FFB2] uppercase tracking-wider sticky left-0 z-30 bg-background-secondary/95 backdrop-blur-md">
+                                                                <SettingInfoLabel label="Name" helpText="Familiar name shown in the configured familiar order." className="text-xs font-bold text-[#00FFB2] uppercase tracking-wider" />
+                                                            </th>
+                                                            <th className="px-4 py-4 text-center text-xs font-bold text-[#00FFB2] uppercase tracking-wider">
+                                                                <SettingInfoLabel label="Level" helpText="Current familiar level shown for tracking." className="text-xs font-bold text-[#00FFB2] uppercase tracking-wider" />
+                                                            </th>
+                                                            <th className="px-4 py-4 text-center text-xs font-bold text-[#00FFB2] uppercase tracking-wider border-r border-[rgba(123,94,255,0.2)]">
+                                                                <SettingInfoLabel label="Rarity" className="text-xs font-bold text-[#00FFB2] uppercase tracking-wider" />
+                                                            </th>
+                                                            <th className="px-4 py-4 text-center text-xs font-bold text-gray-300 uppercase tracking-wider bg-white/5">
+                                                                <SettingInfoLabel label="Training" helpText="Sends the familiar to the gym for training." className="text-xs font-bold text-gray-300 uppercase tracking-wider" />
+                                                            </th>
+                                                            <th className="px-4 py-4 text-center text-xs font-bold text-gray-300 uppercase tracking-wider bg-white/5">
+                                                                <SettingInfoLabel label="Train Skill" className="text-xs font-bold text-gray-300 uppercase tracking-wider" />
+                                                            </th>
+                                                            <th className="px-4 py-4 text-center text-xs font-bold text-gray-300 uppercase tracking-wider bg-white/5">
+                                                                <SettingInfoLabel label="Enhance" className="text-xs font-bold text-gray-300 uppercase tracking-wider" />
+                                                            </th>
+                                                            <th className="px-4 py-4 text-center text-xs font-bold text-gray-300 uppercase tracking-wider bg-white/5">
+                                                                <SettingInfoLabel label="Upg Skills" className="text-xs font-bold text-gray-300 uppercase tracking-wider" />
+                                                            </th>
+                                                            <th className="px-4 py-4 text-center text-xs font-bold text-gray-300 uppercase tracking-wider bg-white/5">
+                                                                <SettingInfoLabel label="Use Exp" className="text-xs font-bold text-gray-300 uppercase tracking-wider" />
+                                                            </th>
+                                                            <th className="px-4 py-4 text-center text-xs font-bold text-gray-300 uppercase tracking-wider bg-white/5">
+                                                                <SettingInfoLabel label="Use Skill" className="text-xs font-bold text-gray-300 uppercase tracking-wider" />
+                                                            </th>
                                                         </tr>
                                                     </thead>
                                                     <tbody className="divide-y divide-white/5">
@@ -377,7 +399,7 @@ export default function PetsModal({ isOpen, onClose, iggId }: PetsModalProps) {
                                                                     <td className="px-4 py-3 text-center text-sm text-gray-300 bg-black/10">
                                                                         <span className="inline-block min-w-[2rem]">{pet.Level}</span>
                                                                     </td>
-                                                                    <td className="px-4 py-3 text-center text-sm text-gray-300 border-r border-white/10 bg-black/10">
+                                                                    <td className="px-4 py-3 text-center text-sm text-gray-300 border-r border-[rgba(123,94,255,0.2)] bg-black/10">
                                                                         <div className="flex justify-center">
                                                                             <span className={`text-sm font-medium ${pet.Rarity >= 5 ? 'text-yellow-400' :
                                                                                 pet.Rarity >= 4 ? 'text-purple-400' :
@@ -390,62 +412,32 @@ export default function PetsModal({ isOpen, onClose, iggId }: PetsModalProps) {
                                                                     </td>
                                                                     <td className="px-4 py-3 text-center">
                                                                         <div className="flex justify-center">
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                checked={pet.allowTraining}
-                                                                                onChange={(e) => updateFamiliar(pet.petId, 'allowTraining', e.target.checked)}
-                                                                                className="w-5 h-5 rounded bg-background-tertiary border-white/20 text-primary-500 focus:ring-2 focus:ring-primary-500/50 cursor-pointer hover:border-primary-500/50 transition-colors"
-                                                                            />
+                                                                            <ToggleSwitch checked={pet.allowTraining} onChange={(v) => updateFamiliar(pet.petId, 'allowTraining', v)} />
                                                                         </div>
                                                                     </td>
                                                                     <td className="px-4 py-3 text-center">
                                                                         <div className="flex justify-center">
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                checked={pet.allowSkillTraining}
-                                                                                onChange={(e) => updateFamiliar(pet.petId, 'allowSkillTraining', e.target.checked)}
-                                                                                className="w-5 h-5 rounded bg-background-tertiary border-white/20 text-primary-500 focus:ring-2 focus:ring-primary-500/50 cursor-pointer hover:border-primary-500/50 transition-colors"
-                                                                            />
+                                                                            <ToggleSwitch checked={pet.allowSkillTraining} onChange={(v) => updateFamiliar(pet.petId, 'allowSkillTraining', v)} />
                                                                         </div>
                                                                     </td>
                                                                     <td className="px-4 py-3 text-center">
                                                                         <div className="flex justify-center">
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                checked={pet.allowEnhance}
-                                                                                onChange={(e) => updateFamiliar(pet.petId, 'allowEnhance', e.target.checked)}
-                                                                                className="w-5 h-5 rounded bg-background-tertiary border-white/20 text-primary-500 focus:ring-2 focus:ring-primary-500/50 cursor-pointer hover:border-primary-500/50 transition-colors"
-                                                                            />
+                                                                            <ToggleSwitch checked={pet.allowEnhance} onChange={(v) => updateFamiliar(pet.petId, 'allowEnhance', v)} />
                                                                         </div>
                                                                     </td>
                                                                     <td className="px-4 py-3 text-center">
                                                                         <div className="flex justify-center">
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                checked={pet.upgradeSkills}
-                                                                                onChange={(e) => updateFamiliar(pet.petId, 'upgradeSkills', e.target.checked)}
-                                                                                className="w-5 h-5 rounded bg-background-tertiary border-white/20 text-primary-500 focus:ring-2 focus:ring-primary-500/50 cursor-pointer hover:border-primary-500/50 transition-colors"
-                                                                            />
+                                                                            <ToggleSwitch checked={pet.upgradeSkills} onChange={(v) => updateFamiliar(pet.petId, 'upgradeSkills', v)} />
                                                                         </div>
                                                                     </td>
                                                                     <td className="px-4 py-3 text-center">
                                                                         <div className="flex justify-center">
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                checked={pet.useExpItems}
-                                                                                onChange={(e) => updateFamiliar(pet.petId, 'useExpItems', e.target.checked)}
-                                                                                className="w-5 h-5 rounded bg-background-tertiary border-white/20 text-primary-500 focus:ring-2 focus:ring-primary-500/50 cursor-pointer hover:border-primary-500/50 transition-colors"
-                                                                            />
+                                                                            <ToggleSwitch checked={pet.useExpItems} onChange={(v) => updateFamiliar(pet.petId, 'useExpItems', v)} />
                                                                         </div>
                                                                     </td>
                                                                     <td className="px-4 py-3 text-center">
                                                                         <div className="flex justify-center">
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                checked={pet.useSkills}
-                                                                                onChange={(e) => updateFamiliar(pet.petId, 'useSkills', e.target.checked)}
-                                                                                className="w-5 h-5 rounded bg-background-tertiary border-white/20 text-primary-500 focus:ring-2 focus:ring-primary-500/50 cursor-pointer hover:border-primary-500/50 transition-colors"
-                                                                            />
+                                                                            <ToggleSwitch checked={pet.useSkills} onChange={(v) => updateFamiliar(pet.petId, 'useSkills', v)} />
                                                                         </div>
                                                                     </td>
                                                                 </tr>
@@ -474,64 +466,34 @@ export default function PetsModal({ isOpen, onClose, iggId }: PetsModalProps) {
                                                         </div>
 
                                                         <div className="grid grid-cols-2 gap-3">
-                                                            <label className="flex items-center gap-2 p-2 rounded-lg bg-surface/50 border border-white/5">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={pet.allowTraining}
-                                                                    onChange={(e) => updateFamiliar(pet.petId, 'allowTraining', e.target.checked)}
-                                                                    className="w-4 h-4 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                                />
-                                                                <span className="text-xs text-gray-300">Training</span>
+                                                            <label className="flex items-center gap-2 p-2 rounded-lg bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] border border-white/5">
+                                                                <ToggleSwitch checked={pet.allowTraining} onChange={(v) => updateFamiliar(pet.petId, 'allowTraining', v)} />
+                                                                <SettingInfoLabel label="Training" helpText="Sends the familiar to the gym for training." className="text-xs text-gray-300" />
                                                             </label>
 
-                                                            <label className="flex items-center gap-2 p-2 rounded-lg bg-surface/50 border border-white/5">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={pet.allowSkillTraining}
-                                                                    onChange={(e) => updateFamiliar(pet.petId, 'allowSkillTraining', e.target.checked)}
-                                                                    className="w-4 h-4 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                                />
-                                                                <span className="text-xs text-gray-300">Skill Train</span>
+                                                            <label className="flex items-center gap-2 p-2 rounded-lg bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] border border-white/5">
+                                                                <ToggleSwitch checked={pet.allowSkillTraining} onChange={(v) => updateFamiliar(pet.petId, 'allowSkillTraining', v)} />
+                                                                <SettingInfoLabel label="Train Skill" className="text-xs text-gray-300" />
                                                             </label>
 
-                                                            <label className="flex items-center gap-2 p-2 rounded-lg bg-surface/50 border border-white/5">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={pet.allowEnhance}
-                                                                    onChange={(e) => updateFamiliar(pet.petId, 'allowEnhance', e.target.checked)}
-                                                                    className="w-4 h-4 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                                />
-                                                                <span className="text-xs text-gray-300">Enhance</span>
+                                                            <label className="flex items-center gap-2 p-2 rounded-lg bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] border border-white/5">
+                                                                <ToggleSwitch checked={pet.allowEnhance} onChange={(v) => updateFamiliar(pet.petId, 'allowEnhance', v)} />
+                                                                <SettingInfoLabel label="Enhance" className="text-xs text-gray-300" />
                                                             </label>
 
-                                                            <label className="flex items-center gap-2 p-2 rounded-lg bg-surface/50 border border-white/5">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={pet.upgradeSkills}
-                                                                    onChange={(e) => updateFamiliar(pet.petId, 'upgradeSkills', e.target.checked)}
-                                                                    className="w-4 h-4 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                                />
-                                                                <span className="text-xs text-gray-300">Upg Skills</span>
+                                                            <label className="flex items-center gap-2 p-2 rounded-lg bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] border border-white/5">
+                                                                <ToggleSwitch checked={pet.upgradeSkills} onChange={(v) => updateFamiliar(pet.petId, 'upgradeSkills', v)} />
+                                                                <SettingInfoLabel label="Upg Skills" className="text-xs text-gray-300" />
                                                             </label>
 
-                                                            <label className="flex items-center gap-2 p-2 rounded-lg bg-surface/50 border border-white/5">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={pet.useExpItems}
-                                                                    onChange={(e) => updateFamiliar(pet.petId, 'useExpItems', e.target.checked)}
-                                                                    className="w-4 h-4 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                                />
-                                                                <span className="text-xs text-gray-300">Use Exp</span>
+                                                            <label className="flex items-center gap-2 p-2 rounded-lg bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] border border-white/5">
+                                                                <ToggleSwitch checked={pet.useExpItems} onChange={(v) => updateFamiliar(pet.petId, 'useExpItems', v)} />
+                                                                <SettingInfoLabel label="Use Exp" className="text-xs text-gray-300" />
                                                             </label>
 
-                                                            <label className="flex items-center gap-2 p-2 rounded-lg bg-surface/50 border border-white/5">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={pet.useSkills}
-                                                                    onChange={(e) => updateFamiliar(pet.petId, 'useSkills', e.target.checked)}
-                                                                    className="w-4 h-4 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                                />
-                                                                <span className="text-xs text-gray-300">Use Skill</span>
+                                                            <label className="flex items-center gap-2 p-2 rounded-lg bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] border border-white/5">
+                                                                <ToggleSwitch checked={pet.useSkills} onChange={(v) => updateFamiliar(pet.petId, 'useSkills', v)} />
+                                                                <SettingInfoLabel label="Use Skill" className="text-xs text-gray-300" />
                                                             </label>
                                                         </div>
                                                     </div>

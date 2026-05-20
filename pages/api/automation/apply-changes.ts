@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponseS
             return res.status(400).json({ error: 'IGG ID is required' })
         }
 
-        console.log('Received automation request for IGG ID:', iggId)
+        // console.log('Received automation request for IGG ID:', iggId)
 
         const iggIdRecord = await prisma.iggId.findUnique({
             where: { iggId },

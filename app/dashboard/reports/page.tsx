@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FileText, Search, Calendar, Download, Eye, X, Filter, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import IggIdSelector from '@/components/settings/IggIdSelector'
+import ReportSettingsPanel from '@/components/settings/ReportSettingsPanel'
 
 interface ReportFile {
     filename: string
@@ -42,51 +43,51 @@ function ViewModal({
     const [activeSheet, setActiveSheet] = useState<string>(file.sheetNames?.[0] || '')
 
     return (
-        <div className="fixed inset-0 bg-black/60  z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm sm:p-6">
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-background-secondary rounded-2xl border border-white/10 w-full max-w-6xl max-h-[90vh] flex flex-col shadow-xl"
+                className="panel-solid flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-lg"
             >
-                {/* Modal Header */}
-                <div className="flex items-center justify-between p-4 border-b border-white/10">
-                    <div className="flex items-center gap-3">
-                        <FileText className="w-6 h-6 text-primary-400" />
-                        <div>
-                            <h3 className="text-lg font-bold text-white">{file.filename}</h3>
-                            <p className="text-gray-400 text-sm">
-                                {formatFileSize(file.size)} • Modified {new Date(file.modifiedAt).toLocaleString()}
+                <div className="flex items-center justify-between gap-3 border-b border-border bg-bg-elevated/60 px-4 py-4 sm:px-5">
+                    <div className="flex min-w-0 items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-accent-2/25 bg-accent-2/10 text-accent-2">
+                            <FileText className="h-5 w-5" />
+                        </div>
+                        <div className="min-w-0">
+                            <h3 className="truncate text-[17px] font-bold text-text-primary">{file.filename}</h3>
+                            <p className="mt-0.5 truncate text-[12px] text-text-muted">
+                                {formatFileSize(file.size)} - Modified {new Date(file.modifiedAt).toLocaleString()}
                             </p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex shrink-0 items-center gap-2">
                         <button
                             onClick={onDownload}
-                            className="flex items-center gap-1 px-3 py-2 bg-accent-emerald/10 text-accent-emerald rounded-lg hover:bg-accent-emerald/20 transition-colors text-sm"
+                            className="flex h-9 items-center gap-2 rounded-md border border-accent-1/25 bg-accent-1/10 px-3 text-[12px] font-bold text-accent-1 transition-colors hover:bg-accent-1/20"
                         >
-                            <Download className="w-4 h-4" />
-                            Download
+                            <Download className="h-4 w-4" />
+                            <span className="hidden sm:inline">Download</span>
                         </button>
                         <button
                             onClick={onClose}
-                            className="p-2 text-gray-400 hover:text-white transition-colors"
+                            className="flex h-9 w-9 items-center justify-center rounded-md border border-accent-3/20 bg-accent-3/10 text-accent-3 transition-colors hover:bg-accent-3/20"
                         >
-                            <X className="w-5 h-5" />
+                            <X className="h-4 w-4" />
                         </button>
                     </div>
                 </div>
 
-                {/* Sheet Tabs for Excel files */}
                 {file.fileType === 'excel' && file.sheetNames && file.sheetNames.length > 1 && (
-                    <div className="flex gap-1 p-2 border-b border-white/10 overflow-x-auto">
+                    <div className="flex gap-1 overflow-x-auto border-b border-border bg-bg-inset/40 p-2">
                         {file.sheetNames.map(sheetName => (
                             <button
                                 key={sheetName}
                                 onClick={() => setActiveSheet(sheetName)}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${activeSheet === sheetName
-                                    ? 'bg-primary-500/20 text-primary-400'
-                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                className={`whitespace-nowrap rounded-md px-4 py-2 text-[12px] font-bold transition-colors ${activeSheet === sheetName
+                                    ? 'border border-primary-500/30 bg-primary-500/20 text-primary-300'
+                                    : 'border border-transparent text-text-muted hover:bg-white/5 hover:text-text-primary'
                                     }`}
                             >
                                 {sheetName}
@@ -95,8 +96,7 @@ function ViewModal({
                     </div>
                 )}
 
-                {/* Modal Content */}
-                <div className="flex-1 overflow-auto p-4">
+                <div className="flex-1 overflow-auto p-4 scrollbar-thin">
                     {file.fileType === 'excel' && file.sheets ? (
                         <div className="overflow-x-auto">
                             <table className="w-full border-collapse min-w-max">
@@ -274,13 +274,38 @@ export default function ReportsPage() {
         setDateTo('')
     }
 
+    const totalReportSize = useMemo(() => files.reduce((sum, file) => sum + file.size, 0), [files])
+    const latestReportDate = filteredFiles[0]
+        ? new Date(filteredFiles[0].parsedDate || filteredFiles[0].modifiedAt).toLocaleDateString()
+        : 'None'
+    const activeFilterCount = [searchTerm, dateFrom, dateTo].filter(Boolean).length
+
+    const getReportDate = (file: ReportFile) => (
+        file.parsedDate ? new Date(file.parsedDate) : new Date(file.modifiedAt)
+    )
+
+    const getReportType = (filename: string) => {
+        const lower = filename.toLowerCase()
+        if (lower.endsWith('.xlsx') || lower.endsWith('.xls')) return 'Spreadsheet'
+        if (lower.endsWith('.pdf')) return 'PDF'
+        if (lower.endsWith('.json')) return 'JSON'
+        return 'Text'
+    }
+
+    const getReportTone = (filename: string) => {
+        const lower = filename.toLowerCase()
+        if (lower.endsWith('.xlsx') || lower.endsWith('.xls')) return 'border-accent-1/25 bg-accent-1/10 text-accent-1'
+        if (lower.endsWith('.pdf')) return 'border-accent-3/25 bg-accent-3/10 text-accent-3'
+        if (lower.endsWith('.json')) return 'border-accent-gold/25 bg-accent-gold/10 text-accent-gold'
+        return 'border-accent-2/25 bg-accent-2/10 text-accent-2'
+    }
+
     return (
-        <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="space-y-5 p-3 sm:p-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                    <h1 className="font-orbitron text-xl sm:text-3xl font-bold text-text-primary tracking-wide mb-1 sm:mb-2">REPORTS</h1>
-                    <p className="font-sans text-text-muted text-sm sm:text-base">View and download exported stat reports</p>
+                    <h1 className="mb-1 font-orbitron text-xl font-bold tracking-wide text-text-primary sm:text-3xl">REPORTS</h1>
+                    <p className="font-sans text-sm text-text-muted sm:text-base">View, preview, and download exported stat reports.</p>
                 </div>
                 <div className="w-full md:w-80">
                     <IggIdSelector
@@ -291,164 +316,181 @@ export default function ReportsPage() {
             </div>
 
             {!selectedIggId ? (
-                <div className="bg-bg-surface border border-border rounded-[14px] p-12 text-center">
-                    <FileText className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-white mb-2">Select an IGG ID</h3>
-                    <p className="text-gray-400">Choose an IGG ID from the dropdown above to view reports</p>
+                <div className="rounded-lg border border-dashed border-border bg-bg-surface p-8 text-center shadow-panel sm:p-12">
+                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-md border border-accent-2/20 bg-accent-2/10 text-accent-2">
+                        <FileText className="h-7 w-7" />
+                    </div>
+                    <h3 className="mb-2 text-[18px] font-bold text-text-primary">Select an IGG ID</h3>
+                    <p className="text-sm text-text-muted">Choose an IGG ID to load generated report files.</p>
                 </div>
             ) : (
                 <>
-                    {/* Filters */}
-                    <div className="bg-bg-surface border border-border rounded-[14px] p-4 mb-4">
-                        <div className="flex flex-col gap-3 sm:gap-4">
-                            {/* Search */}
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-text-muted" />
-                                <input
-                                    type="text"
-                                    placeholder="Search by filename..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-9 sm:pl-10 pr-4 py-2.5 sm:py-3 bg-bg-elevated border border-border rounded-[10px] text-text-primary text-sm sm:text-base placeholder-text-muted focus:outline-none focus:border-accent-2 focus:shadow-glow-violet transition-all"
-                                />
+                    <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+                        {[
+                            { label: 'Total Files', value: files.length, tone: 'text-accent-1' },
+                            { label: 'Visible', value: filteredFiles.length, tone: 'text-accent-cyan' },
+                            { label: 'Latest', value: latestReportDate, tone: 'text-accent-gold' },
+                            { label: 'Storage', value: formatFileSize(totalReportSize), tone: 'text-primary-300' },
+                        ].map((metric) => (
+                            <div key={metric.label} className="min-w-0 rounded-lg border border-border bg-bg-surface p-4 shadow-panel">
+                                <p className="mb-2 truncate text-[10px] font-bold uppercase tracking-[0.16em] text-text-muted sm:text-[11px]">{metric.label}</p>
+                                <p className={`truncate font-orbitron text-[20px] leading-tight sm:text-2xl ${metric.tone}`}>{metric.value}</p>
                             </div>
+                        ))}
+                    </section>
 
-                            {/* Date Filters and Actions Row */}
-                            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-                                {/* Date From */}
-                                <div className="flex items-center gap-2">
-                                    <Calendar className="w-4 h-4 text-accent-2 hidden sm:block" />
-                                    <input
-                                        type="date"
-                                        value={dateFrom}
-                                        onChange={(e) => setDateFrom(e.target.value)}
-                                        className="px-2 sm:px-4 py-2 sm:py-3 bg-bg-elevated border border-border rounded-[10px] text-text-primary text-sm focus:outline-none focus:border-accent-2 focus:shadow-glow-violet transition-all"
-                                    />
+                    <ReportSettingsPanel iggId={selectedIggId} />
+
+                    <section className="rounded-lg border border-border bg-bg-surface shadow-panel">
+                        <div className="flex flex-col gap-3 border-b border-border bg-bg-elevated/55 p-4 lg:flex-row lg:items-center lg:justify-between">
+                            <div className="flex min-w-0 items-center gap-3">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-accent-2/25 bg-accent-2/10 text-accent-2">
+                                    <Filter className="h-5 w-5" />
                                 </div>
-
-                                <span className="text-gray-400 text-sm">to</span>
-
-                                {/* Date To */}
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="date"
-                                        value={dateTo}
-                                        onChange={(e) => setDateTo(e.target.value)}
-                                        className="px-2 sm:px-4 py-2 sm:py-3 bg-bg-elevated border border-border rounded-[10px] text-text-primary text-sm focus:outline-none focus:border-accent-2 focus:shadow-glow-violet transition-all"
-                                    />
+                                <div className="min-w-0">
+                                    <h2 className="text-[15px] font-bold text-text-primary">Report Filters</h2>
+                                    <p className="text-[12px] text-text-muted">{activeFilterCount ? `${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active` : 'Showing newest files first'}</p>
                                 </div>
-
-                                <div className="flex-1" />
-
-                                {/* Clear Filters */}
-                                {(searchTerm || dateFrom || dateTo) && (
-                                    <button
-                                        onClick={clearFilters}
-                                        className="px-2 sm:px-4 py-2 text-gray-400 hover:text-white transition-colors flex items-center gap-1 sm:gap-2 text-sm"
-                                    >
-                                        <X className="w-4 h-4" />
-                                        <span className="hidden sm:inline">Clear</span>
-                                    </button>
-                                )}
-
-                                {/* Refresh */}
-                                <button
-                                    onClick={loadFiles}
-                                    disabled={loading}
-                                    className="w-10 h-10 rounded-full border border-border hover:border-accent-1 text-text-muted hover:text-accent-1 transition-all flex items-center justify-center group flex-shrink-0"
-                                    title="Refresh"
-                                >
-                                    <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-active:rotate-[360deg] transition-transform duration-500 ease-out'}`} />
-                                </button>
                             </div>
+                            <button
+                                onClick={loadFiles}
+                                disabled={loading}
+                                className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-border bg-bg-inset px-4 text-[13px] font-bold text-text-muted transition-colors hover:border-accent-1/35 hover:text-accent-1 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                                Refresh
+                            </button>
                         </div>
-                    </div>
+                        <div className="grid gap-3 p-4 lg:grid-cols-[minmax(0,1fr)_170px_170px_auto] lg:items-end">
+                            <label className="block min-w-0">
+                                <span className="mb-2 block text-[11px] font-bold uppercase tracking-[0.14em] text-text-muted">Filename</span>
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search by filename..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="h-11 w-full rounded-md border border-border bg-bg-inset px-4 pl-10 text-sm text-text-primary placeholder-text-muted transition-all focus:border-accent-2 focus:outline-none focus:shadow-glow-violet"
+                                    />
+                                </div>
+                            </label>
 
-                    {/* Results count */}
-                    <div className="flex mb-4">
-                        <span className="px-3 py-1 rounded-full bg-accent-1/10 text-accent-1 border border-accent-1/20 font-sans text-[12px] font-bold">
-                            Showing {filteredFiles.length} of {files.length} files
-                        </span>
-                    </div>
+                            <label className="block">
+                                <span className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-text-muted">
+                                    <Calendar className="h-3.5 w-3.5 text-accent-2" />
+                                    From
+                                </span>
+                                <input
+                                    type="date"
+                                    value={dateFrom}
+                                    onChange={(e) => setDateFrom(e.target.value)}
+                                    className="h-11 w-full rounded-md border border-border bg-bg-inset px-3 text-sm text-text-primary transition-all focus:border-accent-2 focus:outline-none focus:shadow-glow-violet"
+                                />
+                            </label>
 
-                    {/* Files Table */}
-                    <div className="bg-bg-surface border border-border rounded-[14px] overflow-hidden">
+                            <label className="block">
+                                <span className="mb-2 block text-[11px] font-bold uppercase tracking-[0.14em] text-text-muted">To</span>
+                                <input
+                                    type="date"
+                                    value={dateTo}
+                                    onChange={(e) => setDateTo(e.target.value)}
+                                    className="h-11 w-full rounded-md border border-border bg-bg-inset px-3 text-sm text-text-primary transition-all focus:border-accent-2 focus:outline-none focus:shadow-glow-violet"
+                                />
+                            </label>
+
+                            {(searchTerm || dateFrom || dateTo) && (
+                                <button
+                                    onClick={clearFilters}
+                                    className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-border bg-bg-inset px-4 text-[13px] font-bold text-text-muted transition-colors hover:border-accent-3/35 hover:text-accent-3"
+                                >
+                                    <X className="h-4 w-4" />
+                                    Clear
+                                </button>
+                            )}
+                        </div>
+                    </section>
+
+                    <section className="overflow-hidden rounded-lg border border-border bg-bg-surface shadow-panel">
+                        <div className="flex flex-col gap-2 border-b border-border bg-bg-elevated/55 p-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h2 className="text-[15px] font-bold text-text-primary">Report Files</h2>
+                                <p className="text-[12px] text-text-muted">Showing {filteredFiles.length} of {files.length} files</p>
+                            </div>
+                            <span className="w-fit rounded-full border border-accent-1/20 bg-accent-1/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-accent-1">
+                                IGG {selectedIggId}
+                            </span>
+                        </div>
                         {loading ? (
                             <div className="flex items-center justify-center py-20">
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+                                <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary-500" />
+                            </div>
+                        ) : filteredFiles.length === 0 ? (
+                            <div className="p-8 text-center sm:p-12">
+                                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-md border border-border bg-bg-inset text-text-muted">
+                                    <FileText className="h-6 w-6" />
+                                </div>
+                                <p className="font-bold text-text-primary">{files.length === 0 ? 'No reports found' : 'No matching reports'}</p>
+                                <p className="mt-1 text-sm text-text-muted">{files.length === 0 ? 'Generated reports will appear here.' : 'Adjust the filters to widen the result set.'}</p>
                             </div>
                         ) : (
-                            <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead className="bg-bg-elevated border-b border-border">
-                                        <tr>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left font-orbitron text-[10px] tracking-[0.15em] text-text-muted uppercase">Filename</th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left font-orbitron text-[10px] tracking-[0.15em] text-text-muted uppercase hidden sm:table-cell">Date</th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left font-orbitron text-[10px] tracking-[0.15em] text-text-muted uppercase hidden sm:table-cell">Size</th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-center font-orbitron text-[10px] tracking-[0.15em] text-text-muted uppercase">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-border">
-                                        {filteredFiles.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={4} className="px-6 py-12 text-center text-gray-400">
-                                                    {files.length === 0 ? 'No reports found' : 'No matching reports'}
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            filteredFiles.map((file) => (
-                                                <tr key={file.filename} className="hover:bg-[#7B5EFF0D] transition-all duration-150">
-                                                    <td className="px-3 sm:px-6 py-3 sm:py-4">
-                                                        <div className="flex items-center gap-2 sm:gap-3">
-                                                            {file.filename.endsWith('.xlsx') ? (
-                                                                <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
-                                                            ) : file.filename.endsWith('.pdf') ? (
-                                                                <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-accent-3 flex-shrink-0" />
-                                                            ) : (
-                                                                <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-accent-2 flex-shrink-0" />
-                                                            )}
-                                                            <div>
-                                                                <span className="font-mono text-[13px] text-text-primary font-medium block truncate max-w-[150px] sm:max-w-none">{file.filename}</span>
-                                                                {/* Mobile: Show date and size below filename */}
-                                                                <div className="sm:hidden text-xs text-gray-400 mt-1">
-                                                                    {file.parsedDate
-                                                                        ? new Date(file.parsedDate).toLocaleDateString()
-                                                                        : new Date(file.modifiedAt).toLocaleDateString()
-                                                                    } • {formatFileSize(file.size)}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-3 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">
-                                                        <span className="font-sans text-[13px] text-text-muted">
-                                                            {file.parsedDate
-                                                                ? new Date(file.parsedDate).toLocaleDateString()
-                                                                : new Date(file.modifiedAt).toLocaleDateString()
-                                                            }
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-3 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">
-                                                        <span className="font-sans text-[13px] text-text-muted">{formatFileSize(file.size)}</span>
-                                                    </td>
-                                                    <td className="px-3 sm:px-6 py-3 sm:py-4">
-                                                        <div className="flex items-center justify-center">
-                                                            <button
-                                                                onClick={() => downloadFile(file.filename)}
-                                                                className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-accent-1/10 text-text-muted hover:text-accent-1 transition-colors"
-                                                                title="Download"
-                                                            >
-                                                                <Download className="w-4 h-4" />
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
+                            <div>
+                                <div className="hidden grid-cols-[minmax(0,1.7fr)_140px_120px_120px_104px] gap-3 border-b border-border bg-bg-elevated/35 px-4 py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-text-muted xl:grid">
+                                    <span>Filename</span>
+                                    <span>Type</span>
+                                    <span>Date</span>
+                                    <span>Size</span>
+                                    <span className="text-right">Actions</span>
+                                </div>
+                                <div className="divide-y divide-border">
+                                    {filteredFiles.map((file) => {
+                                        const reportDate = getReportDate(file)
+                                        return (
+                                            <div
+                                                key={file.filename}
+                                                className="grid gap-3 p-4 transition-colors hover:bg-white/[0.025] xl:grid-cols-[minmax(0,1.7fr)_140px_120px_120px_104px] xl:items-center"
+                                            >
+                                                <div className="flex min-w-0 items-center gap-3">
+                                                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md border ${getReportTone(file.filename)}`}>
+                                                        <FileText className="h-5 w-5" />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="truncate font-mono text-[13px] font-bold text-text-primary">{file.filename}</p>
+                                                        <p className="mt-1 text-[12px] text-text-muted xl:hidden">
+                                                            {getReportType(file.filename)} - {reportDate.toLocaleDateString()} - {formatFileSize(file.size)}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="hidden xl:block">
+                                                    <span className="rounded-full border border-border bg-bg-inset px-3 py-1 text-[12px] font-bold text-text-muted">{getReportType(file.filename)}</span>
+                                                </div>
+                                                <div className="hidden text-[13px] text-text-muted xl:block">{reportDate.toLocaleDateString()}</div>
+                                                <div className="hidden text-[13px] text-text-muted xl:block">{formatFileSize(file.size)}</div>
+                                                <div className="flex items-center gap-2 xl:justify-end">
+                                                    <button
+                                                        onClick={() => viewFile(file.filename)}
+                                                        disabled={loadingFile}
+                                                        className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-bg-inset text-text-muted transition-colors hover:border-accent-2/35 hover:text-accent-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                                        title="Preview"
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => downloadFile(file.filename)}
+                                                        className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-bg-inset text-text-muted transition-colors hover:border-accent-1/35 hover:text-accent-1"
+                                                        title="Download"
+                                                    >
+                                                        <Download className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
                             </div>
                         )}
-                    </div>
+                    </section>
                 </>
             )}
 

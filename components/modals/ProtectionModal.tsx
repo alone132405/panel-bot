@@ -1,14 +1,11 @@
 'use client'
 
-import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Loader2 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { Axe, EyeOff, Home, Shield } from 'lucide-react'
 import { toast } from 'sonner'
-import KonohaModal from './KonohaModal'
 import { useDebounce } from '@/hooks/useDebounce'
-import { useWebSocket } from '@/hooks/useWebSocket'
-import { SETTINGS_FIELD_MAP, setNestedValue, getNestedValue } from '@/lib/settingsMapper'
+import { SETTINGS_FIELD_MAP, getNestedValue, setNestedValue } from '@/lib/settingsMapper'
+import { ChoiceControl, ResponsiveModalShell, StepperControl, TabDef, ToggleControl } from '@/components/ui/ResponsiveModalShell'
 
 interface ProtectionModalProps {
     isOpen: boolean
@@ -16,55 +13,67 @@ interface ProtectionModalProps {
     iggId: string | null
 }
 
-export default function ProtectionModal({ isOpen, onClose, iggId }: ProtectionModalProps) {
-    const [settings, setSettings] = useState<any>(null)
-    const [loading, setLoading] = useState(true)
+const TABS: TabDef[] = [
+    { id: 'shield', label: 'Shield', icon: Shield },
+    { id: 'anti-scout', label: 'Anti-Scout', icon: EyeOff },
+    { id: 'gathering', label: 'Gathering', icon: Axe },
+    { id: 'shelter', label: 'Shelter', icon: Home },
+]
 
-    // Prevent background scroll when modal is open
-    useBodyScrollLock(isOpen)
+const PREFERRED_SHIELD_OPTIONS = [
+    { value: -1, label: 'None' },
+    { value: 0, label: '4 Hr' },
+    { value: 1, label: '8 Hr' },
+    { value: 6, label: '12 Hr' },
+    { value: 2, label: '24 Hr' },
+    { value: 3, label: '3 Day' },
+    { value: 4, label: '7 Day' },
+    { value: 5, label: '14 Day' },
+]
+
+const SHELTER_MODE_OPTIONS = [
+    { value: 0, label: "Don't Shelter" },
+    { value: 1, label: 'Always Shelter' },
+    { value: 2, label: 'Only Without Shield' },
+]
+
+export default function ProtectionModal({ isOpen, onClose, iggId }: ProtectionModalProps) {
+    const [settings, setSettings] = useState<Record<string, unknown> | null>(null)
+    const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
 
-    // Load settings when modal opens or IGG ID changes
     useEffect(() => {
-        if (isOpen && iggId) {
-            loadSettings()
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOpen, iggId])
+        if (!isOpen) return
 
-    // WebSocket for real-time updates (disabled for now)
-    // useWebSocket(iggId, (data) => {
-    //     if (data.settings) {
-    //         setSettings(data.settings)
-    //         toast.info('Settings updated externally')
-    //     }
-    // })
-
-    const loadSettings = async () => {
         if (!iggId) {
-            toast.error('Please select an IGG ID first')
+            setSettings(null)
+            setLoading(false)
             return
         }
 
+        loadSettings()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, iggId])
+
+    const loadSettings = async () => {
         setLoading(true)
         try {
             const res = await fetch(`/api/settings/${iggId}`)
             if (res.ok) {
-                const data = await res.json()
+                const data = await res.json() as Record<string, unknown>
                 setSettings(data)
             } else {
                 toast.error('Failed to load settings')
             }
-        } catch (error) {
+        } catch {
             toast.error('Error loading settings')
         } finally {
             setLoading(false)
         }
     }
 
-    const saveSetting = async (path: string, value: any) => {
+    const saveSetting = async (path: string, value: unknown) => {
         if (!iggId) return
-
         setSaving(true)
         try {
             const res = await fetch(`/api/settings/${iggId}`, {
@@ -72,7 +81,6 @@ export default function ProtectionModal({ isOpen, onClose, iggId }: ProtectionMo
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ path, value }),
             })
-
             if (res.ok) {
                 const updatedSettings = { ...settings }
                 setNestedValue(updatedSettings, path, value)
@@ -80,7 +88,7 @@ export default function ProtectionModal({ isOpen, onClose, iggId }: ProtectionMo
             } else {
                 toast.error('Failed to save setting')
             }
-        } catch (error) {
+        } catch {
             toast.error('Error saving setting')
         } finally {
             setSaving(false)
@@ -89,253 +97,138 @@ export default function ProtectionModal({ isOpen, onClose, iggId }: ProtectionMo
 
     const debouncedSave = useDebounce(saveSetting, 500)
 
-    const handleSettingChange = (path: string, value: any) => {
+    const handleSettingChange = (path: string, value: unknown) => {
+        if (!settings) return
+
         const updatedSettings = { ...settings }
         setNestedValue(updatedSettings, path, value)
         setSettings(updatedSettings)
+        debouncedSave(path, value)
     }
 
-    const getProtectionSettings = () => {
-        if (!settings) return { shield: [], antiScout: [], gathering: [], shelter: [] }
+    const getProtectionSettings = (subcategory: string) => {
+        if (!settings) return []
 
-        const protectionMappings = SETTINGS_FIELD_MAP.filter((m) => m.category === 'protection')
+        return SETTINGS_FIELD_MAP
+            .filter((mapping) => mapping.category === 'protection' && mapping.subcategory === subcategory)
+            .map((mapping) => ({
+                label: mapping.uiField,
+                type: mapping.type,
+                value: getNestedValue(settings, mapping.jsonPath),
+                path: mapping.jsonPath,
+                min: mapping.min,
+                max: mapping.max,
+            }))
+    }
 
-        return {
-            shield: protectionMappings
-                .filter((m) => m.subcategory === 'shield')
-                .map((m) => ({
-                    label: m.uiField,
-                    type: m.type,
-                    value: getNestedValue(settings, m.jsonPath),
-                    path: m.jsonPath,
-                    min: m.min,
-                    max: m.max,
-                })),
-            antiScout: protectionMappings
-                .filter((m) => m.subcategory === 'anti-scout')
-                .map((m) => ({
-                    label: m.uiField,
-                    type: m.type,
-                    value: getNestedValue(settings, m.jsonPath),
-                    path: m.jsonPath,
-                    min: m.min,
-                    max: m.max,
-                })),
-            gathering: protectionMappings
-                .filter((m) => m.subcategory === 'gathering')
-                .map((m) => ({
-                    label: m.uiField,
-                    type: m.type,
-                    value: getNestedValue(settings, m.jsonPath),
-                    path: m.jsonPath,
-                    min: m.min,
-                    max: m.max,
-                })),
-            shelter: protectionMappings
-                .filter((m) => m.subcategory === 'shelter')
-                .map((m) => ({
-                    label: m.uiField,
-                    type: m.type,
-                    value: getNestedValue(settings, m.jsonPath),
-                    path: m.jsonPath,
-                    min: m.min,
-                    max: m.max,
-                })),
+    const renderMappedSetting = (setting: ReturnType<typeof getProtectionSettings>[number], isMobile: boolean) => {
+        if (setting.type === 'boolean') {
+            return (
+                <ToggleControl
+                    key={setting.path}
+                    label={setting.label}
+                    checked={!!setting.value}
+                    onChange={(value) => handleSettingChange(setting.path, value)}
+                    isMobile={isMobile}
+                />
+            )
         }
+
+        if (setting.type === 'number') {
+            return (
+                <StepperControl
+                    key={setting.path}
+                    label={setting.label}
+                    val={Number(setting.value || 0)}
+                    min={Number(setting.min || 0)}
+                    max={Number(setting.max || 9999)}
+                    onChange={(value) => handleSettingChange(setting.path, value)}
+                    isMobile={isMobile}
+                />
+            )
+        }
+
+        return null
     }
 
-    const protectionSettings = getProtectionSettings()
+    const renderSectionContent = (tabId: string, isMobile: boolean, isTablet: boolean) => {
+        if (!iggId) {
+            return (
+                <div className="rounded-lg border border-accent-gold/20 bg-accent-gold/10 p-6 text-center">
+                    <Shield className="mx-auto mb-3 h-10 w-10 text-accent-gold" />
+                    <p className="text-[14px] font-bold text-text-primary">Select an IGG ID to edit protection settings.</p>
+                </div>
+            )
+        }
 
-    const renderSetting = (setting: any) => (
-        <div key={setting.path} className="flex items-center justify-between p-4 rounded-xl bg-surface/50 hover:bg-surface transition-colors">
-            <label className="flex items-center gap-3 flex-1 cursor-pointer">
-                {setting.type === 'boolean' && (
-                    <input
-                        type="checkbox"
-                        checked={setting.value || false}
-                        onChange={(e) => handleSettingChange(setting.path, e.target.checked)}
-                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
+        const sectionSettings = getProtectionSettings(tabId)
+        const gridClass = isMobile
+            ? 'grid grid-cols-1 gap-1.5'
+            : isTablet
+                ? 'grid grid-cols-2 gap-2'
+                : 'grid grid-cols-2 gap-3'
+        const enabledCount = sectionSettings.filter((setting) => setting.type === 'boolean' && !!setting.value).length
+        const timerCount = sectionSettings.filter((setting) => setting.type === 'number').length
+
+        return (
+            <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-3 sm:grid-cols-3">
+                    <div className="rounded-lg border border-white/10 bg-bg-inset/70 p-3">
+                        <div className="text-[10px] font-black uppercase tracking-[0.18em] text-text-muted">Rules</div>
+                        <div className="mt-1 font-orbitron text-xl font-black text-text-primary">{sectionSettings.length}</div>
+                    </div>
+                    <div className="rounded-lg border border-accent-1/20 bg-accent-1/10 p-3">
+                        <div className="text-[10px] font-black uppercase tracking-[0.18em] text-accent-1">Enabled</div>
+                        <div className="mt-1 font-orbitron text-xl font-black text-accent-1">{enabledCount}</div>
+                    </div>
+                    <div className="rounded-lg border border-accent-cyan/20 bg-accent-cyan/10 p-3">
+                        <div className="text-[10px] font-black uppercase tracking-[0.18em] text-accent-cyan">Timers</div>
+                        <div className="mt-1 font-orbitron text-xl font-black text-accent-cyan">{timerCount}</div>
+                    </div>
+                </div>
+
+                <div className={gridClass}>
+                    {sectionSettings.map((setting) => renderMappedSetting(setting, isMobile))}
+                </div>
+
+                {tabId === 'shield' && (
+                    <ChoiceControl
+                        label="Preferred Shield"
+                        value={Number(getNestedValue(settings, 'protectionSettings.preferredShield') ?? -1)}
+                        options={PREFERRED_SHIELD_OPTIONS}
+                        onChange={(value) => handleSettingChange('protectionSettings.preferredShield', value)}
+                        isMobile={isMobile}
                     />
                 )}
-                <span className="text-sm text-gray-300">{setting.label}</span>
-            </label>
 
-            {setting.type === 'number' && (
-                <input
-                    type="number"
-                    value={setting.value || 0}
-                    onChange={(e) => handleSettingChange(setting.path, Math.floor(Number(e.target.value)))}
-                    onKeyDown={(e) => {
-                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) {
-                            e.preventDefault();
-                        }
-                    }}
-                    onBlur={(e) => {
-                        let val = Math.floor(Number(e.target.value));
-                        if (setting.min !== undefined && val < setting.min) val = setting.min;
-                        if (setting.max !== undefined && val > setting.max) val = setting.max;
-                        handleSettingChange(setting.path, val);
-                    }}
-                    min={setting.min}
-                    max={setting.max}
-                    className="w-24 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                />
-            )}
-        </div>
-    )
-
-    if (!iggId) {
-        return (
-            <KonohaModal
-                isOpen={isOpen}
-                onClose={onClose}
-                title="Protection Settings"
-                iggId={iggId}
-                icon={Loader2}
-                iconColor="#64748b"
-                iconBg="rgba(100,116,139,0.15)"
-                iconBorder="rgba(100,116,139,0.3)"
-            >
-                <div />
-            </KonohaModal>
+                {tabId === 'shelter' && (
+                    <ChoiceControl
+                        label="Shelter Mode"
+                        value={Number(getNestedValue(settings, 'protectionSettings.ShelterType') ?? 0)}
+                        options={SHELTER_MODE_OPTIONS}
+                        onChange={(value) => handleSettingChange('protectionSettings.ShelterType', value)}
+                        isMobile={isMobile}
+                    />
+                )}
+            </div>
         )
     }
 
     return (
-        <KonohaModal
+        <ResponsiveModalShell
             isOpen={isOpen}
             onClose={onClose}
             title="Protection Settings"
             iggId={iggId}
-            icon={Loader2}
-            iconColor="#64748b"
-            iconBg="rgba(100,116,139,0.15)"
-            iconBorder="rgba(100,116,139,0.3)"
-            maxWidth="860px"
-        >
-            {loading ? (
-                                <div className="flex items-center justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-primary-400" />
-                                </div>
-                            ) : (
-                                <div className="w-full space-y-6">
-                                    {/* Shield Section */}
-                                    <div className="space-y-4">
-                                        <h3 className="text-base sm:text-lg font-bold text-white border-b border-white/10 pb-2">Shield</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            {protectionSettings.shield.map(renderSetting)}
-
-                                            {/* Preferred Shield Dropdown - in grid */}
-                                            <div className="flex items-center justify-between p-4 rounded-xl bg-surface/50 hover:bg-surface transition-colors">
-                                                <label className="text-sm text-gray-300">Preferred Shield:</label>
-                                                <select
-                                                    value={settings?.protectionSettings?.preferredShield ?? -1}
-                                                    onChange={(e) => handleSettingChange('protectionSettings.preferredShield', Number(e.target.value))}
-                                                    className="w-40 px-3 py-2 bg-background-tertiary border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                                                >
-                                                    <option value={-1}>None</option>
-                                                    <option value={0}>4 Hour Shield</option>
-                                                    <option value={1}>8 Hour Shield</option>
-                                                    <option value={2}>1 Day Shield</option>
-                                                    <option value={3}>3 Day Shield</option>
-                                                    <option value={4}>7 Day Shield</option>
-                                                    <option value={5}>14 Day Shield</option>
-                                                    <option value={6}>12 Hour Shield</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Anti-Scout Section */}
-                                    <div className="space-y-4">
-                                        <h3 className="text-base sm:text-lg font-bold text-white border-b border-white/10 pb-2">Anti-Scout</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            {protectionSettings.antiScout.map(renderSetting)}
-                                        </div>
-                                    </div>
-
-                                    {/* Gathering Section */}
-                                    <div className="space-y-4">
-                                        <h3 className="text-base sm:text-lg font-bold text-white border-b border-white/10 pb-2">Gathering (Resource Tiles)</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            {protectionSettings.gathering.map(renderSetting)}
-                                        </div>
-                                    </div>
-
-                                    {/* Shelter Section */}
-                                    <div className="space-y-4">
-                                        <h3 className="text-base sm:text-lg font-bold text-white border-b border-white/10 pb-2">Shelter</h3>
-
-                                        {/* Shelter Mode Option */}
-                                        <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                            <label className="block text-xs sm:text-sm text-gray-300 mb-3">Shelter Mode</label>
-                                            <div className="flex flex-wrap gap-4">
-                                                <label className="flex items-center gap-3 cursor-pointer">
-                                                    <input
-                                                        type="radio"
-                                                        name="shelterMode"
-                                                        checked={settings?.protectionSettings?.ShelterType === 0}
-                                                        onChange={() => handleSettingChange('protectionSettings.ShelterType', 0)}
-                                                        className="w-4 h-4 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                    />
-                                                    <span className="text-sm text-gray-300">Don't Shelter</span>
-                                                </label>
-                                                <label className="flex items-center gap-3 cursor-pointer">
-                                                    <input
-                                                        type="radio"
-                                                        name="shelterMode"
-                                                        checked={settings?.protectionSettings?.ShelterType === 1}
-                                                        onChange={() => handleSettingChange('protectionSettings.ShelterType', 1)}
-                                                        className="w-4 h-4 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                    />
-                                                    <span className="text-sm text-gray-300">Always Shelter</span>
-                                                </label>
-                                                <label className="flex items-center gap-3 cursor-pointer">
-                                                    <input
-                                                        type="radio"
-                                                        name="shelterMode"
-                                                        checked={settings?.protectionSettings?.ShelterType === 2}
-                                                        onChange={() => handleSettingChange('protectionSettings.ShelterType', 2)}
-                                                        className="w-4 h-4 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                    />
-                                                    <span className="text-sm text-gray-300">Shelter When Under Attack</span>
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            {protectionSettings.shelter.map(renderSetting)}
-                                        </div>
-
-                                        {/* Shelter Type Option */}
-                                        <div className="p-3 sm:p-4 rounded-xl bg-surface/50">
-                                            <label className="block text-xs sm:text-sm text-gray-300 mb-3">Shelter Type</label>
-                                            <div className="flex flex-col gap-2">
-                                                <label className="flex items-center gap-3 cursor-pointer">
-                                                    <input
-                                                        type="radio"
-                                                        name="shelterType"
-                                                        checked={settings?.protectionSettings?.AttackShelterType === 0}
-                                                        onChange={() => handleSettingChange('protectionSettings.AttackShelterType', 0)}
-                                                        className="w-4 h-4 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                    />
-                                                    <span className="text-sm text-gray-300">Shelter Hero and 1 Troop</span>
-                                                </label>
-                                                <label className="flex items-center gap-3 cursor-pointer">
-                                                    <input
-                                                        type="radio"
-                                                        name="shelterType"
-                                                        checked={settings?.protectionSettings?.AttackShelterType === 1}
-                                                        onChange={() => handleSettingChange('protectionSettings.AttackShelterType', 1)}
-                                                        className="w-4 h-4 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                    />
-                                                    <span className="text-sm text-gray-300">Shelter Hero and Best Troops (Depends on Shelter Capacity)</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-        </KonohaModal>
+            headerIcon={Shield}
+            tabs={iggId ? TABS : [{ id: 'select', label: 'Select IGG ID', icon: Shield }]}
+            loading={loading}
+            saving={saving}
+            onSave={onClose}
+            saveLabel="Close"
+            statusLabel={saving ? 'Syncing...' : 'Auto-sync'}
+            renderSectionContent={renderSectionContent}
+            maxWidth="940px"
+        />
     )
 }

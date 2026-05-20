@@ -1,11 +1,12 @@
 'use client'
 
-import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Loader2, Gem, Save } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import KonohaModal from './KonohaModal'
+import { Gem, Gift, Sparkles } from 'lucide-react'
+import { useDebounce } from '@/hooks/useDebounce'
+import { getNestedValue, setNestedValue } from '@/lib/settingsMapper'
+import { ModalSummaryGrid } from '@/components/ui/ModalSummaryGrid'
+import { ResponsiveModalShell, ToggleControl, TabDef } from '@/components/ui/ResponsiveModalShell'
 
 interface ArtifactsModalProps {
     isOpen: boolean
@@ -13,46 +14,27 @@ interface ArtifactsModalProps {
     iggId: string | null
 }
 
+const TABS: TabDef[] = [
+    { id: 'general', label: 'Artifacts', icon: Gem },
+]
+
 export default function ArtifactsModal({ isOpen, onClose, iggId }: ArtifactsModalProps) {
     const [settings, setSettings] = useState<any>(null)
     const [loading, setLoading] = useState(true)
-
-    // Prevent background scroll when modal is open
-    useBodyScrollLock(isOpen)
     const [saving, setSaving] = useState(false)
 
-    // Artifacts settings - maps to artifactSettings in settings.json
-    const [appraiseArtifacts, setAppraiseArtifacts] = useState(false)
-    const [collectFreeChest, setCollectFreeChest] = useState(false)
-    const [collectChest, setCollectChest] = useState(false)
-    const [collectWeeklyChallenge, setCollectWeeklyChallenge] = useState(false)
-
     useEffect(() => {
-        if (isOpen && iggId) {
-            loadSettings()
-        }
+        if (isOpen && iggId) loadSettings()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, iggId])
 
     const loadSettings = async () => {
-        if (!iggId) {
-            toast.error('Please select an IGG ID first')
-            return
-        }
-
         setLoading(true)
         try {
             const res = await fetch(`/api/settings/${iggId}`)
             if (res.ok) {
                 const data = await res.json()
                 setSettings(data)
-
-                if (data.artifactSettings) {
-                    setAppraiseArtifacts(data.artifactSettings.appraiseArtifacts ?? false)
-                    setCollectFreeChest(data.artifactSettings.collectFreeChest ?? false)
-                    setCollectChest(data.artifactSettings.collectChest ?? false)
-                    setCollectWeeklyChallenge(data.artifactSettings.collectWeeklyChallenge ?? false)
-                }
             } else {
                 toast.error('Failed to load settings')
             }
@@ -63,103 +45,95 @@ export default function ArtifactsModal({ isOpen, onClose, iggId }: ArtifactsModa
         }
     }
 
-    const saveSettings = async () => {
-        if (!iggId || !settings) return
-
+    const saveSetting = async (path: string, value: any) => {
+        if (!iggId) return
         setSaving(true)
         try {
-            const updatedSettings = {
-                ...settings,
-                artifactSettings: {
-                    ...settings.artifactSettings,
-                    appraiseArtifacts,
-                    collectFreeChest,
-                    collectChest,
-                    collectWeeklyChallenge,
-                }
-            }
-
             const res = await fetch(`/api/settings/${iggId}`, {
-                method: 'PUT',
+                method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedSettings),
+                body: JSON.stringify({ path, value }),
             })
-
             if (res.ok) {
-                toast.success('Settings saved successfully')
-                onClose()
+                const updatedSettings = { ...settings }
+                setNestedValue(updatedSettings, path, value)
                 setSettings(updatedSettings)
             } else {
-                toast.error('Failed to save settings')
+                toast.error('Failed to save setting')
             }
         } catch (error) {
-            toast.error('Error saving settings')
+            toast.error('Error saving setting')
         } finally {
             setSaving(false)
         }
     }
 
-    if (!iggId) {
+    const debouncedSave = useDebounce(saveSetting, 500)
+
+    const handleSettingChange = (path: string, value: any) => {
+        const updatedSettings = { ...settings }
+        setNestedValue(updatedSettings, path, value)
+        setSettings(updatedSettings)
+        debouncedSave(path, value)
+    }
+
+    const renderSectionContent = (tabId: string, isMobile: boolean, isTablet: boolean) => {
+        if (!settings) return null
+        
+        const gridClass = isMobile
+            ? 'grid grid-cols-1 gap-1.5'
+            : isTablet
+                ? 'grid grid-cols-2 gap-2'
+                : 'grid grid-cols-2 gap-3'
+
+        const artifactSettings = [
+            { label: 'Appraise Artifacts', path: 'artifactSettings.appraiseArtifacts' },
+            { label: 'Collect Free Artifact Chests', path: 'artifactSettings.collectFreeChest' },
+            { label: 'Collect Artifact Chests (using coins)', path: 'artifactSettings.collectChest' },
+            { label: 'Collect Weekly Challenge Rewards', path: 'artifactSettings.collectWeeklyChallenge' },
+        ]
+        const enabledCount = artifactSettings.filter((setting) => !!getNestedValue(settings, setting.path)).length
+
         return (
-            <KonohaModal
-                isOpen={isOpen}
-                onClose={onClose}
-                title="Artifacts"
-                iggId={iggId}
-                icon={Gem}
-                iconColor="#8B5CF6"
-                iconBg="rgba(139,92,246,0.15)"
-                iconBorder="rgba(139,92,246,0.3)"
-            >
-                <div />
-            </KonohaModal>
+            <div className="flex flex-col gap-6">
+                <ModalSummaryGrid
+                    items={[
+                        { label: 'Enabled', value: `${enabledCount}/4`, icon: Sparkles, tone: 'mint' },
+                        { label: 'Appraise', value: getNestedValue(settings, 'artifactSettings.appraiseArtifacts') ? 'On' : 'Off', icon: Gem, tone: 'cyan' },
+                        { label: 'Chests', value: getNestedValue(settings, 'artifactSettings.collectChest') ? 'Coins' : 'Free', icon: Gift, tone: 'gold' },
+                    ]}
+                />
+
+                <div className={gridClass}>
+                    {artifactSettings.map((s) => {
+                        const val = getNestedValue(settings, s.path) ?? false
+                        return (
+                            <ToggleControl 
+                                key={s.path}
+                                label={s.label} 
+                                checked={!!val} 
+                                onChange={(v) => handleSettingChange(s.path, v)} 
+                                isMobile={isMobile} 
+                            />
+                        )
+                    })}
+                </div>
+            </div>
         )
     }
 
     return (
-        <KonohaModal
+        <ResponsiveModalShell
             isOpen={isOpen}
             onClose={onClose}
-            title="Artifacts"
+            title="Artifact Settings"
             iggId={iggId}
-            icon={Gem}
-            iconColor="#8B5CF6"
-            iconBg="rgba(139,92,246,0.15)"
-            iconBorder="rgba(139,92,246,0.3)"
+            headerIcon={Gem}
+            tabs={TABS}
+            loading={loading}
             saving={saving}
-            onSave={saveSettings}
-            maxWidth="860px"
-        >
-            {loading ? (
-                                <div className="flex items-center justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-primary-400" />
-                                </div>
-                            ) : (
-                                <div className="w-full space-y-6">
-                                    {/* Settings Section */}
-                                    <div className="space-y-3">
-                                        <h3 className="text-base sm:text-lg font-bold text-white">Settings</h3>
-                                        <div className="flex flex-wrap gap-3">
-                                            {[
-                                                { label: 'Appraise Artifacts', value: appraiseArtifacts, setter: setAppraiseArtifacts },
-                                                { label: 'Collect Free Artifact Chests', value: collectFreeChest, setter: setCollectFreeChest },
-                                                { label: 'Collect Artifact Chests (using coins)', value: collectChest, setter: setCollectChest },
-                                                { label: 'Collect Weekly Challenge Rewards', value: collectWeeklyChallenge, setter: setCollectWeeklyChallenge },
-                                            ].map((option, index) => (
-                                                <label key={index} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 hover:bg-surface transition-colors cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={option.value}
-                                                        onChange={(e) => option.setter(e.target.checked)}
-                                                        className="w-5 h-5 rounded bg-background-tertiary border-white/10 text-primary-500 focus:ring-2 focus:ring-primary-500/50"
-                                                    />
-                                                    <span className="text-sm text-white">{option.label}</span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-        </KonohaModal>
+            statusLabel={saving ? 'Syncing...' : 'Auto-sync'}
+            renderSectionContent={renderSectionContent}
+        />
     )
 }

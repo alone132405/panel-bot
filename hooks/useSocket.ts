@@ -32,7 +32,7 @@ export const useSocket = (iggId?: string) => {
             const onConnect = () => {
                 if (!mounted) return
                 setIsConnected(true)
-                console.log('Socket connected')
+                // console.log('Socket connected')
                 if (iggId) {
                     socket.emit('subscribe', iggId)
                 }
@@ -41,7 +41,7 @@ export const useSocket = (iggId?: string) => {
             const onDisconnect = () => {
                 if (!mounted) return
                 setIsConnected(false)
-                console.log('Socket disconnected')
+                // console.log('Socket disconnected')
             }
 
             const onQueueUpdate = (data: any) => {
@@ -53,7 +53,7 @@ export const useSocket = (iggId?: string) => {
             socket.on('queue_update', onQueueUpdate)
 
             const onAutomationStatus = (data: any) => {
-                console.log('useSocket: received automation_status:', data)
+                // console.log('useSocket: received automation_status:', data)
                 if (mounted) setAutomationStatus(data)
             }
 
@@ -80,13 +80,13 @@ export const useSocket = (iggId?: string) => {
 
             // Clean up listeners on unmount/re-run
             return () => {
-                console.log('useSocket: cleaning up for iggId:', iggId)
+                // console.log('useSocket: cleaning up for iggId:', iggId)
                 socket.off('connect', onConnect)
                 socket.off('disconnect', onDisconnect)
                 socket.off('queue_update', onQueueUpdate)
                 socket.off('automation_status', onAutomationStatus)
                 if (iggId) {
-                    console.log('useSocket: unsubscribing from:', iggId)
+                    // console.log('useSocket: unsubscribing from:', iggId)
                     socket.emit('unsubscribe', iggId)
                 }
             }

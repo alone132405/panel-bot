@@ -4,18 +4,24 @@
 
 @layer base {
   :root {
-    --bg-base:       #07070E;
-    --bg-surface:    #0F0F1A;
-    --bg-elevated:   #161626;
-    --accent-1:      #00FFB2;
-    --accent-2:      #7B5EFF;
-    --accent-3:      #FF4D6D;
-    --accent-gold:   #FFB800;
-    --text-primary:  #F0F4FF;
-    --text-muted:    #6B7A99;
-    --border:        rgba(123,94,255,0.15);
-    --glow-mint:     0 0 20px rgba(0,255,178,0.25);
-    --glow-violet:   0 0 20px rgba(123,94,255,0.3);
+    --bg-base: #05070b;
+    --bg-surface: #0b111a;
+    --bg-elevated: #111927;
+    --bg-inset: #070b12;
+    --surface-hover: #162235;
+    --accent-1: #21f3b1;
+    --accent-2: #7c5cff;
+    --accent-3: #ff4d6d;
+    --accent-gold: #ffbd4a;
+    --accent-cyan: #34d5ff;
+    --text-primary: #eef5ff;
+    --text-muted: #7f8da8;
+    --text-soft: #b8c4d8;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.14);
+    --glow-mint: 0 0 24px rgba(33, 243, 177, 0.24);
+    --glow-violet: 0 0 24px rgba(124, 92, 255, 0.24);
+    --shadow-panel: 0 18px 70px rgba(0, 0, 0, 0.42);
   }
 
   * {
@@ -24,108 +30,219 @@
 
   html {
     @apply scroll-smooth;
+    background: var(--bg-base);
   }
 
   body {
-    background-color: var(--bg-base);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background:
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      radial-gradient(circle at 50% 0%, rgba(52, 213, 255, 0.08), transparent 36rem),
+      var(--bg-base);
+    background-size: 56px 56px, 56px 56px, auto, auto;
     color: var(--text-primary);
     @apply antialiased font-sans;
-    overflow-x: hidden;
   }
 
-  /* Modals global override */
-  .fixed.inset-2.sm\:inset-4, .fixed.inset-4.md\:inset-20 {
-    border-radius: 16px !important;
-    background-color: var(--bg-surface) !important;
-    border: 1px solid var(--border) !important;
-    box-shadow: 0 0 50px -12px rgba(0, 0, 0, 1) !important;
+  ::selection {
+    background: rgba(33, 243, 177, 0.28);
+    color: #fff;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+  }
+
+  input[type='number'] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    margin: 0;
+    -webkit-appearance: none;
   }
 }
 
 @layer components {
-  /* Modern Scrollbar — hidden but scrollable */
-  .scrollbar-thin {
-    scrollbar-width: none;
-  }
-  .scrollbar-thin::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* ─── Konoha Background Wrapper ────────────────────────── */
-  .konoha-bg {
+  .app-frame {
     position: relative;
-    overflow: hidden;
+    min-height: 100vh;
+    color: var(--text-primary);
   }
 
-  /* ─── Animated Blobs ──────────────────────────────────── */
-  .konoha-blob-1,
-  .konoha-blob-2 {
-    position: absolute;
-    border-radius: 50%;
-    opacity: 0.04;
-    will-change: transform;
-    animation: blob-float 12s ease-in-out infinite alternate;
+  .app-frame::before {
+    content: '';
+    position: fixed;
+    inset: 0;
     pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(33, 243, 177, 0.07), transparent 18rem),
+      linear-gradient(115deg, rgba(124, 92, 255, 0.11), transparent 34rem),
+      linear-gradient(245deg, rgba(255, 189, 74, 0.08), transparent 30rem);
+    opacity: 0.78;
+    z-index: 0;
   }
 
-  .konoha-blob-1 {
-    width: 60vw;
-    height: 60vw;
-    background: radial-gradient(circle, var(--accent-1) 0%, transparent 70%);
-    top: -20%;
-    left: -20%;
+  .app-frame::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 36px 36px;
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 74%);
+    z-index: 0;
   }
 
-  .konoha-blob-2 {
-    width: 50vw;
-    height: 50vw;
-    background: radial-gradient(circle, var(--accent-2) 0%, transparent 70%);
-    bottom: -20%;
-    right: -10%;
-    animation-delay: -6s;
+  .panel {
+    background: rgba(11, 17, 26, 0.86);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-panel);
+    backdrop-filter: blur(18px);
   }
 
-  @keyframes blob-float {
-    0%   { transform: translate3d(0, 0, 0) scale(1); }
-    100% { transform: translate3d(5%, 5%, 0) scale(1.1); }
+  .panel-solid {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-panel);
   }
 
-  /* ─── Scan Line ───────────────────────────────────────── */
+  .panel-inset {
+    background: rgba(7, 11, 18, 0.78);
+    border: 1px solid var(--border);
+  }
+
+  .glass-card {
+    background: rgba(11, 17, 26, 0.82);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow-panel);
+    backdrop-filter: blur(18px);
+  }
+
+  .input-field {
+    min-height: 44px;
+    border-radius: 8px;
+    background: rgba(7, 11, 18, 0.85);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 0 14px;
+    outline: none;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  }
+
+  .input-field:focus {
+    border-color: rgba(33, 243, 177, 0.55);
+    box-shadow: 0 0 0 4px rgba(33, 243, 177, 0.08);
+    background: rgba(10, 16, 25, 0.95);
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-cyan));
+    color: #031017;
+    font-weight: 800;
+    padding: 0 18px;
+    box-shadow: var(--glow-mint);
+    transition: transform 160ms ease, filter 160ms ease, box-shadow 160ms ease;
+  }
+
+  .btn-primary:hover {
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+  }
+
+  .status-active {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(33, 243, 177, 0.24);
+    background: rgba(33, 243, 177, 0.08);
+    color: var(--accent-1);
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .status-active::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--accent-1);
+    box-shadow: var(--glow-mint);
+  }
+
+  .scrollbar-thin,
+  .scrollbar-none,
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.16) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar,
+  .scrollbar-none::-webkit-scrollbar,
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb,
+  .scrollbar-none::-webkit-scrollbar-thumb,
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.14);
+    border-radius: 999px;
+  }
+
   .scan-line {
     position: absolute;
     inset: 0;
     pointer-events: none;
     overflow: hidden;
-    z-index: 1;
   }
+
   .scan-line::after {
     content: '';
     position: absolute;
-    top: 0;
     left: 0;
     right: 0;
-    height: 2px;
-    background: rgba(0, 255, 178, 0.03);
-    animation: scanSweep 4s linear infinite;
-    will-change: transform;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(33, 243, 177, 0.44), transparent);
+    animation: scanSweep 5s linear infinite;
   }
 
   @keyframes scanSweep {
-    0%   { transform: translateY(-100%); }
-    100% { transform: translateY(500px); }
+    0% { transform: translateY(-20px); opacity: 0; }
+    12% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { transform: translateY(680px); opacity: 0; }
   }
 
-  /* ─── Float animation (hero chips) ───────────────────── */
   @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50%       { transform: translateY(-8px); }
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
   }
-  .animate-float      { animation: float 3s ease-in-out infinite; }
-  .animate-float-slow { animation: float 4.5s ease-in-out infinite; }
 
-  /* ─── Animation delay utilities ──────────────────────── */
-  .animation-delay-500  { animation-delay: 0.5s; }
-  .animation-delay-1000 { animation-delay: 1s; }
-  .animation-delay-2000 { animation-delay: 2s; }
-  .animation-delay-4000 { animation-delay: 4s; }
+  .animate-float {
+    animation: float 3.5s ease-in-out infinite;
+  }
+
+  .animate-float-slow {
+    animation: float 5s ease-in-out infinite;
+  }
 }
