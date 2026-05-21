@@ -974,11 +974,7 @@ export default function BankSettingsPage() {
                                         {(applying || queuePosition > 0) ? (
                                             <>
                                                 <Loader2 className="h-5 w-5 animate-spin" />
-                                                {automationStatus?.status === 'waiting'
-                                                    ? 'Wait for RDP disconnection'
-                                                    : queuePosition > 0
-                                                        ? `Queue Status #${queuePosition}`
-                                                        : 'Applying Changes...'}
+                                                {queuePosition > 0 ? `Queue Status #${queuePosition}` : 'Applying Changes...'}
                                             </>
                                         ) : cooldown > 0 ? (
                                             <>

@@ -29,9 +29,9 @@ class AutomationQueue {
     }
 
     public async enqueue(iggId: string, io: any) {
-        // If already waiting in queue, skip (the waiting run will pick up all current changes)
+        // If already queued, skip the duplicate request.
         if (this.queue.some(item => item.iggId === iggId)) {
-            // console.log(`IGG ID ${iggId} is already waiting in the queue.`)
+            // console.log(`IGG ID ${iggId} is already queued.`)
             return
         }
 
@@ -73,10 +73,6 @@ class AutomationQueue {
         try {
             this.broadcastQueueStatus(io)
 
-            // 1. Wait for RDP disconnect
-            await this.waitForConsoleSession(io, item.iggId)
-
-            // 2. Processing status
             if (io) {
                 io.to(`igg-${item.iggId}`).emit('automation_status', {
                     status: 'processing',
@@ -85,10 +81,8 @@ class AutomationQueue {
                 })
             }
 
-            // 3. Run Automation
             await this.runAutomation(item.iggId)
 
-            // 4. Success status
             if (io) {
                 io.to(`igg-${item.iggId}`).emit('automation_status', {
                     status: 'completed',
@@ -114,48 +108,6 @@ class AutomationQueue {
             if (this.queue.length > 0) {
                 this.processNext(io).catch(err => console.error('Queue processNext error:', err))
             }
-        }
-    }
-
-    private async isConsoleSession(): Promise<boolean> {
-        try {
-            const result = await execFileAsync('quser', [], { windowsHide: true, encoding: 'utf8' })
-            const stdout = String(result.stdout || '')
-            const lines = stdout.split('\n')
-            const currentSessionLine = lines.find(line => line.trim().startsWith('>'))
-
-            if (!currentSessionLine) return true
-
-            const parts = currentSessionLine.trim().split(/\s+/)
-            const sessionName = parts[1]?.toLowerCase() || ''
-
-            if (sessionName.includes('rdp') || sessionName.includes('tcp')) {
-                return false
-            }
-
-            return true
-        } catch (error) {
-            console.error('Error checking session:', error)
-            return true
-        }
-    }
-
-    private async waitForConsoleSession(io: any, iggId: string): Promise<void> {
-        let isConsole = await this.isConsoleSession()
-
-        while (!isConsole) {
-            // console.log('RDP detected. Waiting for disconnect...')
-
-            if (io) {
-                io.to(`igg-${iggId}`).emit('automation_status', {
-                    status: 'waiting',
-                    message: 'RDP connected. Waiting for disconnect (use disconnect_headless.bat)...',
-                    timestamp: Date.now()
-                })
-            }
-
-            await new Promise(resolve => setTimeout(resolve, 5000))
-            isConsole = await this.isConsoleSession()
         }
     }
 
