@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/adminAuth'
 import { prisma } from '@/lib/prisma'
-import { getConfigDir } from '@/lib/fileSync'
-import fs from 'fs/promises'
-import path from 'path'
+import { ensureSettingsFile } from '@/lib/fileSync'
 
 export async function POST(req: Request) {
     const authError = await requireAdmin(req as any)
@@ -19,45 +17,13 @@ export async function POST(req: Request) {
             )
         }
 
-        // Verify IGG ID folder exists
-        const configPath = path.join(getConfigDir(), iggId)
         try {
-            await fs.access(configPath)
+            await ensureSettingsFile(iggId)
         } catch {
-            // Create the config folder if it doesn't exist
-            try {
-                await fs.mkdir(configPath, { recursive: true })
-                // Create a default settings.json
-                await fs.writeFile(
-                    path.join(configPath, 'settings.json'),
-                    JSON.stringify({
-                        miscSettings: {
-                            giftResetTime: '00:00:00',
-                            dayGiftResetTime: '00:00:00',
-                            giftResetType: 0,
-                            giftResetDay: 0,
-                            saveGuildStats: false,
-                            saveFestStats: false,
-                            saveGuildList: false,
-                            hourReset: 0,
-                            giftExpMode: 1,
-                            giftUpload: false,
-                        },
-                        statSettings: {
-                            pointGoalHunt: [0, 1, 3, 9, 18],
-                            pointGoalPurchase: [1, 2, 4, 8, 16],
-                            finalPointGoalHunt: 50,
-                            finalPointGoalPurchase: 50,
-                        },
-                    }, null, 2),
-                    'utf-8'
-                )
-            } catch {
-                return NextResponse.json(
-                    { error: 'Failed to create config directory for IGG ID' },
-                    { status: 500 }
-                )
-            }
+            return NextResponse.json(
+                { error: 'Failed to create settings file for IGG ID' },
+                { status: 500 }
+            )
         }
 
         // Check if IGG ID is already assigned

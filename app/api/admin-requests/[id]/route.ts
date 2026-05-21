@@ -48,8 +48,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         // If approving, update the settings file
         if (status === 'APPROVED') {
             try {
-                const { readSettingsFile, writeSettingsFile } = await import('@/lib/fileSync')
-                const settings = await readSettingsFile(requestDetails.iggId)
+                const { ensureSettingsFile, writeSettingsFile } = await import('@/lib/fileSync')
+                const settings = await ensureSettingsFile(requestDetails.iggId)
 
                 if (!settings.accountData) {
                     settings.accountData = []

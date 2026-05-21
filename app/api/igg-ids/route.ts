@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/authOptions'
 import { prisma } from '@/lib/prisma'
-import { validateIggIdExists } from '@/lib/fileSync'
+import { ensureSettingsFile, validateIggIdExists } from '@/lib/fileSync'
 
 // Get all IGG IDs for the current user
 export async function GET(req: NextRequest) {
@@ -49,6 +49,8 @@ export async function POST(req: NextRequest) {
                 { status: 404 }
             )
         }
+
+        await ensureSettingsFile(iggId)
 
         // Check if IGG ID is already assigned
         const existing = await prisma.iggId.findUnique({

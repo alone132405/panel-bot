@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/authOptions'
 import { prisma } from '@/lib/prisma'
-import { readSettingsFile, updateNestedProperty, writeSettingsFile } from '@/lib/fileSync'
+import { ensureSettingsFile, updateNestedProperty, writeSettingsFile } from '@/lib/fileSync'
 
 // GET settings for a specific IGG ID
 export async function GET(
@@ -30,7 +30,7 @@ export async function GET(
             return NextResponse.json({ error: 'IGG ID not found or unauthorized' }, { status: 404 })
         }
 
-        const settings = await readSettingsFile(iggId)
+        const settings = await ensureSettingsFile(iggId)
 
         return NextResponse.json(settings)
     } catch (error: any) {
@@ -88,7 +88,7 @@ export async function PATCH(
             return NextResponse.json({ error: 'IGG ID not found or unauthorized' }, { status: 404 })
         }
 
-        const settings = await readSettingsFile(iggId)
+        const settings = await ensureSettingsFile(iggId)
 
         // Update the nested property
         const updatedSettings = updateNestedProperty(settings, path, value)

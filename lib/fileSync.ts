@@ -10,6 +10,40 @@ export interface ConfigWriteResult {
     mtime: string
 }
 
+export const DEFAULT_SETTINGS = {
+    connectionSettings: { reconnectTime: 5, otherLoginTime: 30 },
+    miscSettings: {
+        useVipPoints: true,
+        useExpItems: true,
+        giftResetTime: '00:00:00',
+        dayGiftResetTime: '00:00:00',
+        giftResetType: 0,
+        giftResetDay: 0,
+        saveGuildStats: false,
+        saveFestStats: false,
+        saveGuildList: false,
+        hourReset: 0,
+        giftExpMode: 1,
+        giftUpload: false,
+    },
+    statSettings: {
+        pointGoalHunt: [0, 1, 3, 9, 18],
+        pointGoalPurchase: [1, 2, 4, 8, 16],
+        finalPointGoalHunt: 50,
+        finalPointGoalPurchase: 50,
+    },
+    questSettings: { dailyLoginGift: true },
+    guildSettings: { sendGuildHelp: true, requestGuildHelp: true },
+}
+
+export function getDefaultSettings(): typeof DEFAULT_SETTINGS {
+    return JSON.parse(JSON.stringify(DEFAULT_SETTINGS)) as typeof DEFAULT_SETTINGS
+}
+
+function isMissingFileError(error: unknown): boolean {
+    return Boolean(error && typeof error === 'object' && (error as { code?: string }).code === 'ENOENT')
+}
+
 function getConfigRoot(): string {
     return path.resolve(
         process.env.CONFIG_DIR ||
@@ -62,6 +96,20 @@ async function readJsonFile(filePath: string): Promise<any> {
 // File system operations
 export async function readSettingsFile(iggId: string): Promise<any> {
     return readJsonFile(getConfigFilePath(iggId, 'settings.json'))
+}
+
+export async function ensureSettingsFile(iggId: string): Promise<any> {
+    try {
+        return await readSettingsFile(iggId)
+    } catch (error) {
+        if (!isMissingFileError(error)) {
+            throw error
+        }
+
+        const settings = getDefaultSettings()
+        await writeSettingsFile(iggId, settings)
+        return settings
+    }
 }
 
 export async function readBankSettingsFile(iggId: string): Promise<any> {

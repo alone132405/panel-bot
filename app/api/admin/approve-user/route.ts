@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/authOptions'
 import { prisma } from '@/lib/prisma'
-import { getConfigDir } from '@/lib/fileSync'
+import { getConfigDir, getDefaultSettings } from '@/lib/fileSync'
 import fs from 'fs/promises'
 import path from 'path'
 
@@ -84,34 +84,9 @@ export async function POST(req: NextRequest) {
             await fs.mkdir(configDir, { recursive: true })
 
             // Create default settings.json
-            const defaultSettings = {
-                connectionSettings: { reconnectTime: 5, otherLoginTime: 30 },
-                miscSettings: {
-                    useVipPoints: true,
-                    useExpItems: true,
-                    giftResetTime: '00:00:00',
-                    dayGiftResetTime: '00:00:00',
-                    giftResetType: 0,
-                    giftResetDay: 0,
-                    saveGuildStats: false,
-                    saveFestStats: false,
-                    saveGuildList: false,
-                    hourReset: 0,
-                    giftExpMode: 1,
-                    giftUpload: false,
-                },
-                statSettings: {
-                    pointGoalHunt: [0, 1, 3, 9, 18],
-                    pointGoalPurchase: [1, 2, 4, 8, 16],
-                    finalPointGoalHunt: 50,
-                    finalPointGoalPurchase: 50,
-                },
-                questSettings: { dailyLoginGift: true },
-                guildSettings: { sendGuildHelp: true, requestGuildHelp: true },
-            }
             await fs.writeFile(
                 path.join(configDir, 'settings.json'),
-                JSON.stringify(defaultSettings, null, 2)
+                JSON.stringify(getDefaultSettings(), null, 2)
             )
 
             // Create default banksettings.json

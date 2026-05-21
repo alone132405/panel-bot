@@ -128,6 +128,9 @@ class AutomationQueue {
         const POPUP_FUNCTIONS_Y = 60
         const POPUP_RELOAD_X = 180
         const POPUP_RELOAD_Y = 111
+        const TARGET_WINDOW_WIDTH = 1024
+        const PREFERRED_WINDOW_HEIGHT = 768
+        const MIN_DESKTOP_HEIGHT = 640
 
         const scriptContent = `
 Add-Type -AssemblyName System.Windows.Forms
@@ -269,8 +272,8 @@ function Assert-InteractiveDesktop {
     }
 
     $screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
-    if ($screen.Width -lt 1024 -or $screen.Height -lt 768) {
-        Write-Output "ERROR: Active desktop is $($screen.Width)x$($screen.Height). Automation needs at least 1024x768 for the configured click positions."
+    if ($screen.Width -lt ${TARGET_WINDOW_WIDTH} -or $screen.Height -lt ${MIN_DESKTOP_HEIGHT}) {
+        Write-Output "ERROR: Active desktop is $($screen.Width)x$($screen.Height). Automation needs at least ${TARGET_WINDOW_WIDTH}x${MIN_DESKTOP_HEIGHT} for the configured click positions."
         exit 1
     }
 
@@ -299,8 +302,10 @@ if ([Win32]::IsIconic($mainHwnd)) {
     Start-Sleep -Seconds 1
 }
 
-Write-Output "Resizing window to 1024x768 at (0,0)..."
-[Win32]::MoveWindow($mainHwnd, 0, 0, 1024, 768, $true)
+$screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+$targetWindowHeight = [Math]::Min(${PREFERRED_WINDOW_HEIGHT}, $screen.Height)
+Write-Output "Resizing window to ${TARGET_WINDOW_WIDTH}x$targetWindowHeight at (0,0)..."
+[Win32]::MoveWindow($mainHwnd, 0, 0, ${TARGET_WINDOW_WIDTH}, $targetWindowHeight, $true)
 Start-Sleep -Milliseconds 500
 
 Write-Output "Forcing window to foreground..."
