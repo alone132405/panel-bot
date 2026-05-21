@@ -3,6 +3,10 @@ const { parse } = require('url')
 const { Server } = require('socket.io')
 const { loadEnvConfig } = require('@next/env')
 
+if (!process.env.NODE_ENV && process.env.npm_lifecycle_event !== 'dev') {
+    process.env.NODE_ENV = 'production'
+}
+
 const dev = process.env.NODE_ENV !== 'production'
 loadEnvConfig(process.cwd(), dev)
 
@@ -12,7 +16,11 @@ if (dev && !process.env.NEXT_DIST_DIR) {
 
 const next = require('next')
 const hostname = 'localhost'
-const port = process.env.PORT || 3000
+const port = Number.parseInt(process.env.PORT || '3000', 10)
+
+if (!Number.isFinite(port) || port <= 0) {
+    throw new Error(`Invalid PORT value: ${process.env.PORT}`)
+}
 
 const app = next({ dev, hostname, port })
 const handle = app.getRequestHandler()
@@ -72,6 +80,9 @@ app.prepare().then(() => {
 
     httpServer
         .once('error', (err) => {
+            if (err && err.code === 'EADDRINUSE') {
+                console.error(`Port ${port} is already in use. Stop the existing dashboard process or set a different PORT in ecosystem.config.js.`)
+            }
             console.error(err)
             process.exit(1)
         })

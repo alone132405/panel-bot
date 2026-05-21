@@ -1,9 +1,9 @@
-import { exec } from 'child_process'
+import { execFile } from 'child_process'
 import { promisify } from 'util'
 import fs from 'fs/promises'
 import path from 'path'
 
-const execAsync = promisify(exec)
+const execFileAsync = promisify(execFile)
 
 interface QueueItem {
     iggId: string
@@ -119,7 +119,8 @@ class AutomationQueue {
 
     private async isConsoleSession(): Promise<boolean> {
         try {
-            const { stdout } = await execAsync('quser')
+            const result = await execFileAsync('quser', [], { windowsHide: true, encoding: 'utf8' })
+            const stdout = String(result.stdout || '')
             const lines = stdout.split('\n')
             const currentSessionLine = lines.find(line => line.trim().startsWith('>'))
 
@@ -421,11 +422,15 @@ Write-Output "=== AUTOMATION COMPLETE ==="
         try {
             let stdout = '';
             try {
-                const result = await execAsync(`powershell -ExecutionPolicy Bypass -File "${scriptPath}"`)
-                stdout = result.stdout;
+                const result = await execFileAsync(
+                    'powershell.exe',
+                    ['-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass', '-File', scriptPath],
+                    { windowsHide: true }
+                )
+                stdout = String(result.stdout || '');
             } catch (execError: any) {
-                stdout = execError.stdout || '';
-                const stderr = execError.stderr || '';
+                stdout = String(execError.stdout || '');
+                const stderr = String(execError.stderr || '');
                 // console.log('PowerShell exec error output:', stdout);
                 // console.log('PowerShell exec stderr:', stderr);
 

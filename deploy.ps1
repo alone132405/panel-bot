@@ -12,33 +12,19 @@ if (Test-Path ".next") {
 Write-Host "Building application..."
 npm run build
 
-# 3. Verify standalone build
-if (-not (Test-Path ".next\standalone")) {
-    Write-Error "Build failed: .next\standalone directory not found!"
+# 3. Verify build
+if (-not (Test-Path ".next")) {
+    Write-Error "Build failed: .next directory not found!"
     exit 1
 }
 
-# 4. Copy static assets (Required for Output: Standalone)
-Write-Host "Copying static assets to standalone build..."
-
-# Copy public folder
-if (Test-Path "public") {
-    Copy-Item -Path "public" -Destination ".next\standalone\public" -Recurse -Force
-}
-
-# Copy .next/static folder
-if (Test-Path ".next\static") {
-    New-Item -ItemType Directory -Force -Path ".next\standalone\.next\static" | Out-Null
-    Copy-Item -Path ".next\static\*" -Destination ".next\standalone\.next\static" -Recurse -Force
-}
-
-Write-Host "Assets copied successfully."
-
-# 5. Restart PM2
+# 4. Restart PM2
 Write-Host "Restarting PM2 process..."
-pm2 delete bot-management-dashboard
-pm2 start ecosystem.config.js
+foreach ($name in @("bot-dash", "bot-management-dashboard")) {
+    pm2 delete $name 2>$null
+}
+pm2 start ecosystem.config.js --update-env
 pm2 save
 
 Write-Host "Deployment complete! Application should be running." -ForegroundColor Green
-Write-Host "Check logs with: pm2 logs bot-management-dashboard"
+Write-Host "Check logs with: pm2 logs bot-dash"
