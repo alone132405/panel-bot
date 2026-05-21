@@ -164,6 +164,9 @@ public class Win32 {
     [DllImport("user32.dll")]
     public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
+    [DllImport("user32.dll", SetLastError=true)]
+    public static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
     [DllImport("user32.dll")]
     public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
@@ -188,6 +191,7 @@ public class Win32 {
     public const int MOUSEEVENTF_LEFTUP = 0x04;
     public const int SW_RESTORE = 9;
     public const int SW_SHOW = 5;
+    public const uint WM_CLOSE = 0x0010;
 
     public static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
     public static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
@@ -234,7 +238,47 @@ function ForceForeground($targetHwnd) {
     }
 }
 
+function Get-CurrentSessionState {
+    $currentSessionId = (Get-Process -Id $PID).SessionId
+    $sessionLines = @(query session 2>$null)
+
+    foreach ($line in $sessionLines) {
+        if ($line -match "\\s$currentSessionId\\s+(?<State>\\w+)") {
+            return @{
+                Id = $currentSessionId
+                State = $Matches.State
+                Line = $line.Trim()
+            }
+        }
+    }
+
+    return @{
+        Id = $currentSessionId
+        State = "Unknown"
+        Line = ""
+    }
+}
+
+function Assert-InteractiveDesktop {
+    $sessionInfo = Get-CurrentSessionState
+
+    if ($sessionInfo.State -ne "Active") {
+        Write-Output "ERROR: Windows session $($sessionInfo.Id) is $($sessionInfo.State), so UI automation cannot safely click Lords Mobile Bot."
+        Write-Output "ERROR: Reconnect RDP, or disconnect using disconnect_headless.bat/tscon so the session stays active on the console."
+        exit 1
+    }
+
+    $screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+    if ($screen.Width -lt 1024 -or $screen.Height -lt 768) {
+        Write-Output "ERROR: Active desktop is $($screen.Width)x$($screen.Height). Automation needs at least 1024x768 for the configured click positions."
+        exit 1
+    }
+
+    Write-Output "Session $($sessionInfo.Id) is Active. Screen: $($screen.Width)x$($screen.Height)"
+}
+
 Write-Output "=== AUTOMATION START ==="
+Assert-InteractiveDesktop
 Write-Output "Searching for Lords Mobile Bot..."
 
 $botProcess = Get-Process | Where-Object { $_.MainWindowTitle -like "*Lords Mobile Bot*" } | Select-Object -First 1
@@ -353,16 +397,34 @@ Click $reloadX $reloadY
 Start-Sleep -Seconds 2
 
 # Close popup
-$closeX = $baseX + ${CLOSE_X}
-$closeY = $baseY + ${CLOSE_Y}
-Write-Output "Step 7: Click to close at ($closeX, $closeY)"
-Click $closeX $closeY
+if ($popupHwnd -ne $mainHwnd) {
+    Write-Output "Step 7: Close popup by window handle"
+    ForceForeground $popupHwnd
+    Start-Sleep -Milliseconds 300
+    [Win32]::PostMessage($popupHwnd, [Win32]::WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero) | Out-Null
+} else {
+    $closeX = $baseX + ${CLOSE_X}
+    $closeY = $baseY + ${CLOSE_Y}
+    Write-Output "Step 7: Click to close at ($closeX, $closeY)"
+    Click $closeX $closeY
+}
 Start-Sleep -Seconds 1
+
+# Clear the search field so the bot UI is not left filtered/focused after apply.
+Write-Output "Step 8: Clear search field"
+ForceForeground $mainHwnd
+Start-Sleep -Milliseconds 300
+Click $searchX $searchY
+Start-Sleep -Milliseconds 200
+[System.Windows.Forms.SendKeys]::SendWait("^a")
+Start-Sleep -Milliseconds 100
+[System.Windows.Forms.SendKeys]::SendWait("{DELETE}")
+Start-Sleep -Milliseconds 300
 
 # Final cleanup
 $finalX = $baseX + ${FINAL_X}
 $finalY = $baseY + ${FINAL_Y}
-Write-Output "Step 8: Final click at ($finalX, $finalY)"
+Write-Output "Step 9: Final click at ($finalX, $finalY)"
 Click $finalX $finalY
 Start-Sleep -Seconds 1
 
@@ -402,7 +464,9 @@ Write-Output "=== AUTOMATION COMPLETE ==="
             // console.log('PowerShell output:', stdout)
 
             if (stdout.includes('ERROR:')) {
-                throw new Error('Lords Mobile Bot application not found.')
+                const lines = stdout.split('\n')
+                const errLine = lines.find((line: string) => line.includes('ERROR:'))
+                throw new Error(errLine ? errLine.trim() : 'Automation failed.')
             }
         } finally {
             try {
