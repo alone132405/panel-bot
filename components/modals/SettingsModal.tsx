@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Settings, Zap, Target, Scroll, Swords, Users, TrendingUp, CheckSquare } from 'lucide-react'
-import { useDebounce } from '@/hooks/useDebounce'
 import { SETTINGS_FIELD_MAP, getNestedValue, setNestedValue } from '@/lib/settingsMapper'
 import { ResponsiveModalShell, ToggleControl, StepperControl, InputControl, TabDef } from '@/components/ui/ResponsiveModalShell'
 
@@ -52,36 +51,34 @@ export default function SettingsModal({ isOpen, onClose, iggId }: SettingsModalP
         if (isOpen) loadSettings()
     }, [isOpen, loadSettings])
 
-    const saveSetting = async (path: string, value: any) => {
-        if (!iggId) return
+    const saveSettings = async () => {
+        if (!iggId || !settings) return
+
         setSaving(true)
         try {
             const res = await fetch(`/api/settings/${iggId}`, {
-                method: 'PATCH',
+                method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ path, value }),
+                body: JSON.stringify(settings),
             })
             if (res.ok) {
-                const updatedSettings = { ...settings }
-                setNestedValue(updatedSettings, path, value)
-                setSettings(updatedSettings)
+                toast.success('Settings saved to config')
             } else {
-                toast.error('Failed to save setting')
+                toast.error('Failed to save settings')
             }
         } catch {
-            toast.error('Error saving setting')
+            toast.error('Error saving settings')
         } finally {
             setSaving(false)
         }
     }
 
-    const debouncedSave = useDebounce(saveSetting, 500)
-
     const handleSettingChange = (path: string, value: any) => {
+        if (!settings) return
+
         const updatedSettings = { ...settings }
         setNestedValue(updatedSettings, path, value)
         setSettings(updatedSettings)
-        debouncedSave(path, value)
     }
 
     const renderSectionContent = (tabId: string, isMobile: boolean, isTablet: boolean) => {
@@ -212,9 +209,9 @@ export default function SettingsModal({ isOpen, onClose, iggId }: SettingsModalP
             tabs={TABS}
             loading={loading}
             saving={saving}
-            onSave={onClose}
-            saveLabel="Close"
-            statusLabel={saving ? 'Syncing...' : 'Auto-sync'}
+            onSave={saveSettings}
+            saveLabel="Save Changes"
+            statusLabel={saving ? 'Saving...' : 'Manual save'}
             renderSectionContent={renderSectionContent}
         />
     )

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/authOptions'
 import { prisma } from '@/lib/prisma'
-import { readSettingsFile, writeSettingsFile, updateNestedProperty } from '@/lib/fileSync'
+import { readSettingsFile, updateNestedProperty, writeSettingsFile } from '@/lib/fileSync'
 
 // GET settings for a specific IGG ID
 export async function GET(
@@ -30,7 +30,6 @@ export async function GET(
             return NextResponse.json({ error: 'IGG ID not found or unauthorized' }, { status: 404 })
         }
 
-        // Read settings from JSON file
         const settings = await readSettingsFile(iggId)
 
         return NextResponse.json(settings)
@@ -89,16 +88,13 @@ export async function PATCH(
             return NextResponse.json({ error: 'IGG ID not found or unauthorized' }, { status: 404 })
         }
 
-        // Read current settings
         const settings = await readSettingsFile(iggId)
 
         // Update the nested property
         const updatedSettings = updateNestedProperty(settings, path, value)
 
-        // Write back to file and verify the file changed on disk.
         const sync = await writeSettingsFile(iggId, updatedSettings)
 
-        // Update last sync time
         await prisma.iggId.update({
             where: { id: iggIdRecord.id },
             data: { lastSync: new Date() },
@@ -118,7 +114,7 @@ export async function PATCH(
         return NextResponse.json({
             success: true,
             synced: true,
-            message: 'Setting updated successfully',
+            message: 'Setting saved successfully',
             path,
             value,
             filePath: sync.filePath,
@@ -155,16 +151,23 @@ export async function PUT(
                 iggId,
                 userId: session.user.id,
             },
+            include: {
+                subscription: true,
+            },
         })
 
         if (!iggIdRecord) {
             return NextResponse.json({ error: 'IGG ID not found or unauthorized' }, { status: 404 })
         }
 
-        // Write entire settings object to file and verify the file changed on disk.
+        if (iggIdRecord.subscription?.expiresAt && new Date(iggIdRecord.subscription.expiresAt) < new Date()) {
+            return NextResponse.json({
+                error: 'Subscription expired. Please renew to make changes.'
+            }, { status: 403 })
+        }
+
         const sync = await writeSettingsFile(iggId, settings)
 
-        // Update last sync time
         await prisma.iggId.update({
             where: { id: iggIdRecord.id },
             data: { lastSync: new Date() },

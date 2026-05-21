@@ -20,7 +20,6 @@ import IggIdSelector from '@/components/settings/IggIdSelector'
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch'
 import { TacticalSelect } from '@/components/ui/TacticalSelect'
 import { useSocket } from '@/hooks/useSocket'
-import { useDebounce } from '@/hooks/useDebounce'
 
 interface AuthorizedUser {
     UserID: number
@@ -270,27 +269,9 @@ export default function BankSettingsPage() {
         }
     }
 
-    const saveSetting = async (newSettings: BankSettings) => {
-        if (!selectedIggId) return
-        try {
-            const res = await fetch(`/api/settings/${selectedIggId}/bank`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newSettings)
-            })
-            if (res.ok) {
-                setShowApplyButton(true)
-            }
-        } catch (error) {
-            console.error('Failed to auto-save settings')
-        }
-    }
-
-    const debouncedSave = useDebounce(saveSetting, 500)
-
     const updateSettings = (newSettings: BankSettings) => {
         setSettings(newSettings)
-        debouncedSave(newSettings)
+        setShowApplyButton(false)
     }
 
     const saveSettings = async () => {
@@ -302,7 +283,7 @@ export default function BankSettingsPage() {
                 body: JSON.stringify(settings)
             })
             if (res.ok) {
-                toast.success('Bank settings saved successfully')
+                toast.success('Bank settings saved to config')
                 setShowApplyButton(true)
             } else {
                 toast.error('Failed to save settings')

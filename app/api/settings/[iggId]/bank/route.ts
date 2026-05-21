@@ -43,10 +43,6 @@ const DEFAULT_MANAGE_GUILD_SETTINGS = {
     accountData: [],
 }
 
-type BankAccountData = Record<string, unknown>
-type BankSettingsPayload = Record<string, unknown> & { accountData?: unknown }
-
-
 export async function GET(
     req: Request,
     { params }: { params: { iggId: string } }

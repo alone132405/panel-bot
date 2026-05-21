@@ -8,7 +8,6 @@ import { ModalSummaryGrid } from '@/components/ui/ModalSummaryGrid'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { TacticalSelect } from '@/components/ui/TacticalSelect'
 import { SettingInfoLabel } from '@/components/ui/SettingInfoLabel'
-import { useAutoSaveSettings } from '@/hooks/useAutoSaveSettings'
 
 interface GemsCoinsModalProps {
     isOpen: boolean
@@ -177,6 +176,7 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
 
             if (res.ok) {
                 setSettings(updatedSettings)
+                toast.success('Settings saved to config')
             } else {
                 toast.error('Failed to save settings')
             }
@@ -186,36 +186,6 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
             setSaving(false)
         }
     }
-
-    useAutoSaveSettings(
-        isOpen && !loading && Boolean(iggId && settings),
-        saveSettings,
-        [
-            useGems,
-            buyShield,
-            buyWithdrawSquad,
-            withdrawSquadShield,
-            goldHammer,
-            steelCuffs,
-            soulCrystal,
-            crystalPickaxe,
-            warTome,
-            archaicTome,
-            reduceUpkeep,
-            gemsBuyVIPLevel,
-            useGuildCoins,
-            shield8h,
-            withdrawSquad,
-            gatheringBoost,
-            foodBoost,
-            stoneBoost,
-            woodBoost,
-            oreBoost,
-            goldBoost,
-            guildCoinsBuyVIPLevel,
-            reserveGuildCoins,
-        ]
-    )
 
     const enabledGemItems = [buyShield, buyWithdrawSquad, goldHammer, steelCuffs, soulCrystal, crystalPickaxe, warTome, archaicTome, reduceUpkeep].filter(Boolean).length
     const enabledCoinItems = [shield8h, withdrawSquad, gatheringBoost, foodBoost, stoneBoost, woodBoost, oreBoost, goldBoost].filter(Boolean).length
@@ -261,7 +231,9 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
             iconBg="rgba(16,185,129,0.15)"
             iconBorder="rgba(16,185,129,0.3)"
             saving={saving}
-            statusLabel={saving ? 'Syncing...' : 'Auto-sync. Use Protocol Apply Changes to deploy.'}
+            onSave={saveSettings}
+            saveLabel="Save Changes"
+            statusLabel={saving ? 'Saving...' : 'Manual save. Use Apply Changes to run the script.'}
             maxWidth="860px"
         >
             {loading ? (

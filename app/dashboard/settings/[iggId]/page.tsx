@@ -7,7 +7,7 @@ import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { TacticalSelect } from '@/components/ui/TacticalSelect'
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch'
-import { Settings, Shield, Package, Globe, Sprout, Moon, Ship, Gem, Target, Users, Building, FlaskConical, Swords, ChevronRight, LogOut } from 'lucide-react'
+import { Settings, Shield, Package, Globe, Sprout, Moon, Ship, Gem, Target, Users, Building, FlaskConical, Swords, ChevronRight, LogOut, Save, Loader2 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 
 interface Category {
@@ -42,6 +42,7 @@ export default function SettingsDetailPage() {
     const [settings, setSettings] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
+    const [applying, setApplying] = useState(false)
 
     useEffect(() => {
         if (!session) {
@@ -76,6 +77,54 @@ export default function SettingsDetailPage() {
         }
         current[keys[keys.length - 1]] = value
         setSettings(newSettings)
+    }
+
+    const handleSaveSettings = async () => {
+        if (!iggId || !settings) return
+
+        setSaving(true)
+        try {
+            const res = await fetch(`/api/settings/${iggId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(settings),
+            })
+
+            if (res.ok) {
+                toast.success('Settings saved to config')
+            } else {
+                const data = await res.json().catch(() => null)
+                toast.error(data?.error || 'Failed to save settings')
+            }
+        } catch (error: unknown) {
+            toast.error(error instanceof Error ? error.message : 'Error saving settings')
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    const handleApplyChanges = async () => {
+        if (!iggId) return
+
+        setApplying(true)
+        try {
+            const res = await fetch('/api/automation/apply-changes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ iggId }),
+            })
+            const data = await res.json()
+
+            if (res.ok && data.success) {
+                toast.success('Request sent to queue')
+            } else {
+                toast.error(data.error || 'Failed to apply changes')
+            }
+        } catch (error: unknown) {
+            toast.error(error instanceof Error ? error.message : 'Error applying changes')
+        } finally {
+            setApplying(false)
+        }
     }
 
     const handleLogout = async () => {
@@ -267,22 +316,31 @@ export default function SettingsDetailPage() {
                                 )}
                             </div>
 
-                            {/* Apply Changes Button */}
+                            {/* Save and apply actions */}
                             <div className="mt-8 pt-6 border-t border-white/10">
-                                <div className="flex items-center justify-between">
+                                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                     <div>
-                                        <h3 className="text-sm font-semibold text-white">Apply Changes to Bot</h3>
-                                        <p className="text-xs text-gray-400 mt-1">Click to apply all saved settings to the running bot</p>
+                                        <h3 className="text-sm font-semibold text-white">Save Config, Then Apply</h3>
+                                        <p className="text-xs text-gray-400 mt-1">Save writes config files. Apply Changes runs the script.</p>
                                     </div>
-                                    <button
-                                        onClick={() => {
-                                            // Functionality to be implemented later
-                                            toast.info('Apply Changes functionality will be implemented soon')
-                                        }}
-                                        className="px-8 py-3 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors shadow-lg hover:shadow-blue-500/50"
-                                    >
-                                        Apply Changes
-                                    </button>
+                                    <div className="flex flex-col gap-2 sm:flex-row">
+                                        <button
+                                            onClick={() => void handleSaveSettings()}
+                                            disabled={saving || applying}
+                                            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-blue-500 px-6 py-3 font-medium text-white shadow-lg transition-colors hover:bg-blue-600 hover:shadow-blue-500/50 disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                                            {saving ? 'Saving...' : 'Save Changes'}
+                                        </button>
+                                        <button
+                                            onClick={() => void handleApplyChanges()}
+                                            disabled={saving || applying}
+                                            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/10 px-6 py-3 font-medium text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            {applying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Settings className="h-4 w-4" />}
+                                            {applying ? 'Applying...' : 'Apply Changes'}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

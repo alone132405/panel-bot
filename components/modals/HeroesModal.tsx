@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { Gem, HeartPulse, ShieldCheck, Sparkles, Swords, Trophy, Users2, type LucideIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { ChoiceControl, ResponsiveModalShell, StepperControl, TabDef, ToggleControl } from '@/components/ui/ResponsiveModalShell'
-import { useAutoSaveSettings } from '@/hooks/useAutoSaveSettings'
 
 interface HeroesModalProps {
     isOpen: boolean
@@ -315,6 +314,7 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
 
             if (res.ok) {
                 setFullSettings(updatedSettings)
+                toast.success('Settings saved to config')
             } else {
                 toast.error('Failed to save settings')
             }
@@ -324,39 +324,6 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
             setSaving(false)
         }
     }
-
-    useAutoSaveSettings(
-        isOpen && !loading && Boolean(iggId && fullSettings),
-        saveSettings,
-        [
-            hireNewHeroes,
-            enhanceHeroes,
-            useHeroExpItems,
-            upgradeHeroes,
-            reviveDeadLeader,
-            autoAttackHeroStages,
-            useBraveheartItems,
-            heroesToUse,
-            chapterMode,
-            stageType,
-            customChapter,
-            chapterNumber,
-            attackAllStages,
-            stagePoint,
-            sweepStage,
-            tenxSweep,
-            usePriorityMode,
-            autoAttackColosseum,
-            attackGuildMembers,
-            collectArenaGems,
-            buyExtraAttempts,
-            attemptsToBuy,
-            winChanceMin,
-            winChanceMax,
-            colosseumHeroesToUse,
-            defendersToUse,
-        ]
-    )
 
     const handleChapterChange = (value: string) => {
         setChapterNumber(value)
@@ -610,8 +577,9 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
             tabs={iggId ? TABS : NO_ID_TABS}
             loading={loading}
             saving={saving}
-            saveLabel="Close"
-            statusLabel={saving ? 'Syncing...' : 'Auto-sync'}
+            onSave={saveSettings}
+            saveLabel="Save Changes"
+            statusLabel={saving ? 'Saving...' : 'Manual save'}
             renderSectionContent={renderSectionContent}
             maxWidth="980px"
         />

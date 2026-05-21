@@ -8,7 +8,6 @@ import { ModalSummaryGrid } from '@/components/ui/ModalSummaryGrid'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { TacticalSelect } from '@/components/ui/TacticalSelect'
 import { SettingInfoLabel } from '@/components/ui/SettingInfoLabel'
-import { useAutoSaveSettings } from '@/hooks/useAutoSaveSettings'
 
 interface GearsModalProps {
     isOpen: boolean
@@ -103,6 +102,7 @@ export default function GearsModal({ isOpen, onClose, iggId }: GearsModalProps) 
 
             if (res.ok) {
                 setFullSettings(updatedSettings)
+                toast.success('Settings saved to config')
             } else {
                 toast.error('Failed to save settings')
             }
@@ -112,12 +112,6 @@ export default function GearsModal({ isOpen, onClose, iggId }: GearsModalProps) 
             setSaving(false)
         }
     }
-
-    useAutoSaveSettings(
-        isOpen && !loading && Boolean(iggId && fullSettings),
-        saveSettings,
-        [autoSwitchGear, idleGearTime, idleGearSet]
-    )
 
     const idleGearLabel = idleGearOptions.find((option) => option.value === idleGearSet)?.label || 'None'
 
@@ -149,7 +143,9 @@ export default function GearsModal({ isOpen, onClose, iggId }: GearsModalProps) 
             iconBg="rgba(100,116,139,0.15)"
             iconBorder="rgba(100,116,139,0.3)"
             saving={saving}
-            statusLabel={saving ? 'Syncing...' : 'Auto-sync. Use Protocol Apply Changes to deploy.'}
+            onSave={saveSettings}
+            saveLabel="Save Changes"
+            statusLabel={saving ? 'Saving...' : 'Manual save. Use Apply Changes to run the script.'}
             maxWidth="860px"
         >
             {loading ? (

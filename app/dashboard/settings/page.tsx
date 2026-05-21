@@ -426,7 +426,7 @@ export default function SettingsPage() {
                     <div>
                         <h3 className="font-orbitron text-[14px] font-bold text-text-primary mb-2 tracking-wide">SYSTEM TIP</h3>
                         <p className="font-sans text-text-muted text-[13px] leading-relaxed">
-                            Select a protocol module below to configure its parameters. Modifying these values updates the central automation core in real-time.
+                            Select a protocol module below to configure its parameters. Use each modal Save button to write config files; Apply Changes only runs the script.
                         </p>
                     </div>
                 </div>

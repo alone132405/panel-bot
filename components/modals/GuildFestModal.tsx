@@ -8,7 +8,6 @@ import { ModalSummaryGrid } from '@/components/ui/ModalSummaryGrid'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { TacticalSelect } from '@/components/ui/TacticalSelect'
 import { SettingInfoLabel } from '@/components/ui/SettingInfoLabel'
-import { useAutoSaveSettings } from '@/hooks/useAutoSaveSettings'
 
 interface GuildFestModalProps {
     isOpen: boolean
@@ -241,6 +240,7 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
 
             if (res.ok) {
                 setSettings(updatedSettings)
+                toast.success('Settings saved to config')
             } else {
                 toast.error('Failed to save settings')
             }
@@ -388,12 +388,6 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
 
     const enabledCount = missions.filter((mission) => getMissionState(mission).checked).length
 
-    useAutoSaveSettings(
-        isOpen && !loading && Boolean(iggId && settings),
-        handleSave,
-        [collectRewards, completeMissions, buyExtraMission, mailPlayer, itemToBuyNum, missions]
-    )
-
     return (
         <KonohaModal
             isOpen={isOpen}
@@ -405,7 +399,9 @@ export default function GuildFestModal({ isOpen, onClose, iggId }: GuildFestModa
             iconBg="rgba(255,189,74,0.14)"
             iconBorder="rgba(255,189,74,0.30)"
             saving={saving}
-            statusLabel={saving ? 'Syncing...' : 'Auto-sync. Use Protocol Apply Changes to deploy.'}
+            onSave={handleSave}
+            saveLabel="Save Changes"
+            statusLabel={saving ? 'Saving...' : 'Manual save. Use Apply Changes to run the script.'}
             maxWidth="980px"
         >
             {loading ? (

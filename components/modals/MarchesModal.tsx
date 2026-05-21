@@ -9,7 +9,6 @@ import { Checkbox } from '@/components/ui/Checkbox'
 import { TacticalRadioGroup } from '@/components/ui/TacticalRadioGroup'
 import { TacticalSelect } from '@/components/ui/TacticalSelect'
 import { SettingInfoLabel } from '@/components/ui/SettingInfoLabel'
-import { useAutoSaveSettings } from '@/hooks/useAutoSaveSettings'
 
 interface MarchesModalProps {
     isOpen: boolean
@@ -168,6 +167,7 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
 
             if (res.ok) {
                 setFullSettings(updatedSettings)
+                toast.success('Settings saved to config')
             } else {
                 toast.error('Failed to save settings')
             }
@@ -177,30 +177,6 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
             setSaving(false)
         }
     }
-
-    useAutoSaveSettings(
-        isOpen && !loading && Boolean(iggId && fullSettings),
-        saveSettings,
-        [
-            joinRallies,
-            rallyLimit,
-            maxTravelTime,
-            darkestLevels,
-            dontJoinIfLabFull,
-            dontFillRally,
-            dontSendSiege,
-            dontSendT5,
-            sendOneType,
-            addBuffers,
-            maxRallyTime,
-            leaveExtraSpace,
-            timeToWait,
-            rallyTroopType,
-            transmuteDarkEssences,
-            keepOneSlotFree,
-            deleteEssencesLowerThan,
-        ]
-    )
 
     const enabledDarknestLevels = Object.values(darkestLevels).filter(Boolean).length
 
@@ -232,7 +208,9 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
             iconBg="rgba(239,68,68,0.15)"
             iconBorder="rgba(239,68,68,0.3)"
             saving={saving}
-            statusLabel={saving ? 'Syncing...' : 'Auto-sync. Use Protocol Apply Changes to deploy.'}
+            onSave={saveSettings}
+            saveLabel="Save Changes"
+            statusLabel={saving ? 'Saving...' : 'Manual save. Use Apply Changes to run the script.'}
             maxWidth="980px"
         >
             {loading ? (

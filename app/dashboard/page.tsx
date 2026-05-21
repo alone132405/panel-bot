@@ -151,7 +151,7 @@ export default function DashboardPage() {
                         </div>
                         <div className="absolute right-[20px] top-[140px] rounded-lg border border-accent-cyan/20 bg-bg-surface px-4 py-3 animate-[float_4s_ease-in-out_infinite_1s]">
                             <span className="flex items-center gap-2 font-sans text-sm font-medium text-text-primary">
-                                <Database className="h-4 w-4 text-accent-cyan" /> Sync: <span className="text-accent-1">Live</span>
+                                <Database className="h-4 w-4 text-accent-cyan" /> Sync: <span className="text-accent-1">Manual</span>
                             </span>
                         </div>
                     </div>

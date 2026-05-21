@@ -49,7 +49,7 @@ export default function LoginPage() {
     const featurePills = [
         { icon: Terminal, text: 'Control center', meta: 'Configuration matrix', color: 'text-accent-1', bg: 'bg-accent-1/10', border: 'border-accent-1/20' },
         { icon: Shield, text: 'Protected access', meta: 'Admin approval flow', color: 'text-accent-2', bg: 'bg-accent-2/10', border: 'border-accent-2/20' },
-        { icon: Radio, text: 'Live sync', meta: 'Backend APIs preserved', color: 'text-accent-cyan', bg: 'bg-accent-cyan/10', border: 'border-accent-cyan/20' },
+        { icon: Radio, text: 'Manual save', meta: 'Save config, then apply', color: 'text-accent-cyan', bg: 'bg-accent-cyan/10', border: 'border-accent-cyan/20' },
     ]
 
     return (
@@ -113,7 +113,7 @@ export default function LoginPage() {
                 </div>
 
                 <div className="grid grid-cols-3 gap-3 text-center">
-                    {['API READY', 'JSON SYNC', 'SECURE'].map((item) => (
+                    {['API READY', 'MANUAL SYNC', 'SECURE'].map((item) => (
                         <div key={item} className="rounded-lg border border-border bg-white/[0.03] px-3 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-text-muted">
                             {item}
                         </div>

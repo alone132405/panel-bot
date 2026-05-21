@@ -9,7 +9,6 @@ import { Checkbox } from '@/components/ui/Checkbox'
 import { TacticalSelect } from '@/components/ui/TacticalSelect'
 import { SettingInfoLabel } from '@/components/ui/SettingInfoLabel'
 import { SettingHelpButton } from '@/components/ui/ResponsiveModalShell'
-import { useAutoSaveSettings } from '@/hooks/useAutoSaveSettings'
 
 interface ConstructionModalProps {
     isOpen: boolean
@@ -249,6 +248,7 @@ export default function ConstructionModal({ isOpen, onClose, iggId }: Constructi
 
             if (res.ok) {
                 setSettings(updatedSettings)
+                toast.success('Settings saved to config')
             } else {
                 toast.error('Failed to save settings')
             }
@@ -258,27 +258,6 @@ export default function ConstructionModal({ isOpen, onClose, iggId }: Constructi
             setSaving(false)
         }
     }
-
-    useAutoSaveSettings(
-        isOpen && !loading && Boolean(iggId && settings),
-        saveSettings,
-        [
-            autoBuild,
-            upgrade,
-            lowestLevelFirst,
-            ignoreSpamTarget,
-            autoRentSecondQueue,
-            secondQueueSpamOnly,
-            spamTargetType,
-            spamTargetBuilding,
-            buildingPriority,
-            strict,
-            maxBuildingLevel,
-            resourceTargets,
-            militaryTargets,
-            familiarTargets,
-        ]
-    )
 
     const toggleOptions = [
         { label: 'Auto Build', value: autoBuild, setter: setAutoBuild },
@@ -301,7 +280,9 @@ export default function ConstructionModal({ isOpen, onClose, iggId }: Constructi
             iconBg="rgba(251,146,60,0.14)"
             iconBorder="rgba(251,146,60,0.30)"
             saving={saving}
-            statusLabel={saving ? 'Syncing...' : 'Auto-sync. Use Protocol Apply Changes to deploy.'}
+            onSave={saveSettings}
+            saveLabel="Save Changes"
+            statusLabel={saving ? 'Saving...' : 'Manual save. Use Apply Changes to run the script.'}
             maxWidth="1120px"
         >
             {loading ? (

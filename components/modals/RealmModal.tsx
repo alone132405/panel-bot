@@ -7,7 +7,6 @@ import KonohaModal from './KonohaModal'
 import { ModalSummaryGrid } from '@/components/ui/ModalSummaryGrid'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { SettingInfoLabel } from '@/components/ui/SettingInfoLabel'
-import { useAutoSaveSettings } from '@/hooks/useAutoSaveSettings'
 
 interface RealmModalProps {
     isOpen: boolean
@@ -131,6 +130,7 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
 
             if (res.ok) {
                 setFullSettings(updatedSettings)
+                toast.success('Settings saved to config')
             } else {
                 toast.error('Failed to save settings')
             }
@@ -140,28 +140,6 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
             setSaving(false)
         }
     }
-
-    useAutoSaveSettings(
-        isOpen && !loading && Boolean(iggId && fullSettings),
-        saveSettings,
-        [
-            gatherResources,
-            maxArmies,
-            leaveSpareArmy,
-            spareArmyAmount,
-            useHighTierTroops,
-            gatherFood,
-            gatherStone,
-            gatherWood,
-            gatherOre,
-            gatherGold,
-            gatherLunite,
-            huntMonsters,
-            useEnergyItems,
-            killsPerDay,
-            monsterLevel,
-        ]
-    )
 
     const selectedResourceCount = [gatherFood, gatherStone, gatherWood, gatherOre, gatherGold, gatherLunite].filter(Boolean).length
 
@@ -193,7 +171,9 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
             iconBg="rgba(139,92,246,0.15)"
             iconBorder="rgba(139,92,246,0.3)"
             saving={saving}
-            statusLabel={saving ? 'Syncing...' : 'Auto-sync. Use Protocol Apply Changes to deploy.'}
+            onSave={saveSettings}
+            saveLabel="Save Changes"
+            statusLabel={saving ? 'Saving...' : 'Manual save. Use Apply Changes to run the script.'}
             maxWidth="980px"
         >
             {loading ? (

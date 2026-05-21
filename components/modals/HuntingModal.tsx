@@ -8,7 +8,6 @@ import { ModalSummaryGrid } from '@/components/ui/ModalSummaryGrid'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { TacticalSelect } from '@/components/ui/TacticalSelect'
 import { SettingInfoLabel } from '@/components/ui/SettingInfoLabel'
-import { useAutoSaveSettings } from '@/hooks/useAutoSaveSettings'
 
 interface HuntingModalProps {
     isOpen: boolean
@@ -151,6 +150,7 @@ export default function HuntingModal({ isOpen, onClose, iggId }: HuntingModalPro
 
             if (res.ok) {
                 setSettings(updatedSettings)
+                toast.success('Settings saved to config')
             } else {
                 toast.error('Failed to save settings')
             }
@@ -160,34 +160,6 @@ export default function HuntingModal({ isOpen, onClose, iggId }: HuntingModalPro
             setSaving(false)
         }
     }
-
-    useAutoSaveSettings(
-        isOpen && !loading && Boolean(iggId && settings),
-        saveSettings,
-        [
-            huntMonsters,
-            maxTravelTime,
-            sendingDelay,
-            useEnergyItems,
-            useWingedBoots,
-            sendUnfinishedToGuildChat,
-            avoidConflict,
-            alsoAvoidGuild,
-            useSaberfangSkill,
-            huntPriority,
-            huntLevel1,
-            huntLevel2,
-            huntLevel3,
-            huntLevel4,
-            huntLevel5,
-            huntMagicPhysical,
-            huntHighMDEF,
-            huntHighPDEF,
-            startHuntWhenEnergy,
-            useComboPrediction,
-            stopAfterOneKill,
-        ]
-    )
 
     const enabledLevels = [huntLevel1, huntLevel2, huntLevel3, huntLevel4, huntLevel5].filter(Boolean).length
 
@@ -219,7 +191,9 @@ export default function HuntingModal({ isOpen, onClose, iggId }: HuntingModalPro
             iconBg="rgba(249,115,22,0.15)"
             iconBorder="rgba(249,115,22,0.3)"
             saving={saving}
-            statusLabel={saving ? 'Syncing...' : 'Auto-sync. Use Protocol Apply Changes to deploy.'}
+            onSave={saveSettings}
+            saveLabel="Save Changes"
+            statusLabel={saving ? 'Saving...' : 'Manual save. Use Apply Changes to run the script.'}
             maxWidth="860px"
         >
             {loading ? (

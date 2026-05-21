@@ -1,9 +1,8 @@
 'use client'
 
 import { type ReactNode, useCallback, useEffect, useState } from 'react'
-import { BarChart3, Check, ChevronRight, Clock3, Loader2, SlidersHorizontal, TimerReset, X, type LucideIcon } from 'lucide-react'
+import { BarChart3, ChevronRight, Clock3, Loader2, Save, SlidersHorizontal, TimerReset, X, type LucideIcon } from 'lucide-react'
 import { toast } from 'sonner'
-import { useDebounce } from '@/hooks/useDebounce'
 import { getNestedValue, setNestedValue } from '@/lib/settingsMapper'
 import { SettingHelpButton } from '@/components/ui/ResponsiveModalShell'
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch'
@@ -97,29 +96,6 @@ export default function ReportSettingsPanel({ iggId }: ReportSettingsPanelProps)
         setIsStatisticSettingsOpen(false)
     }, [iggId])
 
-    const saveSetting = async (path: string, value: unknown) => {
-        setSaving(true)
-        try {
-            const res = await fetch(`/api/settings/${iggId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ path, value }),
-            })
-
-            if (res.ok) {
-                const updatedSettings = { ...(settings || {}) }
-                setNestedValue(updatedSettings, path, value)
-                setSettings(updatedSettings)
-            } else {
-                toast.error('Failed to save report setting')
-            }
-        } catch {
-            toast.error('Error saving report setting')
-        } finally {
-            setSaving(false)
-        }
-    }
-
     const saveSettingsObject = async (nextSettings: Record<string, unknown>) => {
         setSaving(true)
         try {
@@ -131,6 +107,7 @@ export default function ReportSettingsPanel({ iggId }: ReportSettingsPanelProps)
 
             if (res.ok) {
                 setSettings(nextSettings)
+                toast.success('Report settings saved to config')
                 return true
             }
 
@@ -144,13 +121,15 @@ export default function ReportSettingsPanel({ iggId }: ReportSettingsPanelProps)
         }
     }
 
-    const debouncedSave = useDebounce(saveSetting, 500)
+    const saveCurrentSettings = async () => {
+        if (!settings) return
+        await saveSettingsObject(cloneSettings(settings))
+    }
 
     const handleToggleChange = (path: string, value: boolean) => {
-        const updatedSettings = { ...(settings || {}) }
+        const updatedSettings = cloneSettings(settings)
         setNestedValue(updatedSettings, path, value)
         setSettings(updatedSettings)
-        debouncedSave(path, value)
     }
 
     const handleResetTimeApply = async (draft: ResetTimeDraft) => {
@@ -192,12 +171,23 @@ export default function ReportSettingsPanel({ iggId }: ReportSettingsPanelProps)
                         </div>
                         <div className="min-w-0">
                             <h2 className="text-[15px] font-bold text-text-primary">Report Settings</h2>
-                            <p className="text-[12px] text-text-muted">{saving ? 'Syncing settings to JSON' : 'Controls exported stats and reset timing'}</p>
+                            <p className="text-[12px] text-text-muted">{saving ? 'Saving settings to config' : 'Controls exported stats and reset timing'}</p>
                         </div>
                     </div>
-                    <span className="w-fit rounded-full border border-accent-1/20 bg-accent-1/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-accent-1 sm:text-[11px]">
-                        {enabledCount} Enabled
-                    </span>
+                    <div className="flex flex-wrap items-center gap-2">
+                        <span className="w-fit rounded-full border border-accent-1/20 bg-accent-1/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-accent-1 sm:text-[11px]">
+                            {enabledCount} Enabled
+                        </span>
+                        <button
+                            type="button"
+                            onClick={() => void saveCurrentSettings()}
+                            disabled={loading || saving || !settings}
+                            className="btn-primary min-h-[34px] gap-2 px-3 text-[12px] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                            {saving ? 'Saving...' : 'Save'}
+                        </button>
+                    </div>
                 </div>
 
                 {loading ? (
@@ -440,8 +430,8 @@ function ResetTimeDialog({
                         }}
                         className="btn-primary min-h-[42px] touch-manipulation gap-2 px-5 text-[13px] disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        <Check className="h-4 w-4" />
-                        OK
+                        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                        {saving ? 'Saving...' : 'Save'}
                     </button>
                 </>
             }
@@ -579,8 +569,8 @@ function StatisticSettingsDialog({
                         }}
                         className="btn-primary min-h-[42px] touch-manipulation gap-2 px-5 text-[13px] disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        <Check className="h-4 w-4" />
-                        OK
+                        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                        {saving ? 'Saving...' : 'Save'}
                     </button>
                 </>
             }

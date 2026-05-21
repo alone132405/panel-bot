@@ -58,7 +58,7 @@ export function ResponsiveModalShell({
     saving = false,
     onSave,
     saveLabel = 'Close',
-    statusLabel = 'Auto-sync to JSON',
+    statusLabel = 'Manual save to config',
     renderSectionContent,
     maxWidth = '940px',
 }: ResponsiveModalShellProps) {
@@ -163,7 +163,7 @@ export function ResponsiveModalShell({
                                 <div className="flex shrink-0 items-center gap-3">
                                     {!isMobile && (
                                         <span className="status-active text-[11px]">
-                                            {saving ? 'Syncing' : isManualSave ? 'Manual save' : 'Auto-sync'}
+                                            {saving ? 'Saving' : 'Manual save'}
                                         </span>
                                     )}
                                     <button
@@ -339,13 +339,13 @@ export function ResponsiveModalShell({
                                     </button>
                                 ) : (
                                     <div className="truncate text-center text-[11px] text-text-muted">
-                                        {saving ? 'Syncing settings to JSON...' : `${statusLabel}. Apply from Protocols when ready.`}
+                                        {saving ? 'Saving settings to config...' : `${statusLabel}. Apply from Protocols when ready.`}
                                     </div>
                                 )
                             ) : (
                                 <>
                                     <div className="text-[12px] text-text-muted">
-                                        {saving ? 'Syncing settings to JSON...' : `${statusLabel}. Use Protocol Apply Changes to deploy.`}
+                                        {saving ? 'Saving settings to config...' : `${statusLabel}. Use Protocol Apply Changes to run the script.`}
                                     </div>
                                     {isManualSave && (
                                         <button

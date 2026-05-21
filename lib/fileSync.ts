@@ -31,8 +31,7 @@ export function getReportsExportPath(iggId: string): string {
     return path.join(getConfigRoot(), iggId, 'stats', 'exported')
 }
 
-async function writeJsonConfigFile(iggId: string, fileName: string, settings: any): Promise<ConfigWriteResult> {
-    const filePath = getConfigFilePath(iggId, fileName)
+async function writeJsonFile(filePath: string, settings: any): Promise<ConfigWriteResult> {
     await fs.mkdir(path.dirname(filePath), { recursive: true })
     await fs.writeFile(filePath, JSON.stringify(settings, null, 2), 'utf-8')
 
@@ -48,27 +47,29 @@ async function writeJsonConfigFile(iggId: string, fileName: string, settings: an
         bytes: stat.size,
         mtime: stat.mtime.toISOString(),
     }
-    // console.log(`[config-sync] wrote ${fileName} for ${iggId} -> ${filePath} (${result.bytes} bytes)`)
     return result
+}
+
+async function writeJsonConfigFile(iggId: string, fileName: string, settings: any): Promise<ConfigWriteResult> {
+    return writeJsonFile(getConfigFilePath(iggId, fileName), settings)
+}
+
+async function readJsonFile(filePath: string): Promise<any> {
+    const content = await fs.readFile(filePath, 'utf-8')
+    return JSON.parse(content)
 }
 
 // File system operations
 export async function readSettingsFile(iggId: string): Promise<any> {
-    const filePath = getConfigFilePath(iggId, 'settings.json')
-    const content = await fs.readFile(filePath, 'utf-8')
-    return JSON.parse(content)
+    return readJsonFile(getConfigFilePath(iggId, 'settings.json'))
 }
 
 export async function readBankSettingsFile(iggId: string): Promise<any> {
-    const filePath = getConfigFilePath(iggId, 'banksettings.json')
-    const content = await fs.readFile(filePath, 'utf-8')
-    return JSON.parse(content)
+    return readJsonFile(getConfigFilePath(iggId, 'banksettings.json'))
 }
 
 export async function readManageGuildSettingsFile(iggId: string): Promise<any> {
-    const filePath = getConfigFilePath(iggId, 'manageGuild.json')
-    const content = await fs.readFile(filePath, 'utf-8')
-    return JSON.parse(content)
+    return readJsonFile(getConfigFilePath(iggId, 'manageGuild.json'))
 }
 
 export async function writeSettingsFile(iggId: string, settings: any): Promise<ConfigWriteResult> {

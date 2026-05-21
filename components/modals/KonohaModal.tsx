@@ -35,7 +35,7 @@ export default function KonohaModal({
     saving = false,
     onSave,
     saveLabel = 'Save',
-    statusLabel = 'Auto-saving. Use Protocol Apply Changes to deploy.',
+    statusLabel = 'Manual save. Use Protocol Apply Changes to run the script.',
     children,
     maxWidth = '860px',
 }: KonohaModalProps) {
@@ -47,7 +47,7 @@ export default function KonohaModal({
         exit: { opacity: 0, scale: 0.96, y: 14 },
         transition: { duration: 0.2, ease: 'easeOut' as const },
     }
-    const syncLabel = saving ? 'Syncing' : onSave ? 'Manual save' : 'Auto-sync'
+    const syncLabel = saving ? 'Saving' : 'Manual save'
 
     if (!iggId) {
         const noIggModal = (
@@ -148,7 +148,7 @@ export default function KonohaModal({
 
                             <div className="flex flex-col gap-3 border-t border-border bg-bg-elevated/55 px-5 py-4 sm:flex-row sm:items-center sm:justify-between md:px-6">
                                 <div className="text-center text-[12px] text-text-muted sm:text-left">
-                                    {saving ? 'Syncing settings...' : statusLabel}
+                                    {saving ? 'Saving settings to config...' : statusLabel}
                                 </div>
                                 {onSave && (
                                     <div className="flex w-full items-center gap-3 sm:w-auto">
@@ -159,7 +159,7 @@ export default function KonohaModal({
                                             className="btn-primary flex-1 gap-2 px-5 text-[13px] disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
                                         >
                                             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                                            {saveLabel}
+                                            {saving ? 'Saving...' : saveLabel}
                                         </button>
                                     </div>
                                 )}

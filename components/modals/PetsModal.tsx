@@ -7,7 +7,6 @@ import KonohaModal from './KonohaModal'
 import { ModalSummaryGrid } from '@/components/ui/ModalSummaryGrid'
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch'
 import { SettingInfoLabel } from '@/components/ui/SettingInfoLabel'
-import { useAutoSaveSettings } from '@/hooks/useAutoSaveSettings'
 
 interface PetsModalProps {
     isOpen: boolean
@@ -205,6 +204,7 @@ export default function PetsModal({ isOpen, onClose, iggId }: PetsModalProps) {
 
             if (res.ok) {
                 setFullSettings(updatedSettings)
+                toast.success('Settings saved to config')
             } else {
                 toast.error('Failed to save settings')
             }
@@ -240,12 +240,6 @@ export default function PetsModal({ isOpen, onClose, iggId }: PetsModalProps) {
         return name.toLowerCase().includes(searchQuery.toLowerCase())
     })
 
-    useAutoSaveSettings(
-        isOpen && !loading && Boolean(iggId && fullSettings),
-        saveSettings,
-        [pactSettings, familiarData]
-    )
-
     const unlockedFamiliars = familiarData.filter((pet) => pet.petUnlocked).length
     const trainingEnabled = familiarData.filter((pet) => pet.allowTraining || pet.allowSkillTraining || pet.allowEnhance || pet.upgradeSkills).length
 
@@ -277,7 +271,9 @@ export default function PetsModal({ isOpen, onClose, iggId }: PetsModalProps) {
             iconBg="rgba(236,72,153,0.15)"
             iconBorder="rgba(236,72,153,0.3)"
             saving={saving}
-            statusLabel={saving ? 'Syncing...' : 'Auto-sync. Use Protocol Apply Changes to deploy.'}
+            onSave={saveSettings}
+            saveLabel="Save Changes"
+            statusLabel={saving ? 'Saving...' : 'Manual save. Use Apply Changes to run the script.'}
             maxWidth="860px"
         >
             {loading ? (
