@@ -115,21 +115,21 @@ class AutomationQueue {
         // console.log('Running automation for IGG ID:', iggId)
 
         // Coordinates
-        const SEARCH_ICON_X = 1263
-        const SEARCH_ICON_Y = 144
-        const SEARCH_FIELD_X = 1091
-        const SEARCH_FIELD_Y = 144
-        const FIRST_RESULT_X = 355
-        const FIRST_RESULT_Y = 216
-        const CLOSE_SIGN_X = 682
-        const CLOSE_SIGN_Y = 637
-        const OUTSIDE_POPUP_X = 1023
-        const OUTSIDE_POPUP_Y = 144
+        const SEARCH_ICON_X = 1266
+        const SEARCH_ICON_Y = 142
+        const SEARCH_FIELD_X = 1086
+        const SEARCH_FIELD_Y = 145
+        const FIRST_RESULT_X = 307
+        const FIRST_RESULT_Y = 217
+        const CLOSE_SIGN_X = 241
+        const CLOSE_SIGN_Y = 563
+        const OUTSIDE_POPUP_X = 1018
+        const OUTSIDE_POPUP_Y = 149
 
-        const POPUP_FUNCTIONS_X = 159
-        const POPUP_FUNCTIONS_Y = 60
-        const POPUP_RELOAD_X = 180
-        const POPUP_RELOAD_Y = 111
+        const POPUP_FUNCTIONS_X = 167
+        const POPUP_FUNCTIONS_Y = 51
+        const POPUP_RELOAD_X = 69
+        const POPUP_RELOAD_Y = 112
         const MAIN_REQUIRED_X = Math.max(SEARCH_ICON_X, SEARCH_FIELD_X, FIRST_RESULT_X, OUTSIDE_POPUP_X)
         const MAIN_REQUIRED_Y = Math.max(SEARCH_ICON_Y, SEARCH_FIELD_Y, FIRST_RESULT_Y, OUTSIDE_POPUP_Y)
         const POPUP_REQUIRED_X = Math.max(POPUP_FUNCTIONS_X, POPUP_RELOAD_X, CLOSE_SIGN_X)
