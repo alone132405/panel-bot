@@ -132,8 +132,8 @@ class AutomationQueue {
         const POPUP_RELOAD_Y = 112
         const MAIN_REQUIRED_X = Math.max(SEARCH_ICON_X, SEARCH_FIELD_X, FIRST_RESULT_X, OUTSIDE_POPUP_X)
         const MAIN_REQUIRED_Y = Math.max(SEARCH_ICON_Y, SEARCH_FIELD_Y, FIRST_RESULT_Y, OUTSIDE_POPUP_Y)
-        const POPUP_REQUIRED_X = Math.max(POPUP_FUNCTIONS_X, POPUP_RELOAD_X, CLOSE_SIGN_X)
-        const POPUP_REQUIRED_Y = Math.max(POPUP_FUNCTIONS_Y, POPUP_RELOAD_Y, CLOSE_SIGN_Y)
+        const POPUP_REQUIRED_X = Math.max(POPUP_FUNCTIONS_X, POPUP_RELOAD_X)
+        const POPUP_REQUIRED_Y = Math.max(POPUP_FUNCTIONS_Y, POPUP_RELOAD_Y)
         const MIN_WINDOW_WIDTH = 1024
         const MIN_DESKTOP_HEIGHT = 640
 
@@ -288,6 +288,20 @@ function Get-WindowBase($hwnd) {
 
 function Write-WindowBase($base, $label) {
     Write-Output "$label Window at: ($($base.X), $($base.Y))"
+}
+
+function Get-ClampedPoint($base, $relativeX, $relativeY, $margin) {
+    $windowWidth = $base.Rect.Right - $base.Rect.Left
+    $windowHeight = $base.Rect.Bottom - $base.Rect.Top
+    $safeX = [Math]::Min([Math]::Max($relativeX, $margin), $windowWidth - $margin)
+    $safeY = [Math]::Min([Math]::Max($relativeY, $margin), $windowHeight - $margin)
+
+    return [PSCustomObject]@{
+        X = $base.X + $safeX
+        Y = $base.Y + $safeY
+        RelativeX = $safeX
+        RelativeY = $safeY
+    }
 }
 
 function Move-WindowTopLeft($hwnd, $label) {
@@ -498,9 +512,10 @@ ForceForeground $popupHwnd
 Start-Sleep -Milliseconds 300
 $popupBase = Get-WindowBase $popupHwnd
 Write-WindowBase $popupBase "Popup"
-$closeX = $popupBase.X + ${CLOSE_SIGN_X}
-$closeY = $popupBase.Y + ${CLOSE_SIGN_Y}
-Write-Output "Step 8: Click close sign at ($closeX, $closeY)"
+$closePoint = Get-ClampedPoint $popupBase ${CLOSE_SIGN_X} ${CLOSE_SIGN_Y} 8
+$closeX = $closePoint.X
+$closeY = $closePoint.Y
+Write-Output "Step 8: Click close sign at ($closeX, $closeY), relative ($($closePoint.RelativeX), $($closePoint.RelativeY))"
 Click $closeX $closeY
 Start-Sleep -Seconds 1
 
