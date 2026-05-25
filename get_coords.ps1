@@ -82,23 +82,32 @@ Write-Host "Window Size: $($windowRect.Right - $windowRect.Left) x $($windowRect
 Write-Host ""
 Write-Host "=============================================="
 Write-Host "CONTROLS:"
-Write-Host "  SPACE  = Capture coordinate"
+Write-Host "  SPACE  = Capture next named coordinate"
 Write-Host "  R      = Set reference point (for popup)"
 Write-Host "  ESC    = Exit"
 Write-Host ""
 Write-Host "Recommended capture order:"
 Write-Host "  Main window: SEARCH_ICON, SEARCH_FIELD, FIRST_RESULT, OUTSIDE_POPUP"
 Write-Host "  Popup: press R on popup top-left, then capture POPUP_FUNCTIONS, POPUP_RELOAD, CLOSE_SIGN"
+Write-Host ""
+Write-Host "Important: do not send Screen values. Send only the final NAME=x,y block."
 Write-Host "=============================================="
 Write-Host ""
 
 $captured = @()
 $referencePoint = $null
+$mainLabels = @("SEARCH_ICON", "SEARCH_FIELD", "FIRST_RESULT", "OUTSIDE_POPUP")
+$popupLabels = @("POPUP_FUNCTIONS", "POPUP_RELOAD", "CLOSE_SIGN")
+$mainCaptureIndex = 0
+$popupCaptureIndex = 0
 
 while ($true) {
     # Get current mouse position
     $point = New-Object Win32Helper+POINT
     [Win32Helper]::GetCursorPos([ref]$point) | Out-Null
+
+    # Refresh the bot window position each loop so main-relative coordinates remain valid.
+    [Win32Helper]::GetWindowRect($hwnd, [ref]$windowRect) | Out-Null
     
     # Calculate relative to main window
     $relX = $point.X - $windowRect.Left
@@ -113,9 +122,9 @@ while ($true) {
     }
     
     # Display
-    $display = "Screen: ($($point.X), $($point.Y)) | Relative to Window: ($relX, $relY)"
+    $display = "DO NOT SEND Screen: ($($point.X), $($point.Y)) | Main relative: ($relX, $relY)"
     if ($referencePoint) {
-        $display += " | Relative to Ref: ($refRelX, $refRelY)"
+        $display += " | Popup relative: ($refRelX, $refRelY)"
     }
     Write-Host "`r$display          " -NoNewline
     
@@ -124,7 +133,33 @@ while ($true) {
         $key = [System.Console]::ReadKey($true)
         
         if ($key.Key -eq "Spacebar") {
+            if ($referencePoint) {
+                if ($popupCaptureIndex -lt $popupLabels.Count) {
+                    $label = $popupLabels[$popupCaptureIndex]
+                } else {
+                    $label = "POPUP_EXTRA_$($popupCaptureIndex + 1)"
+                }
+                $useX = $refRelX
+                $useY = $refRelY
+                $source = "Popup relative"
+                $popupCaptureIndex++
+            } else {
+                if ($mainCaptureIndex -lt $mainLabels.Count) {
+                    $label = $mainLabels[$mainCaptureIndex]
+                } else {
+                    $label = "MAIN_EXTRA_$($mainCaptureIndex + 1)"
+                }
+                $useX = $relX
+                $useY = $relY
+                $source = "Main relative"
+                $mainCaptureIndex++
+            }
+
             $entry = @{
+                Label = $label
+                UseX = $useX
+                UseY = $useY
+                Source = $source
                 ScreenX = $point.X
                 ScreenY = $point.Y
                 RelWindowX = $relX
@@ -134,15 +169,13 @@ while ($true) {
             }
             $captured += $entry
             Write-Host ""
-            Write-Host ">>> CAPTURED #$($captured.Count):" -ForegroundColor Green
-            Write-Host "    Screen: ($($point.X), $($point.Y))" -ForegroundColor Yellow
-            Write-Host "    Relative to Window: ($relX, $relY)" -ForegroundColor Yellow
-            if ($referencePoint) {
-                Write-Host "    Relative to Reference: ($refRelX, $refRelY)" -ForegroundColor Yellow
-            }
+            Write-Host ">>> CAPTURED $label from $source" -ForegroundColor Green
+            Write-Host "    USE: $label=$useX,$useY" -ForegroundColor Green
+            Write-Host "    Diagnostic only, do not send: Screen=($($point.X),$($point.Y))" -ForegroundColor DarkGray
         }
         elseif ($key.Key -eq "R") {
             $referencePoint = @{ X = $point.X; Y = $point.Y }
+            $popupCaptureIndex = 0
             Write-Host ""
             Write-Host ">>> REFERENCE POINT SET: ($($point.X), $($point.Y))" -ForegroundColor Magenta
             Write-Host "    (Use this for popup window top-left corner)" -ForegroundColor Magenta
@@ -164,27 +197,19 @@ Write-Host "=============================================="
 for ($i = 0; $i -lt $captured.Count; $i++) {
     $c = $captured[$i]
     Write-Host ""
-    Write-Host "Point $($i + 1):" -ForegroundColor Cyan
-    Write-Host "  Screen:            ($($c.ScreenX), $($c.ScreenY))"
-    Write-Host "  Relative to Window: ($($c.RelWindowX), $($c.RelWindowY))" -ForegroundColor Green
-    if ($c.RelRefX -ne "-") {
-        Write-Host "  Relative to Ref:   ($($c.RelRefX), $($c.RelRefY))" -ForegroundColor Yellow
-    }
+    Write-Host "$($c.Label):" -ForegroundColor Cyan
+    Write-Host "  USE: $($c.Label)=$($c.UseX),$($c.UseY)" -ForegroundColor Green
+    Write-Host "  Source: $($c.Source)"
+    Write-Host "  Screen diagnostic only: ($($c.ScreenX), $($c.ScreenY))" -ForegroundColor DarkGray
 }
 
 Write-Host ""
 Write-Host "=============================================="
-Write-Host "HOW TO USE THESE VALUES:"
+Write-Host "COPY THIS BLOCK TO CHAT:"
 Write-Host "=============================================="
-Write-Host ""
-Write-Host "For MAIN WINDOW elements (search box, account, etc.):"
-Write-Host "  Use 'Relative to Window' values" -ForegroundColor Green
-Write-Host "  Example: SEARCH_BOX_X = $($captured[0].RelWindowX)" -ForegroundColor Green
-Write-Host ""
-Write-Host "For POPUP elements (functions, reload settings):"
-Write-Host "  1. Press R when mouse is at popup's TOP-LEFT corner"
-Write-Host "  2. Then capture buttons - use 'Relative to Ref' values" -ForegroundColor Yellow
-Write-Host "  Example: POPUP_FUNCTIONS_X = $($captured[2].RelRefX)" -ForegroundColor Yellow
+foreach ($c in $captured) {
+    Write-Host "$($c.Label)=$($c.UseX),$($c.UseY)" -ForegroundColor Green
+}
 Write-Host "=============================================="
 Write-Host ""
 Read-Host "Press Enter to exit"
