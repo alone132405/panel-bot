@@ -115,16 +115,16 @@ class AutomationQueue {
         // console.log('Running automation for IGG ID:', iggId)
 
         // Coordinates
-        const SEARCH_ICON_X = 994
-        const SEARCH_ICON_Y = 142
-        const SEARCH_FIELD_X = 994
-        const SEARCH_FIELD_Y = 142
-        const FIRST_RESULT_X = 391
+        const SEARCH_ICON_X = 1263
+        const SEARCH_ICON_Y = 144
+        const SEARCH_FIELD_X = 1091
+        const SEARCH_FIELD_Y = 144
+        const FIRST_RESULT_X = 355
         const FIRST_RESULT_Y = 216
-        const CLOSE_SIGN_X = 450
-        const CLOSE_SIGN_Y = 14
-        const OUTSIDE_POPUP_X = 745
-        const OUTSIDE_POPUP_Y = 145
+        const CLOSE_SIGN_X = 682
+        const CLOSE_SIGN_Y = 637
+        const OUTSIDE_POPUP_X = 1023
+        const OUTSIDE_POPUP_Y = 144
 
         const POPUP_FUNCTIONS_X = 159
         const POPUP_FUNCTIONS_Y = 60
