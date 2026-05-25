@@ -126,14 +126,14 @@ class AutomationQueue {
         const OUTSIDE_POPUP_X = 1018
         const OUTSIDE_POPUP_Y = 149
 
-        const POPUP_ANCHOR_X = 94
-        const POPUP_ANCHOR_Y = -12
         const POPUP_FUNCTIONS_X = 167
         const POPUP_FUNCTIONS_Y = 51
         const POPUP_RELOAD_X = 69
         const POPUP_RELOAD_Y = 112
-        const MAIN_REQUIRED_X = Math.max(SEARCH_ICON_X, SEARCH_FIELD_X, FIRST_RESULT_X, OUTSIDE_POPUP_X, POPUP_ANCHOR_X + POPUP_FUNCTIONS_X, POPUP_ANCHOR_X + POPUP_RELOAD_X, POPUP_ANCHOR_X + CLOSE_SIGN_X)
-        const MAIN_REQUIRED_Y = Math.max(SEARCH_ICON_Y, SEARCH_FIELD_Y, FIRST_RESULT_Y, OUTSIDE_POPUP_Y, POPUP_ANCHOR_Y + POPUP_FUNCTIONS_Y, POPUP_ANCHOR_Y + POPUP_RELOAD_Y, POPUP_ANCHOR_Y + CLOSE_SIGN_Y)
+        const MAIN_REQUIRED_X = Math.max(SEARCH_ICON_X, SEARCH_FIELD_X, FIRST_RESULT_X, OUTSIDE_POPUP_X)
+        const MAIN_REQUIRED_Y = Math.max(SEARCH_ICON_Y, SEARCH_FIELD_Y, FIRST_RESULT_Y, OUTSIDE_POPUP_Y)
+        const POPUP_REQUIRED_X = Math.max(POPUP_FUNCTIONS_X, POPUP_RELOAD_X, CLOSE_SIGN_X)
+        const POPUP_REQUIRED_Y = Math.max(POPUP_FUNCTIONS_Y, POPUP_RELOAD_Y, CLOSE_SIGN_Y)
         const MIN_WINDOW_WIDTH = 1024
         const MIN_DESKTOP_HEIGHT = 640
 
@@ -142,9 +142,18 @@ Add-Type -AssemblyName System.Windows.Forms
 
 Add-Type @"
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 public class Win32 {
+    public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    public static extern bool EnumWindows(EnumWindowsProc enumProc, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    public static extern bool IsWindowVisible(IntPtr hWnd);
+
     [DllImport("user32.dll")]
     public static extern bool SetCursorPos(int X, int Y);
     
@@ -180,6 +189,23 @@ public class Win32 {
 
     [DllImport("kernel32.dll")]
     public static extern uint GetCurrentThreadId();
+
+    public static IntPtr[] GetVisibleWindowsForProcess(uint processId) {
+        List<IntPtr> windows = new List<IntPtr>();
+
+        EnumWindows(delegate(IntPtr hWnd, IntPtr lParam) {
+            uint windowProcessId = 0;
+            GetWindowThreadProcessId(hWnd, out windowProcessId);
+
+            if (windowProcessId == processId && IsWindowVisible(hWnd)) {
+                windows.Add(hWnd);
+            }
+
+            return true;
+        }, IntPtr.Zero);
+
+        return windows.ToArray();
+    }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct RECT {
@@ -264,6 +290,14 @@ function Write-WindowBase($base, $label) {
     Write-Output "$label Window at: ($($base.X), $($base.Y))"
 }
 
+function Move-WindowTopLeft($hwnd, $label) {
+    $screen = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea
+    Write-Host "Moving $label window to top-left at ($($screen.Left), $($screen.Top))..."
+    [Win32]::SetWindowPos($hwnd, [IntPtr]::Zero, $screen.Left, $screen.Top, 0, 0, [Win32]::SWP_NOSIZE -bor [Win32]::SWP_NOZORDER -bor [Win32]::SWP_SHOWWINDOW) | Out-Null
+    Start-Sleep -Milliseconds 500
+    return (Get-WindowBase $hwnd)
+}
+
 function Ensure-WindowClickArea($hwnd, $base, $label, $requiredX, $requiredY, $canMaximize) {
     $windowWidth = $base.Rect.Right - $base.Rect.Left
     $windowHeight = $base.Rect.Bottom - $base.Rect.Top
@@ -330,6 +364,7 @@ if (-not $botProcess) {
 
 Write-Output "Found: $($botProcess.MainWindowTitle)"
 $mainHwnd = $botProcess.MainWindowHandle
+$botProcessId = [uint32]$botProcess.Id
 
 if ([Win32]::IsIconic($mainHwnd)) {
     Write-Output "Restoring minimized window..."
@@ -351,6 +386,8 @@ if ($fgNow -eq $mainHwnd) {
 }
 
 $mainBase = Get-WindowBase $mainHwnd
+Write-WindowBase $mainBase "Main"
+$mainBase = Move-WindowTopLeft $mainHwnd "Main"
 Write-WindowBase $mainBase "Main"
 $mainBase = Ensure-WindowClickArea $mainHwnd $mainBase "Main" ${MAIN_REQUIRED_X} ${MAIN_REQUIRED_Y} $true
 Write-WindowBase $mainBase "Main"
@@ -399,43 +436,51 @@ while ($true) {
         Write-Output "SUCCESS: Account popup detected. Handle: $popupHwnd"
         break
     }
+
+    $processWindows = [Win32]::GetVisibleWindowsForProcess($botProcessId)
+    foreach ($window in $processWindows) {
+        if ($window -ne $mainHwnd -and $window -ne [IntPtr]::Zero) {
+            $popupHwnd = $window
+            Write-Output "SUCCESS: Account popup detected from process windows. Handle: $popupHwnd"
+            break
+        }
+    }
+    if ($popupHwnd -ne [IntPtr]::Zero) {
+        break
+    }
     
     if ((New-TimeSpan -Start $startTime -End (Get-Date)).TotalSeconds -gt 10) {
-        Write-Output "WARNING: Timeout waiting for separate popup window."
+        Write-Output "ERROR: Timeout waiting for account popup window."
         $fgTitle = New-Object System.Text.StringBuilder 256
         [Win32]::GetWindowText($currentFg, $fgTitle, $fgTitle.Capacity) | Out-Null
         Write-Output "DEBUG: Current foreground window title: $($fgTitle.ToString())"
-        Write-Output "Falling back to main window."
-        $popupHwnd = $mainHwnd
-        break
+        exit 1
     }
     Start-Sleep -Milliseconds 500
 }
 
-$mainBase = Get-WindowBase $mainHwnd
-Write-WindowBase $mainBase "Main"
-$popupBaseX = $mainBase.X + ${POPUP_ANCHOR_X}
-$popupBaseY = $mainBase.Y + ${POPUP_ANCHOR_Y}
-Write-Output "Popup visual anchor at: ($popupBaseX, $popupBaseY)"
+ForceForeground $popupHwnd
+Start-Sleep -Milliseconds 300
 
-if ($popupHwnd -ne $mainHwnd) {
-    ForceForeground $popupHwnd
-    Start-Sleep -Milliseconds 300
-}
+$popupBase = Get-WindowBase $popupHwnd
+Write-WindowBase $popupBase "Popup"
+$popupBase = Ensure-WindowClickArea $popupHwnd $popupBase "Popup" ${POPUP_REQUIRED_X} ${POPUP_REQUIRED_Y} $false
+Write-WindowBase $popupBase "Popup"
 
 # Functions tab (relative to popup)
-$funcX = $popupBaseX + ${POPUP_FUNCTIONS_X}
-$funcY = $popupBaseY + ${POPUP_FUNCTIONS_Y}
+$funcX = $popupBase.X + ${POPUP_FUNCTIONS_X}
+$funcY = $popupBase.Y + ${POPUP_FUNCTIONS_Y}
 Write-Output "Step 5: Click Functions at ($funcX, $funcY)"
 DoubleClick $funcX $funcY
 Start-Sleep -Seconds 1
 
 # Reload Settings (relative to popup)
-$mainBase = Get-WindowBase $mainHwnd
-$popupBaseX = $mainBase.X + ${POPUP_ANCHOR_X}
-$popupBaseY = $mainBase.Y + ${POPUP_ANCHOR_Y}
-$reloadX = $popupBaseX + ${POPUP_RELOAD_X}
-$reloadY = $popupBaseY + ${POPUP_RELOAD_Y}
+ForceForeground $popupHwnd
+Start-Sleep -Milliseconds 300
+$popupBase = Get-WindowBase $popupHwnd
+Write-WindowBase $popupBase "Popup"
+$reloadX = $popupBase.X + ${POPUP_RELOAD_X}
+$reloadY = $popupBase.Y + ${POPUP_RELOAD_Y}
 Write-Output "Step 6: Click Reload Settings at ($reloadX, $reloadY)"
 Click $reloadX $reloadY
 Start-Sleep -Seconds 2
@@ -449,11 +494,12 @@ Write-Output "Step 7: Click outside popup at ($outsideX, $outsideY)"
 Click $outsideX $outsideY
 Start-Sleep -Milliseconds 500
 
-$mainBase = Get-WindowBase $mainHwnd
-$popupBaseX = $mainBase.X + ${POPUP_ANCHOR_X}
-$popupBaseY = $mainBase.Y + ${POPUP_ANCHOR_Y}
-$closeX = $popupBaseX + ${CLOSE_SIGN_X}
-$closeY = $popupBaseY + ${CLOSE_SIGN_Y}
+ForceForeground $popupHwnd
+Start-Sleep -Milliseconds 300
+$popupBase = Get-WindowBase $popupHwnd
+Write-WindowBase $popupBase "Popup"
+$closeX = $popupBase.X + ${CLOSE_SIGN_X}
+$closeY = $popupBase.Y + ${CLOSE_SIGN_Y}
 Write-Output "Step 8: Click close sign at ($closeX, $closeY)"
 Click $closeX $closeY
 Start-Sleep -Seconds 1
