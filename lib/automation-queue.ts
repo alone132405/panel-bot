@@ -128,8 +128,8 @@ class AutomationQueue {
         const POPUP_FUNCTIONS_Y = 60
         const POPUP_RELOAD_X = 180
         const POPUP_RELOAD_Y = 111
-        const TARGET_WINDOW_WIDTH = 1024
-        const PREFERRED_WINDOW_HEIGHT = 768
+        const MIN_WINDOW_WIDTH = 1024
+        const MIN_WINDOW_HEIGHT = 640
         const MIN_DESKTOP_HEIGHT = 640
 
         const scriptContent = `
@@ -154,9 +154,6 @@ public class Win32 {
     
     [DllImport("user32.dll")]
     public static extern bool IsIconic(IntPtr hWnd);
-
-    [DllImport("user32.dll")]
-    public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
 
     [DllImport("user32.dll")]
     public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
@@ -243,8 +240,8 @@ function ForceForeground($targetHwnd) {
 
 function Assert-InteractiveDesktop {
     $screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
-    if ($screen.Width -lt ${TARGET_WINDOW_WIDTH} -or $screen.Height -lt ${MIN_DESKTOP_HEIGHT}) {
-        Write-Output "ERROR: Active desktop is $($screen.Width)x$($screen.Height). Automation needs at least ${TARGET_WINDOW_WIDTH}x${MIN_DESKTOP_HEIGHT} for the configured click positions."
+    if ($screen.Width -lt ${MIN_WINDOW_WIDTH} -or $screen.Height -lt ${MIN_DESKTOP_HEIGHT}) {
+        Write-Output "ERROR: Active desktop is $($screen.Width)x$($screen.Height). Automation needs at least ${MIN_WINDOW_WIDTH}x${MIN_DESKTOP_HEIGHT} for the configured click positions."
         exit 1
     }
 
@@ -263,6 +260,18 @@ function Get-WindowBase($hwnd) {
 
 function Write-WindowBase($base, $label) {
     Write-Output "$label Window at: ($($base.X), $($base.Y))"
+}
+
+function Assert-BotWindowSize($base) {
+    $windowWidth = $base.Rect.Right - $base.Rect.Left
+    $windowHeight = $base.Rect.Bottom - $base.Rect.Top
+
+    if ($windowWidth -lt ${MIN_WINDOW_WIDTH} -or $windowHeight -lt ${MIN_WINDOW_HEIGHT}) {
+        Write-Output "ERROR: Lords Mobile Bot window is $($windowWidth)x$($windowHeight). Resize it to at least ${MIN_WINDOW_WIDTH}x${MIN_WINDOW_HEIGHT} and run Apply Changes again."
+        exit 1
+    }
+
+    Write-Output "Bot window size: $($windowWidth)x$($windowHeight)"
 }
 
 Write-Output "=== AUTOMATION START ==="
@@ -287,12 +296,6 @@ if ([Win32]::IsIconic($mainHwnd)) {
     Start-Sleep -Seconds 1
 }
 
-$screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
-$targetWindowHeight = [Math]::Min(${PREFERRED_WINDOW_HEIGHT}, $screen.Height)
-Write-Output "Resizing window to ${TARGET_WINDOW_WIDTH}x$targetWindowHeight at (0,0)..."
-[Win32]::MoveWindow($mainHwnd, 0, 0, ${TARGET_WINDOW_WIDTH}, $targetWindowHeight, $true)
-Start-Sleep -Milliseconds 500
-
 Write-Output "Forcing window to foreground..."
 ForceForeground $mainHwnd
 Start-Sleep -Seconds 1
@@ -308,6 +311,7 @@ if ($fgNow -eq $mainHwnd) {
 
 $mainBase = Get-WindowBase $mainHwnd
 Write-WindowBase $mainBase "Main"
+Assert-BotWindowSize $mainBase
 
 # Step 1: Click search box
 $searchX = $mainBase.X + ${SEARCH_BOX_X}
@@ -403,27 +407,14 @@ if ($popupHwnd -ne $mainHwnd) {
 }
 Start-Sleep -Seconds 1
 
-# Clear the search field so the bot UI is not left filtered/focused after apply.
-Write-Output "Step 8: Clear search field"
+# Final cleanup
 ForceForeground $mainHwnd
 Start-Sleep -Milliseconds 300
 $mainBase = Get-WindowBase $mainHwnd
 Write-WindowBase $mainBase "Main"
-$searchX = $mainBase.X + ${SEARCH_BOX_X}
-$searchY = $mainBase.Y + ${SEARCH_BOX_Y}
-Click $searchX $searchY
-Start-Sleep -Milliseconds 200
-[System.Windows.Forms.SendKeys]::SendWait("^a")
-Start-Sleep -Milliseconds 100
-[System.Windows.Forms.SendKeys]::SendWait("{DELETE}")
-Start-Sleep -Milliseconds 300
-
-# Final cleanup
-$mainBase = Get-WindowBase $mainHwnd
-Write-WindowBase $mainBase "Main"
 $finalX = $mainBase.X + ${FINAL_X}
 $finalY = $mainBase.Y + ${FINAL_Y}
-Write-Output "Step 9: Final click at ($finalX, $finalY)"
+Write-Output "Step 8: Final click at ($finalX, $finalY)"
 Click $finalX $finalY
 Start-Sleep -Seconds 1
 
