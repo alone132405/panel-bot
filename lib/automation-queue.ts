@@ -176,6 +176,9 @@ public class Win32 {
     public static extern IntPtr GetForegroundWindow();
 
     [DllImport("user32.dll")]
+    public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+    [DllImport("user32.dll")]
     public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
     [DllImport("user32.dll")]
@@ -217,6 +220,12 @@ public class Win32 {
     public const int SW_RESTORE = 9;
     public const int SW_SHOW = 5;
 
+    public static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+    public static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
+    public const uint SWP_NOMOVE = 0x0002;
+    public const uint SWP_NOSIZE = 0x0001;
+    public const uint SWP_NOZORDER = 0x0004;
+    public const uint SWP_SHOWWINDOW = 0x0040;
 }
 "@
 
@@ -237,8 +246,6 @@ function DoubleClick($x, $y) {
 
 function ForceForeground($targetHwnd) {
     $currentHwnd = [Win32]::GetForegroundWindow()
-
-    [Win32]::ShowWindow($targetHwnd, [Win32]::SW_SHOW) | Out-Null
     
     if ($currentHwnd -ne $targetHwnd) {
         $currentThreadId = [Win32]::GetCurrentThreadId()
@@ -248,6 +255,11 @@ function ForceForeground($targetHwnd) {
         $fgThreadId = [Win32]::GetWindowThreadProcessId($currentHwnd, [ref]$fgProcId)
         
         [Win32]::AttachThreadInput($currentThreadId, $fgThreadId, $true) | Out-Null
+        
+        [Win32]::SetWindowPos($targetHwnd, [Win32]::HWND_TOPMOST, 0, 0, 0, 0, [Win32]::SWP_NOMOVE -bor [Win32]::SWP_NOSIZE) | Out-Null
+        [Win32]::SetWindowPos($targetHwnd, [Win32]::HWND_NOTOPMOST, 0, 0, 0, 0, [Win32]::SWP_NOMOVE -bor [Win32]::SWP_NOSIZE -bor [Win32]::SWP_SHOWWINDOW) | Out-Null
+        
+        [Win32]::ShowWindow($targetHwnd, [Win32]::SW_SHOW) | Out-Null
         [Win32]::SetForegroundWindow($targetHwnd) | Out-Null
         
         [Win32]::AttachThreadInput($currentThreadId, $fgThreadId, $false) | Out-Null
@@ -292,12 +304,29 @@ function Get-ClampedPoint($base, $relativeX, $relativeY, $margin) {
     }
 }
 
+function Move-WindowTopLeft($hwnd, $label) {
+    $screen = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea
+    Write-Host "Moving $label window to top-left at ($($screen.Left), $($screen.Top))..."
+    [Win32]::SetWindowPos($hwnd, [IntPtr]::Zero, $screen.Left, $screen.Top, 0, 0, [Win32]::SWP_NOSIZE -bor [Win32]::SWP_NOZORDER -bor [Win32]::SWP_SHOWWINDOW) | Out-Null
+    Start-Sleep -Milliseconds 500
+    return (Get-WindowBase $hwnd)
+}
+
 function Ensure-WindowClickArea($hwnd, $base, $label, $requiredX, $requiredY, $canMaximize) {
     $windowWidth = $base.Rect.Right - $base.Rect.Left
     $windowHeight = $base.Rect.Bottom - $base.Rect.Top
 
+    if (($windowWidth -le $requiredX -or $windowHeight -le $requiredY) -and $canMaximize) {
+        Write-Host "$label window is $($windowWidth)x$($windowHeight), maximizing for click area..."
+        [Win32]::ShowWindow($hwnd, 3) | Out-Null
+        Start-Sleep -Seconds 1
+        $base = Get-WindowBase $hwnd
+        $windowWidth = $base.Rect.Right - $base.Rect.Left
+        $windowHeight = $base.Rect.Bottom - $base.Rect.Top
+    }
+
     if ($windowWidth -le $requiredX -or $windowHeight -le $requiredY) {
-        Write-Output "ERROR: $label window is $($windowWidth)x$($windowHeight). Needed click area reaches relative ($requiredX, $requiredY). Resize the bot window larger, then try again."
+        Write-Output "ERROR: $label window is $($windowWidth)x$($windowHeight). Needed click area reaches relative ($requiredX, $requiredY)."
         exit 1
     }
 
@@ -305,10 +334,29 @@ function Ensure-WindowClickArea($hwnd, $base, $label, $requiredX, $requiredY, $c
     $margin = 8
     $targetX = $base.X + $requiredX
     $targetY = $base.Y + $requiredY
+    $newX = $base.X
+    $newY = $base.Y
 
-    if ($targetX -gt ($screen.Right - $margin) -or $targetY -gt ($screen.Bottom - $margin) -or $targetX -lt ($screen.Left + $margin) -or $targetY -lt ($screen.Top + $margin)) {
-        Write-Output "ERROR: $label click target would be off-screen at ($targetX, $targetY). Move the bot window so the saved click points are visible, then try again."
-        exit 1
+    if ($targetX -gt ($screen.Right - $margin)) {
+        $newX = $newX - ($targetX - ($screen.Right - $margin))
+    }
+    if ($targetY -gt ($screen.Bottom - $margin)) {
+        $newY = $newY - ($targetY - ($screen.Bottom - $margin))
+    }
+    if ($newX -lt ($screen.Left + $margin)) {
+        $newX = $screen.Left + $margin
+    }
+    if ($newY -lt ($screen.Top + $margin)) {
+        $newY = $screen.Top + $margin
+    }
+
+    if ($newX -ne $base.X -or $newY -ne $base.Y) {
+        Write-Host "Moving $label window to ($newX, $newY) so click targets stay on-screen..."
+        [Win32]::SetWindowPos($hwnd, [IntPtr]::Zero, $newX, $newY, 0, 0, [Win32]::SWP_NOSIZE -bor [Win32]::SWP_NOZORDER -bor [Win32]::SWP_SHOWWINDOW) | Out-Null
+        Start-Sleep -Milliseconds 500
+        $base = Get-WindowBase $hwnd
+        $windowWidth = $base.Rect.Right - $base.Rect.Left
+        $windowHeight = $base.Rect.Bottom - $base.Rect.Top
     }
 
     Write-Host "$label window size: $($windowWidth)x$($windowHeight)"
@@ -353,7 +401,9 @@ if ($fgNow -eq $mainHwnd) {
 
 $mainBase = Get-WindowBase $mainHwnd
 Write-WindowBase $mainBase "Main"
-$mainBase = Ensure-WindowClickArea $mainHwnd $mainBase "Main" ${MAIN_REQUIRED_X} ${MAIN_REQUIRED_Y} $false
+$mainBase = Move-WindowTopLeft $mainHwnd "Main"
+Write-WindowBase $mainBase "Main"
+$mainBase = Ensure-WindowClickArea $mainHwnd $mainBase "Main" ${MAIN_REQUIRED_X} ${MAIN_REQUIRED_Y} $true
 Write-WindowBase $mainBase "Main"
 
 # Step 1: Click search icon
