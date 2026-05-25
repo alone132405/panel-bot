@@ -378,13 +378,13 @@ Start-Sleep -Milliseconds 100
 [System.Windows.Forms.SendKeys]::SendWait("^v")
 Start-Sleep -Seconds 1
 
-# Step 3: Click first search result
+# Step 3: Double-click first search result
 $mainBase = Get-WindowBase $mainHwnd
 Write-WindowBase $mainBase "Main"
 $firstResultX = $mainBase.X + ${FIRST_RESULT_X}
 $firstResultY = $mainBase.Y + ${FIRST_RESULT_Y}
-Write-Output "Step 3: Click first result at ($firstResultX, $firstResultY)"
-Click $firstResultX $firstResultY
+Write-Output "Step 3: Double-click first result at ($firstResultX, $firstResultY)"
+DoubleClick $firstResultX $firstResultY
 Start-Sleep -Seconds 3
 
 # Step 4: Detect popup by waiting for foreground window to change from main
