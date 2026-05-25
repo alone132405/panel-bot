@@ -507,13 +507,7 @@ export default function SettingsPage() {
             </motion.div>
 
             {/* Modals */}
-            {selectedCategory && (
-                <SettingsModal
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
-                    iggId={selectedIggId}
-                />
-            )}
+            <SettingsModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} iggId={selectedIggId} />
             <ProtectionModal isOpen={isProtectionModalOpen} onClose={() => setIsProtectionModalOpen(false)} iggId={selectedIggId} />
             <SupplyModal isOpen={isSupplyModalOpen} onClose={() => setIsSupplyModalOpen(false)} iggId={selectedIggId} />
             <GatherModal isOpen={isGatherModalOpen} onClose={() => setIsGatherModalOpen(false)} iggId={selectedIggId} />

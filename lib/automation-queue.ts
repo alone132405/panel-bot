@@ -241,43 +241,28 @@ function ForceForeground($targetHwnd) {
     }
 }
 
-function Get-CurrentSessionState {
-    $currentSessionId = (Get-Process -Id $PID).SessionId
-    $sessionLines = @(query session 2>$null)
-
-    foreach ($line in $sessionLines) {
-        if ($line -match "\\s$currentSessionId\\s+(?<State>\\w+)") {
-            return @{
-                Id = $currentSessionId
-                State = $Matches.State
-                Line = $line.Trim()
-            }
-        }
-    }
-
-    return @{
-        Id = $currentSessionId
-        State = "Unknown"
-        Line = ""
-    }
-}
-
 function Assert-InteractiveDesktop {
-    $sessionInfo = Get-CurrentSessionState
-
-    if ($sessionInfo.State -ne "Active") {
-        Write-Output "ERROR: Windows session $($sessionInfo.Id) is $($sessionInfo.State), so UI automation cannot safely click Lords Mobile Bot."
-        Write-Output "ERROR: Reconnect RDP, or disconnect using disconnect_headless.bat/tscon so the session stays active on the console."
-        exit 1
-    }
-
     $screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
     if ($screen.Width -lt ${TARGET_WINDOW_WIDTH} -or $screen.Height -lt ${MIN_DESKTOP_HEIGHT}) {
         Write-Output "ERROR: Active desktop is $($screen.Width)x$($screen.Height). Automation needs at least ${TARGET_WINDOW_WIDTH}x${MIN_DESKTOP_HEIGHT} for the configured click positions."
         exit 1
     }
 
-    Write-Output "Session $($sessionInfo.Id) is Active. Screen: $($screen.Width)x$($screen.Height)"
+    Write-Output "Screen: $($screen.Width)x$($screen.Height)"
+}
+
+function Get-WindowBase($hwnd) {
+    $rect = New-Object Win32+RECT
+    [Win32]::GetWindowRect($hwnd, [ref]$rect) | Out-Null
+    return [PSCustomObject]@{
+        X = $rect.Left
+        Y = $rect.Top
+        Rect = $rect
+    }
+}
+
+function Write-WindowBase($base, $label) {
+    Write-Output "$label Window at: ($($base.X), $($base.Y))"
 }
 
 Write-Output "=== AUTOMATION START ==="
@@ -321,16 +306,12 @@ if ($fgNow -eq $mainHwnd) {
     Start-Sleep -Seconds 1
 }
 
-$mainRect = New-Object Win32+RECT
-[Win32]::GetWindowRect($mainHwnd, [ref]$mainRect) | Out-Null
-Write-Output "Main Window at: ($($mainRect.Left), $($mainRect.Top))"
-
-$baseX = $mainRect.Left
-$baseY = $mainRect.Top
+$mainBase = Get-WindowBase $mainHwnd
+Write-WindowBase $mainBase "Main"
 
 # Step 1: Click search box
-$searchX = $baseX + ${SEARCH_BOX_X}
-$searchY = $baseY + ${SEARCH_BOX_Y}
+$searchX = $mainBase.X + ${SEARCH_BOX_X}
+$searchY = $mainBase.Y + ${SEARCH_BOX_Y}
 Write-Output "Step 1: Click Search at ($searchX, $searchY)"
 Click $searchX $searchY
 Start-Sleep -Milliseconds 500
@@ -350,8 +331,10 @@ Start-Sleep -Milliseconds 500
 Start-Sleep -Seconds 2
 
 # Step 3: Double-click account
-$accX = $baseX + ${ACCOUNT_X}
-$accY = $baseY + ${ACCOUNT_Y}
+$mainBase = Get-WindowBase $mainHwnd
+Write-WindowBase $mainBase "Main"
+$accX = $mainBase.X + ${ACCOUNT_X}
+$accY = $mainBase.Y + ${ACCOUNT_Y}
 Write-Output "Step 3: Double-click Account at ($accX, $accY)"
 DoubleClick $accX $accY
 Start-Sleep -Seconds 3
@@ -381,22 +364,25 @@ while ($true) {
     Start-Sleep -Milliseconds 500
 }
 
-$popupRect = New-Object Win32+RECT
-[Win32]::GetWindowRect($popupHwnd, [ref]$popupRect) | Out-Null
+$popupBase = Get-WindowBase $popupHwnd
+Write-WindowBase $popupBase "Popup"
+$popupRect = $popupBase.Rect
 
 Write-Output "Popup Window Rect: Left=$($popupRect.Left), Top=$($popupRect.Top), Right=$($popupRect.Right), Bottom=$($popupRect.Bottom)"
 Write-Output "Clicking relative to popup at ($($popupRect.Left), $($popupRect.Top))"
 
 # Functions tab (relative to popup)
-$funcX = $popupRect.Left + ${POPUP_FUNCTIONS_X}
-$funcY = $popupRect.Top + ${POPUP_FUNCTIONS_Y}
+$funcX = $popupBase.X + ${POPUP_FUNCTIONS_X}
+$funcY = $popupBase.Y + ${POPUP_FUNCTIONS_Y}
 Write-Output "Step 5: Click Functions at ($funcX, $funcY)"
 DoubleClick $funcX $funcY
 Start-Sleep -Seconds 1
 
 # Reload Settings (relative to popup)
-$reloadX = $popupRect.Left + ${POPUP_RELOAD_X}
-$reloadY = $popupRect.Top + ${POPUP_RELOAD_Y}
+$popupBase = Get-WindowBase $popupHwnd
+Write-WindowBase $popupBase "Popup"
+$reloadX = $popupBase.X + ${POPUP_RELOAD_X}
+$reloadY = $popupBase.Y + ${POPUP_RELOAD_Y}
 Write-Output "Step 6: Click Reload Settings at ($reloadX, $reloadY)"
 Click $reloadX $reloadY
 Start-Sleep -Seconds 2
@@ -408,8 +394,10 @@ if ($popupHwnd -ne $mainHwnd) {
     Start-Sleep -Milliseconds 300
     [Win32]::PostMessage($popupHwnd, [Win32]::WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero) | Out-Null
 } else {
-    $closeX = $baseX + ${CLOSE_X}
-    $closeY = $baseY + ${CLOSE_Y}
+    $mainBase = Get-WindowBase $mainHwnd
+    Write-WindowBase $mainBase "Main"
+    $closeX = $mainBase.X + ${CLOSE_X}
+    $closeY = $mainBase.Y + ${CLOSE_Y}
     Write-Output "Step 7: Click to close at ($closeX, $closeY)"
     Click $closeX $closeY
 }
@@ -419,6 +407,10 @@ Start-Sleep -Seconds 1
 Write-Output "Step 8: Clear search field"
 ForceForeground $mainHwnd
 Start-Sleep -Milliseconds 300
+$mainBase = Get-WindowBase $mainHwnd
+Write-WindowBase $mainBase "Main"
+$searchX = $mainBase.X + ${SEARCH_BOX_X}
+$searchY = $mainBase.Y + ${SEARCH_BOX_Y}
 Click $searchX $searchY
 Start-Sleep -Milliseconds 200
 [System.Windows.Forms.SendKeys]::SendWait("^a")
@@ -427,8 +419,10 @@ Start-Sleep -Milliseconds 100
 Start-Sleep -Milliseconds 300
 
 # Final cleanup
-$finalX = $baseX + ${FINAL_X}
-$finalY = $baseY + ${FINAL_Y}
+$mainBase = Get-WindowBase $mainHwnd
+Write-WindowBase $mainBase "Main"
+$finalX = $mainBase.X + ${FINAL_X}
+$finalY = $mainBase.Y + ${FINAL_Y}
 Write-Output "Step 9: Final click at ($finalX, $finalY)"
 Click $finalX $finalY
 Start-Sleep -Seconds 1
@@ -454,13 +448,13 @@ Write-Output "=== AUTOMATION COMPLETE ==="
                 // console.log('PowerShell exec stderr:', stderr);
 
                 if (stdout.includes('ERROR:')) {
-                    const lines = stdout.split('\\n');
+                    const lines = stdout.split('\n');
                     const errLine = lines.find((l: string) => l.includes('ERROR:'));
                     throw new Error(errLine ? errLine.trim() : 'Lords Mobile Bot application not found.');
                 }
 
                 if (stderr) {
-                    throw new Error(`PowerShell Error: ${stderr.trim().split('\\n')[0]}`);
+                    throw new Error(`PowerShell Error: ${stderr.trim().split('\n')[0]}`);
                 }
 
                 throw new Error('Automation script failed to execute (code 1).');

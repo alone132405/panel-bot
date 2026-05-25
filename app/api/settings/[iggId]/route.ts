@@ -84,10 +84,6 @@ export async function PATCH(
             }, { status: 403 })
         }
 
-        if (!iggIdRecord) {
-            return NextResponse.json({ error: 'IGG ID not found or unauthorized' }, { status: 404 })
-        }
-
         const settings = await ensureSettingsFile(iggId)
 
         // Update the nested property

@@ -1,6 +1,8 @@
 import { NextApiRequest } from 'next'
+import { getServerSession } from 'next-auth'
 import { NextApiResponseServerIO } from '@/types/socket'
 import { prisma } from '@/lib/prisma'
+import { authOptions } from '@/lib/authOptions'
 import { automationQueue } from '@/lib/automation-queue'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponseServerIO) {
@@ -14,21 +16,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponseS
     }
 
     try {
+        // Authenticate the user
+        const session = await getServerSession(req, res, authOptions)
+
+        if (!session?.user?.id) {
+            return res.status(401).json({ error: 'Unauthorized' })
+        }
+
         const { iggId } = req.body
 
         if (!iggId) {
             return res.status(400).json({ error: 'IGG ID is required' })
         }
 
-        // console.log('Received automation request for IGG ID:', iggId)
-
-        const iggIdRecord = await prisma.iggId.findUnique({
-            where: { iggId },
-            include: { subscription: true }
+        // Verify user owns this IGG ID
+        const iggIdRecord = await prisma.iggId.findFirst({
+            where: {
+                iggId,
+                userId: session.user.id,
+            },
+            include: { subscription: true },
         })
 
         if (!iggIdRecord) {
-            return res.status(404).json({ error: 'IGG ID not found' })
+            return res.status(404).json({ error: 'IGG ID not found or unauthorized' })
         }
 
         if (iggIdRecord.subscription?.expiresAt && new Date(iggIdRecord.subscription.expiresAt) < new Date()) {
