@@ -73,6 +73,8 @@ class AutomationQueue {
         try {
             this.broadcastQueueStatus(io)
 
+            await this.waitForConsoleSession(io, item.iggId)
+
             if (io) {
                 io.to(`igg-${item.iggId}`).emit('automation_status', {
                     status: 'processing',
@@ -108,6 +110,42 @@ class AutomationQueue {
             if (this.queue.length > 0) {
                 this.processNext(io).catch(err => console.error('Queue processNext error:', err))
             }
+        }
+    }
+
+    private async isConsoleSession(): Promise<boolean> {
+        try {
+            const result = await execFileAsync('quser', [], { windowsHide: true, encoding: 'utf8' })
+            const stdout = String(result.stdout || '')
+            const lines = stdout.split('\n')
+            const currentSessionLine = lines.find(line => line.trim().startsWith('>'))
+
+            if (!currentSessionLine) return true
+
+            const parts = currentSessionLine.trim().split(/\s+/)
+            const sessionName = parts[1]?.toLowerCase() || ''
+
+            return !(sessionName.includes('rdp') || sessionName.includes('tcp'))
+        } catch (error) {
+            console.error('Error checking session:', error)
+            return true
+        }
+    }
+
+    private async waitForConsoleSession(io: any, iggId: string): Promise<void> {
+        let isConsole = await this.isConsoleSession()
+
+        while (!isConsole) {
+            if (io) {
+                io.to(`igg-${iggId}`).emit('automation_status', {
+                    status: 'waiting',
+                    message: 'RDP connected. Waiting for disconnect (use disconnect_headless.bat)...',
+                    timestamp: Date.now()
+                })
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 5000))
+            isConsole = await this.isConsoleSession()
         }
     }
 
