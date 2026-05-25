@@ -1,5 +1,5 @@
 # ===========================================
-# COORDINATE FINDER SCRIPT (with Relative Coordinates)
+# COORDINATE FINDER SCRIPT (with Relative Coordinates, no resize)
 # ===========================================
 
 Add-Type -AssemblyName System.Windows.Forms
@@ -14,9 +14,6 @@ public class Win32Helper {
     
     [DllImport("user32.dll")]
     public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
-
-    [DllImport("user32.dll")]
-    public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
 
     [DllImport("user32.dll")]
     public static extern bool SetForegroundWindow(IntPtr hWnd);
@@ -46,7 +43,7 @@ public class Win32Helper {
 "@
 
 Write-Host "=============================================="
-Write-Host "    COORDINATE FINDER (with Relative)"
+Write-Host "    COORDINATE FINDER (with Relative, no resize)"
 Write-Host "=============================================="
 Write-Host ""
 
@@ -71,10 +68,8 @@ if ([Win32Helper]::IsIconic($hwnd)) {
     Start-Sleep -Seconds 1
 }
 
-# Position window at 0,0 with size 1024x768
-Write-Host "Positioning window at (0,0) with size 1024x768..."
-[Win32Helper]::MoveWindow($hwnd, 0, 0, 1024, 768, $true)
-Start-Sleep -Milliseconds 500
+# Keep the bot window exactly as-is so coordinate capture matches the live UI.
+Write-Host "Using current bot window position and size. Resize/move it manually first if needed."
 [Win32Helper]::SetForegroundWindow($hwnd)
 
 # Get window position
@@ -90,6 +85,10 @@ Write-Host "CONTROLS:"
 Write-Host "  SPACE  = Capture coordinate"
 Write-Host "  R      = Set reference point (for popup)"
 Write-Host "  ESC    = Exit"
+Write-Host ""
+Write-Host "Recommended capture order:"
+Write-Host "  Main window: SEARCH_ICON, SEARCH_FIELD, FIRST_RESULT, OUTSIDE_POPUP"
+Write-Host "  Popup: press R on popup top-left, then capture POPUP_FUNCTIONS, POPUP_RELOAD, CLOSE_SIGN"
 Write-Host "=============================================="
 Write-Host ""
 

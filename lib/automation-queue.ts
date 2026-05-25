@@ -115,21 +115,26 @@ class AutomationQueue {
         // console.log('Running automation for IGG ID:', iggId)
 
         // Coordinates
-        const SEARCH_BOX_X = 994
-        const SEARCH_BOX_Y = 142
-        const ACCOUNT_X = 391
-        const ACCOUNT_Y = 216
-        const CLOSE_X = 450
-        const CLOSE_Y = 14
-        const FINAL_X = 745
-        const FINAL_Y = 145
+        const SEARCH_ICON_X = 994
+        const SEARCH_ICON_Y = 142
+        const SEARCH_FIELD_X = 994
+        const SEARCH_FIELD_Y = 142
+        const FIRST_RESULT_X = 391
+        const FIRST_RESULT_Y = 216
+        const CLOSE_SIGN_X = 450
+        const CLOSE_SIGN_Y = 14
+        const OUTSIDE_POPUP_X = 745
+        const OUTSIDE_POPUP_Y = 145
 
         const POPUP_FUNCTIONS_X = 159
         const POPUP_FUNCTIONS_Y = 60
         const POPUP_RELOAD_X = 180
         const POPUP_RELOAD_Y = 111
+        const MAIN_REQUIRED_X = Math.max(SEARCH_ICON_X, SEARCH_FIELD_X, FIRST_RESULT_X, OUTSIDE_POPUP_X)
+        const MAIN_REQUIRED_Y = Math.max(SEARCH_ICON_Y, SEARCH_FIELD_Y, FIRST_RESULT_Y, OUTSIDE_POPUP_Y)
+        const POPUP_REQUIRED_X = Math.max(POPUP_FUNCTIONS_X, POPUP_RELOAD_X, CLOSE_SIGN_X)
+        const POPUP_REQUIRED_Y = Math.max(POPUP_FUNCTIONS_Y, POPUP_RELOAD_Y, CLOSE_SIGN_Y)
         const MIN_WINDOW_WIDTH = 1024
-        const MIN_WINDOW_HEIGHT = 640
         const MIN_DESKTOP_HEIGHT = 640
 
         const scriptContent = `
@@ -164,9 +169,6 @@ public class Win32 {
     [DllImport("user32.dll")]
     public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
-    [DllImport("user32.dll", SetLastError=true)]
-    public static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-
     [DllImport("user32.dll")]
     public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
@@ -191,12 +193,12 @@ public class Win32 {
     public const int MOUSEEVENTF_LEFTUP = 0x04;
     public const int SW_RESTORE = 9;
     public const int SW_SHOW = 5;
-    public const uint WM_CLOSE = 0x0010;
 
     public static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
     public static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
     public const uint SWP_NOMOVE = 0x0002;
     public const uint SWP_NOSIZE = 0x0001;
+    public const uint SWP_NOZORDER = 0x0004;
     public const uint SWP_SHOWWINDOW = 0x0040;
 }
 "@
@@ -262,16 +264,55 @@ function Write-WindowBase($base, $label) {
     Write-Output "$label Window at: ($($base.X), $($base.Y))"
 }
 
-function Assert-BotWindowSize($base) {
+function Ensure-WindowClickArea($hwnd, $base, $label, $requiredX, $requiredY, $canMaximize) {
     $windowWidth = $base.Rect.Right - $base.Rect.Left
     $windowHeight = $base.Rect.Bottom - $base.Rect.Top
 
-    if ($windowWidth -lt ${MIN_WINDOW_WIDTH} -or $windowHeight -lt ${MIN_WINDOW_HEIGHT}) {
-        Write-Output "ERROR: Lords Mobile Bot window is $($windowWidth)x$($windowHeight). Resize it to at least ${MIN_WINDOW_WIDTH}x${MIN_WINDOW_HEIGHT} and run Apply Changes again."
+    if (($windowWidth -le $requiredX -or $windowHeight -le $requiredY) -and $canMaximize) {
+        Write-Host "$label window is $($windowWidth)x$($windowHeight), maximizing for click area..."
+        [Win32]::ShowWindow($hwnd, 3) | Out-Null
+        Start-Sleep -Seconds 1
+        $base = Get-WindowBase $hwnd
+        $windowWidth = $base.Rect.Right - $base.Rect.Left
+        $windowHeight = $base.Rect.Bottom - $base.Rect.Top
+    }
+
+    if ($windowWidth -le $requiredX -or $windowHeight -le $requiredY) {
+        Write-Output "ERROR: $label window is $($windowWidth)x$($windowHeight). Needed click area reaches relative ($requiredX, $requiredY)."
         exit 1
     }
 
-    Write-Output "Bot window size: $($windowWidth)x$($windowHeight)"
+    $screen = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea
+    $margin = 8
+    $targetX = $base.X + $requiredX
+    $targetY = $base.Y + $requiredY
+    $newX = $base.X
+    $newY = $base.Y
+
+    if ($targetX -gt ($screen.Right - $margin)) {
+        $newX = $newX - ($targetX - ($screen.Right - $margin))
+    }
+    if ($targetY -gt ($screen.Bottom - $margin)) {
+        $newY = $newY - ($targetY - ($screen.Bottom - $margin))
+    }
+    if ($newX -lt ($screen.Left + $margin)) {
+        $newX = $screen.Left + $margin
+    }
+    if ($newY -lt ($screen.Top + $margin)) {
+        $newY = $screen.Top + $margin
+    }
+
+    if ($newX -ne $base.X -or $newY -ne $base.Y) {
+        Write-Host "Moving $label window to ($newX, $newY) so click targets stay on-screen..."
+        [Win32]::SetWindowPos($hwnd, [IntPtr]::Zero, $newX, $newY, 0, 0, [Win32]::SWP_NOSIZE -bor [Win32]::SWP_NOZORDER -bor [Win32]::SWP_SHOWWINDOW) | Out-Null
+        Start-Sleep -Milliseconds 500
+        $base = Get-WindowBase $hwnd
+        $windowWidth = $base.Rect.Right - $base.Rect.Left
+        $windowHeight = $base.Rect.Bottom - $base.Rect.Top
+    }
+
+    Write-Host "$label window size: $($windowWidth)x$($windowHeight)"
+    return $base
 }
 
 Write-Output "=== AUTOMATION START ==="
@@ -311,36 +352,39 @@ if ($fgNow -eq $mainHwnd) {
 
 $mainBase = Get-WindowBase $mainHwnd
 Write-WindowBase $mainBase "Main"
-Assert-BotWindowSize $mainBase
+$mainBase = Ensure-WindowClickArea $mainHwnd $mainBase "Main" ${MAIN_REQUIRED_X} ${MAIN_REQUIRED_Y} $true
+Write-WindowBase $mainBase "Main"
 
-# Step 1: Click search box
-$searchX = $mainBase.X + ${SEARCH_BOX_X}
-$searchY = $mainBase.Y + ${SEARCH_BOX_Y}
-Write-Output "Step 1: Click Search at ($searchX, $searchY)"
-Click $searchX $searchY
-Start-Sleep -Milliseconds 500
-Click $searchX $searchY
+# Step 1: Click search icon
+$searchIconX = $mainBase.X + ${SEARCH_ICON_X}
+$searchIconY = $mainBase.Y + ${SEARCH_ICON_Y}
+Write-Output "Step 1: Click search icon at ($searchIconX, $searchIconY)"
+Click $searchIconX $searchIconY
 Start-Sleep -Milliseconds 500
 
-# Step 2: Paste IGG ID
-Write-Output "Step 2: Paste IGG ID ${iggId}"
+# Step 2: Click search field and paste IGG ID
+$mainBase = Get-WindowBase $mainHwnd
+Write-WindowBase $mainBase "Main"
+$searchFieldX = $mainBase.X + ${SEARCH_FIELD_X}
+$searchFieldY = $mainBase.Y + ${SEARCH_FIELD_Y}
+Write-Output "Step 2: Paste IGG ID ${iggId} into search field at ($searchFieldX, $searchFieldY)"
+Click $searchFieldX $searchFieldY
+Start-Sleep -Milliseconds 200
 Set-Clipboard -Value "${iggId}"
 [System.Windows.Forms.SendKeys]::SendWait("^a")
 Start-Sleep -Milliseconds 100
 [System.Windows.Forms.SendKeys]::SendWait("{DELETE}")
 Start-Sleep -Milliseconds 100
 [System.Windows.Forms.SendKeys]::SendWait("^v")
-Start-Sleep -Milliseconds 500
-[System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
-Start-Sleep -Seconds 2
+Start-Sleep -Seconds 1
 
-# Step 3: Double-click account
+# Step 3: Click first search result
 $mainBase = Get-WindowBase $mainHwnd
 Write-WindowBase $mainBase "Main"
-$accX = $mainBase.X + ${ACCOUNT_X}
-$accY = $mainBase.Y + ${ACCOUNT_Y}
-Write-Output "Step 3: Double-click Account at ($accX, $accY)"
-DoubleClick $accX $accY
+$firstResultX = $mainBase.X + ${FIRST_RESULT_X}
+$firstResultY = $mainBase.Y + ${FIRST_RESULT_Y}
+Write-Output "Step 3: Click first result at ($firstResultX, $firstResultY)"
+Click $firstResultX $firstResultY
 Start-Sleep -Seconds 3
 
 # Step 4: Detect popup by waiting for foreground window to change from main
@@ -370,6 +414,8 @@ while ($true) {
 
 $popupBase = Get-WindowBase $popupHwnd
 Write-WindowBase $popupBase "Popup"
+$popupBase = Ensure-WindowClickArea $popupHwnd $popupBase "Popup" ${POPUP_REQUIRED_X} ${POPUP_REQUIRED_Y} $false
+Write-WindowBase $popupBase "Popup"
 $popupRect = $popupBase.Rect
 
 Write-Output "Popup Window Rect: Left=$($popupRect.Left), Top=$($popupRect.Top), Right=$($popupRect.Right), Bottom=$($popupRect.Bottom)"
@@ -391,31 +437,28 @@ Write-Output "Step 6: Click Reload Settings at ($reloadX, $reloadY)"
 Click $reloadX $reloadY
 Start-Sleep -Seconds 2
 
-# Close popup
+# Click outside popup, then close by close sign.
+$mainBase = Get-WindowBase $mainHwnd
+Write-WindowBase $mainBase "Main"
+$outsideX = $mainBase.X + ${OUTSIDE_POPUP_X}
+$outsideY = $mainBase.Y + ${OUTSIDE_POPUP_Y}
+Write-Output "Step 7: Click outside popup at ($outsideX, $outsideY)"
+Click $outsideX $outsideY
+Start-Sleep -Milliseconds 500
+
 if ($popupHwnd -ne $mainHwnd) {
-    Write-Output "Step 7: Close popup by window handle"
-    ForceForeground $popupHwnd
-    Start-Sleep -Milliseconds 300
-    [Win32]::PostMessage($popupHwnd, [Win32]::WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero) | Out-Null
+    $popupBase = Get-WindowBase $popupHwnd
+    Write-WindowBase $popupBase "Popup"
+    $closeX = $popupBase.X + ${CLOSE_SIGN_X}
+    $closeY = $popupBase.Y + ${CLOSE_SIGN_Y}
 } else {
     $mainBase = Get-WindowBase $mainHwnd
     Write-WindowBase $mainBase "Main"
-    $closeX = $mainBase.X + ${CLOSE_X}
-    $closeY = $mainBase.Y + ${CLOSE_Y}
-    Write-Output "Step 7: Click to close at ($closeX, $closeY)"
-    Click $closeX $closeY
+    $closeX = $mainBase.X + ${CLOSE_SIGN_X}
+    $closeY = $mainBase.Y + ${CLOSE_SIGN_Y}
 }
-Start-Sleep -Seconds 1
-
-# Final cleanup
-ForceForeground $mainHwnd
-Start-Sleep -Milliseconds 300
-$mainBase = Get-WindowBase $mainHwnd
-Write-WindowBase $mainBase "Main"
-$finalX = $mainBase.X + ${FINAL_X}
-$finalY = $mainBase.Y + ${FINAL_Y}
-Write-Output "Step 8: Final click at ($finalX, $finalY)"
-Click $finalX $finalY
+Write-Output "Step 8: Click close sign at ($closeX, $closeY)"
+Click $closeX $closeY
 Start-Sleep -Seconds 1
 
 Write-Output "=== AUTOMATION COMPLETE ==="
