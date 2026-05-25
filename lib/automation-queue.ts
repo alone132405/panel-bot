@@ -121,8 +121,6 @@ class AutomationQueue {
         const SEARCH_FIELD_Y = 147
         const FIRST_RESULT_X = 386
         const FIRST_RESULT_Y = 217
-        const CLOSE_SIGN_X = 870
-        const CLOSE_SIGN_Y = -5
         const OUTSIDE_POPUP_X = 1018
         const OUTSIDE_POPUP_Y = 149
 
@@ -132,8 +130,8 @@ class AutomationQueue {
         const POPUP_FUNCTIONS_Y = 52
         const POPUP_RELOAD_X = 144
         const POPUP_RELOAD_Y = 110
-        const MAIN_REQUIRED_X = Math.max(SEARCH_ICON_X, SEARCH_FIELD_X, FIRST_RESULT_X, OUTSIDE_POPUP_X, POPUP_ANCHOR_X + POPUP_FUNCTIONS_X, POPUP_ANCHOR_X + POPUP_RELOAD_X, POPUP_ANCHOR_X + CLOSE_SIGN_X)
-        const MAIN_REQUIRED_Y = Math.max(SEARCH_ICON_Y, SEARCH_FIELD_Y, FIRST_RESULT_Y, OUTSIDE_POPUP_Y, POPUP_ANCHOR_Y + POPUP_FUNCTIONS_Y, POPUP_ANCHOR_Y + POPUP_RELOAD_Y, POPUP_ANCHOR_Y + CLOSE_SIGN_Y)
+        const MAIN_REQUIRED_X = Math.max(SEARCH_ICON_X, SEARCH_FIELD_X, FIRST_RESULT_X, OUTSIDE_POPUP_X, POPUP_ANCHOR_X + POPUP_FUNCTIONS_X, POPUP_ANCHOR_X + POPUP_RELOAD_X)
+        const MAIN_REQUIRED_Y = Math.max(SEARCH_ICON_Y, SEARCH_FIELD_Y, FIRST_RESULT_Y, OUTSIDE_POPUP_Y, POPUP_ANCHOR_Y + POPUP_FUNCTIONS_Y, POPUP_ANCHOR_Y + POPUP_RELOAD_Y)
         const MIN_WINDOW_WIDTH = 1024
         const MIN_DESKTOP_HEIGHT = 640
 
@@ -500,7 +498,7 @@ Write-Output "Step 6: Click Reload Settings at ($reloadX, $reloadY)"
 Click $reloadX $reloadY
 Start-Sleep -Seconds 2
 
-# Click outside popup, then close by close sign.
+# Click outside popup.
 $mainBase = Get-WindowBase $mainHwnd
 Write-WindowBase $mainBase "Main"
 $outsideX = $mainBase.X + ${OUTSIDE_POPUP_X}
@@ -508,17 +506,6 @@ $outsideY = $mainBase.Y + ${OUTSIDE_POPUP_Y}
 Write-Output "Step 7: Click outside popup at ($outsideX, $outsideY)"
 Click $outsideX $outsideY
 Start-Sleep -Milliseconds 500
-
-ForceForeground $popupHwnd
-Start-Sleep -Milliseconds 300
-$mainBase = Get-WindowBase $mainHwnd
-$popupBaseX = $mainBase.X + ${POPUP_ANCHOR_X}
-$popupBaseY = $mainBase.Y + ${POPUP_ANCHOR_Y}
-$closeX = $popupBaseX + ${CLOSE_SIGN_X}
-$closeY = $popupBaseY + ${CLOSE_SIGN_Y}
-Write-Output "Step 8: Click close sign at ($closeX, $closeY)"
-Click $closeX $closeY
-Start-Sleep -Seconds 1
 
 Write-Output "=== AUTOMATION COMPLETE ==="
 `
