@@ -96,6 +96,7 @@ Write-Host ""
 
 $captured = @()
 $referencePoint = $null
+$referenceRelWindow = $null
 $mainLabels = @("SEARCH_ICON", "SEARCH_FIELD", "FIRST_RESULT", "OUTSIDE_POPUP")
 $popupLabels = @("POPUP_FUNCTIONS", "POPUP_RELOAD", "CLOSE_SIGN")
 $mainCaptureIndex = 0
@@ -175,9 +176,11 @@ while ($true) {
         }
         elseif ($key.Key -eq "R") {
             $referencePoint = @{ X = $point.X; Y = $point.Y }
+            $referenceRelWindow = @{ X = $relX; Y = $relY }
             $popupCaptureIndex = 0
             Write-Host ""
             Write-Host ">>> REFERENCE POINT SET: ($($point.X), $($point.Y))" -ForegroundColor Magenta
+            Write-Host "    USE: POPUP_ANCHOR=$relX,$relY" -ForegroundColor Green
             Write-Host "    (Use this for popup window top-left corner)" -ForegroundColor Magenta
         }
         elseif ($key.Key -eq "Escape") {
@@ -207,6 +210,9 @@ Write-Host ""
 Write-Host "=============================================="
 Write-Host "COPY THIS BLOCK TO CHAT:"
 Write-Host "=============================================="
+if ($referenceRelWindow) {
+    Write-Host "POPUP_ANCHOR=$($referenceRelWindow.X),$($referenceRelWindow.Y)" -ForegroundColor Green
+}
 foreach ($c in $captured) {
     Write-Host "$($c.Label)=$($c.UseX),$($c.UseY)" -ForegroundColor Green
 }
