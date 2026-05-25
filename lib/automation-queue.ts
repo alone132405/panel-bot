@@ -115,25 +115,25 @@ class AutomationQueue {
         // console.log('Running automation for IGG ID:', iggId)
 
         // Coordinates
-        const SEARCH_ICON_X = 1266
-        const SEARCH_ICON_Y = 142
-        const SEARCH_FIELD_X = 1086
-        const SEARCH_FIELD_Y = 145
-        const FIRST_RESULT_X = 307
+        const SEARCH_ICON_X = 1277
+        const SEARCH_ICON_Y = 143
+        const SEARCH_FIELD_X = 1116
+        const SEARCH_FIELD_Y = 147
+        const FIRST_RESULT_X = 386
         const FIRST_RESULT_Y = 217
-        const CLOSE_SIGN_X = 241
-        const CLOSE_SIGN_Y = 563
+        const CLOSE_SIGN_X = 870
+        const CLOSE_SIGN_Y = -5
         const OUTSIDE_POPUP_X = 1018
         const OUTSIDE_POPUP_Y = 149
 
-        const POPUP_FUNCTIONS_X = 167
-        const POPUP_FUNCTIONS_Y = 51
-        const POPUP_RELOAD_X = 69
-        const POPUP_RELOAD_Y = 112
-        const MAIN_REQUIRED_X = Math.max(SEARCH_ICON_X, SEARCH_FIELD_X, FIRST_RESULT_X, OUTSIDE_POPUP_X)
-        const MAIN_REQUIRED_Y = Math.max(SEARCH_ICON_Y, SEARCH_FIELD_Y, FIRST_RESULT_Y, OUTSIDE_POPUP_Y)
-        const POPUP_REQUIRED_X = Math.max(POPUP_FUNCTIONS_X, POPUP_RELOAD_X)
-        const POPUP_REQUIRED_Y = Math.max(POPUP_FUNCTIONS_Y, POPUP_RELOAD_Y)
+        const POPUP_ANCHOR_X = 153
+        const POPUP_ANCHOR_Y = 152
+        const POPUP_FUNCTIONS_X = 1125
+        const POPUP_FUNCTIONS_Y = 219
+        const POPUP_RELOAD_X = 158
+        const POPUP_RELOAD_Y = 107
+        const MAIN_REQUIRED_X = Math.max(SEARCH_ICON_X, SEARCH_FIELD_X, FIRST_RESULT_X, OUTSIDE_POPUP_X, POPUP_ANCHOR_X + POPUP_FUNCTIONS_X, POPUP_ANCHOR_X + POPUP_RELOAD_X, POPUP_ANCHOR_X + CLOSE_SIGN_X)
+        const MAIN_REQUIRED_Y = Math.max(SEARCH_ICON_Y, SEARCH_FIELD_Y, FIRST_RESULT_Y, OUTSIDE_POPUP_Y, POPUP_ANCHOR_Y + POPUP_FUNCTIONS_Y, POPUP_ANCHOR_Y + POPUP_RELOAD_Y, POPUP_ANCHOR_Y + CLOSE_SIGN_Y)
         const MIN_WINDOW_WIDTH = 1024
         const MIN_DESKTOP_HEIGHT = 640
 
@@ -476,14 +476,14 @@ while ($true) {
 ForceForeground $popupHwnd
 Start-Sleep -Milliseconds 300
 
-$popupBase = Get-WindowBase $popupHwnd
-Write-WindowBase $popupBase "Popup"
-$popupBase = Ensure-WindowClickArea $popupHwnd $popupBase "Popup" ${POPUP_REQUIRED_X} ${POPUP_REQUIRED_Y} $false
-Write-WindowBase $popupBase "Popup"
+$mainBase = Get-WindowBase $mainHwnd
+$popupBaseX = $mainBase.X + ${POPUP_ANCHOR_X}
+$popupBaseY = $mainBase.Y + ${POPUP_ANCHOR_Y}
+Write-Output "Popup visual anchor at: ($popupBaseX, $popupBaseY)"
 
 # Functions tab (relative to popup)
-$funcX = $popupBase.X + ${POPUP_FUNCTIONS_X}
-$funcY = $popupBase.Y + ${POPUP_FUNCTIONS_Y}
+$funcX = $popupBaseX + ${POPUP_FUNCTIONS_X}
+$funcY = $popupBaseY + ${POPUP_FUNCTIONS_Y}
 Write-Output "Step 5: Click Functions at ($funcX, $funcY)"
 DoubleClick $funcX $funcY
 Start-Sleep -Seconds 1
@@ -491,10 +491,11 @@ Start-Sleep -Seconds 1
 # Reload Settings (relative to popup)
 ForceForeground $popupHwnd
 Start-Sleep -Milliseconds 300
-$popupBase = Get-WindowBase $popupHwnd
-Write-WindowBase $popupBase "Popup"
-$reloadX = $popupBase.X + ${POPUP_RELOAD_X}
-$reloadY = $popupBase.Y + ${POPUP_RELOAD_Y}
+$mainBase = Get-WindowBase $mainHwnd
+$popupBaseX = $mainBase.X + ${POPUP_ANCHOR_X}
+$popupBaseY = $mainBase.Y + ${POPUP_ANCHOR_Y}
+$reloadX = $popupBaseX + ${POPUP_RELOAD_X}
+$reloadY = $popupBaseY + ${POPUP_RELOAD_Y}
 Write-Output "Step 6: Click Reload Settings at ($reloadX, $reloadY)"
 Click $reloadX $reloadY
 Start-Sleep -Seconds 2
@@ -510,12 +511,12 @@ Start-Sleep -Milliseconds 500
 
 ForceForeground $popupHwnd
 Start-Sleep -Milliseconds 300
-$popupBase = Get-WindowBase $popupHwnd
-Write-WindowBase $popupBase "Popup"
-$closePoint = Get-ClampedPoint $popupBase ${CLOSE_SIGN_X} ${CLOSE_SIGN_Y} 8
-$closeX = $closePoint.X
-$closeY = $closePoint.Y
-Write-Output "Step 8: Click close sign at ($closeX, $closeY), relative ($($closePoint.RelativeX), $($closePoint.RelativeY))"
+$mainBase = Get-WindowBase $mainHwnd
+$popupBaseX = $mainBase.X + ${POPUP_ANCHOR_X}
+$popupBaseY = $mainBase.Y + ${POPUP_ANCHOR_Y}
+$closeX = $popupBaseX + ${CLOSE_SIGN_X}
+$closeY = $popupBaseY + ${CLOSE_SIGN_Y}
+Write-Output "Step 8: Click close sign at ($closeX, $closeY)"
 Click $closeX $closeY
 Start-Sleep -Seconds 1
 
