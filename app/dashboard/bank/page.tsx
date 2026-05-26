@@ -359,9 +359,9 @@ export default function BankSettingsPage() {
             accountData: [
                 ...accountData,
                 {
+                    highAuth: newUser.highAuth,
                     UserID: parsedUserId,
                     AccountName: displayName,
-                    highAuth: newUser.highAuth,
                     deferAccountName: '',
                     DeferID: 0,
                     accountBalance: [0, 0, 0, 0, 0],
@@ -379,16 +379,20 @@ export default function BankSettingsPage() {
         const accountData = Array.isArray(settings.accountData) ? settings.accountData : []
         updateSettings({
             ...settings,
-            accountData: accountData.filter(u => u.UserID !== userId)
+            accountData: accountData.map((u) => u.UserID === userId ? { ...u, highAuth: false } : u)
         })
-        toast.success('User removed. Save changes to write config.')
+        toast.success('User removed from authorized list. Save changes to write config.')
     }
 
     const clearAllUsers = () => {
         if (!settings) return
-        if (confirm('Are you sure you want to remove all users?')) {
-            updateSettings({ ...settings, accountData: [] })
-            toast.success('All users cleared. Save changes to write config.')
+        if (confirm('Are you sure you want to remove all authorized users?')) {
+            const accountData = Array.isArray(settings.accountData) ? settings.accountData : []
+            updateSettings({
+                ...settings,
+                accountData: accountData.map((u) => ({ ...u, highAuth: false })),
+            })
+            toast.success('Authorized users cleared. Save changes to write config.')
         }
     }
 
@@ -420,7 +424,7 @@ export default function BankSettingsPage() {
         { id: 'commands', label: 'Commands', icon: Terminal },
     ]
 
-    const rosterUsers = Array.isArray(settings?.accountData) ? settings.accountData : []
+    const authorizedUsers = (Array.isArray(settings?.accountData) ? settings.accountData : []).filter((user) => user.highAuth === true)
     const filteredCommands = (Array.isArray(settings?.guildCommands) ? settings.guildCommands : [])
         .map((cmd, index) => ({ cmd, index }))
         .filter(({ cmd }) => cmd.commadReference.toLowerCase().includes(commandSearch.toLowerCase()))
@@ -633,7 +637,7 @@ export default function BankSettingsPage() {
                                         <div>
                                             <h3 className="text-[15px] font-bold text-text-primary">Authorized Users</h3>
                                             <p className="mt-1 text-[12px] text-text-muted">
-                                                {rosterUsers.length} users linked
+                                                {authorizedUsers.length} high-auth users linked
                                             </p>
                                         </div>
                                     </div>
@@ -651,14 +655,14 @@ export default function BankSettingsPage() {
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-border">
-                                                {rosterUsers.length > 0 ? (
-                                                    rosterUsers.map((user) => (
+                                                {authorizedUsers.length > 0 ? (
+                                                    authorizedUsers.map((user) => (
                                                         <tr key={user.UserID} className="hover:bg-white/[0.02]">
                                                             <td className="px-6 py-5 font-mono text-sm font-bold text-white">{user.UserID}</td>
                                                             <td className="px-6 py-5 text-sm text-text-primary">{user.AccountName || `User ${user.UserID}`}</td>
                                                             <td className="px-6 py-5">
-                                                                <span className={`rounded-full px-3 py-1 text-[12px] font-bold ${user.highAuth ? 'bg-emerald-500/15 text-emerald-400' : 'bg-white/[0.06] text-text-muted'}`}>
-                                                                    {user.highAuth ? 'ADMIN' : 'USER'}
+                                                                <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-[12px] font-bold text-emerald-400">
+                                                                    ADMIN
                                                                 </span>
                                                             </td>
                                                             <td className="px-6 py-5">
@@ -677,7 +681,7 @@ export default function BankSettingsPage() {
                                                                     onClick={() => removeUser(user.UserID)}
                                                                     className="rounded-md border border-accent-3/25 bg-accent-3/10 px-3 py-2 text-[13px] font-bold text-accent-3 transition-colors hover:bg-accent-3/20"
                                                                 >
-                                                                    Delete
+                                                                    Remove
                                                                 </button>
                                                             </td>
                                                         </tr>
@@ -685,7 +689,7 @@ export default function BankSettingsPage() {
                                                 ) : (
                                                     <tr>
                                                         <td colSpan={6} className="px-6 py-14 text-center text-text-muted">
-                                                            No users added
+                                                            No authorized users added
                                                         </td>
                                                     </tr>
                                                 )}
@@ -694,15 +698,15 @@ export default function BankSettingsPage() {
                                     </div>
 
                                     <div className="space-y-3 p-4 xl:hidden">
-                                        {rosterUsers.length > 0 ? (
-                                            rosterUsers.map((user) => (
+                                        {authorizedUsers.length > 0 ? (
+                                            authorizedUsers.map((user) => (
                                                 <div key={user.UserID} className="rounded-lg border border-border bg-bg-inset/70 p-4">
                                                     <div className="flex items-start justify-between gap-3">
                                                         <div>
                                                             <p className="font-mono text-[16px] font-bold text-white">{user.UserID}</p>
                                                             <p className="mt-1 text-[14px] text-text-primary">{user.AccountName || `User ${user.UserID}`}</p>
-                                                            <span className={`mt-3 inline-flex rounded-full px-3 py-1 text-[12px] font-bold ${user.highAuth ? 'bg-emerald-500/15 text-emerald-400' : 'bg-white/[0.06] text-text-muted'}`}>
-                                                                {user.highAuth ? 'ADMIN' : 'USER'}
+                                                            <span className="mt-3 inline-flex rounded-full bg-emerald-500/15 px-3 py-1 text-[12px] font-bold text-emerald-400">
+                                                                ADMIN
                                                             </span>
                                                             <div className="mt-2 flex items-center gap-2">
                                                                 <span className="text-[12px] font-medium text-text-muted">High Auth:</span>
@@ -718,14 +722,14 @@ export default function BankSettingsPage() {
                                                             onClick={() => removeUser(user.UserID)}
                                                             className="rounded-md border border-accent-3/25 bg-accent-3/10 px-3 py-2 text-[12px] font-bold text-accent-3"
                                                         >
-                                                            Delete
+                                                            Remove
                                                         </button>
                                                     </div>
                                                 </div>
                                             ))
                                         ) : (
                                             <div className="rounded-lg border border-dashed border-border bg-bg-inset/30 px-6 py-12 text-center text-text-muted">
-                                                No users added
+                                                No authorized users added
                                             </div>
                                         )}
                                     </div>
