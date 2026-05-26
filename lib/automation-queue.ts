@@ -122,12 +122,12 @@ class AutomationQueue {
         const OUTSIDE_POPUP_X = 1018
         const OUTSIDE_POPUP_Y = 149
 
-        const POPUP_ANCHOR_X = 104
-        const POPUP_ANCHOR_Y = 102
-        const POPUP_FUNCTIONS_X = 160
-        const POPUP_FUNCTIONS_Y = 44
-        const POPUP_RELOAD_X = 143
-        const POPUP_RELOAD_Y = 102
+        const POPUP_ANCHOR_X = 72
+        const POPUP_ANCHOR_Y = 75
+        const POPUP_FUNCTIONS_X = 166
+        const POPUP_FUNCTIONS_Y = 49
+        const POPUP_RELOAD_X = 171
+        const POPUP_RELOAD_Y = 104
         const MAIN_REQUIRED_X = Math.max(SEARCH_FIELD_X, FIRST_RESULT_X, OUTSIDE_POPUP_X, POPUP_ANCHOR_X + POPUP_FUNCTIONS_X, POPUP_ANCHOR_X + POPUP_RELOAD_X)
         const MAIN_REQUIRED_Y = Math.max(SEARCH_FIELD_Y, FIRST_RESULT_Y, OUTSIDE_POPUP_Y, POPUP_ANCHOR_Y + POPUP_FUNCTIONS_Y, POPUP_ANCHOR_Y + POPUP_RELOAD_Y)
         const MIN_WINDOW_WIDTH = 1024
@@ -308,21 +308,12 @@ function Move-WindowTopLeft($hwnd, $label) {
     return (Get-WindowBase $hwnd)
 }
 
-function Ensure-WindowClickArea($hwnd, $base, $label, $requiredX, $requiredY, $canMaximize) {
+function Ensure-WindowClickArea($base, $label, $requiredX, $requiredY) {
     $windowWidth = $base.Rect.Right - $base.Rect.Left
     $windowHeight = $base.Rect.Bottom - $base.Rect.Top
 
-    if (($windowWidth -le $requiredX -or $windowHeight -le $requiredY) -and $canMaximize) {
-        Write-Host "$label window is $($windowWidth)x$($windowHeight), maximizing for click area..."
-        [Win32]::ShowWindow($hwnd, 3) | Out-Null
-        Start-Sleep -Seconds 1
-        $base = Get-WindowBase $hwnd
-        $windowWidth = $base.Rect.Right - $base.Rect.Left
-        $windowHeight = $base.Rect.Bottom - $base.Rect.Top
-    }
-
     if ($windowWidth -le $requiredX -or $windowHeight -le $requiredY) {
-        Write-Output "ERROR: $label window is $($windowWidth)x$($windowHeight). Needed click area reaches relative ($requiredX, $requiredY)."
+        Write-Output "ERROR: $label window is $($windowWidth)x$($windowHeight). Needed click area reaches relative ($requiredX, $requiredY). Resize it manually and retake coordinates."
         exit 1
     }
 
@@ -330,29 +321,10 @@ function Ensure-WindowClickArea($hwnd, $base, $label, $requiredX, $requiredY, $c
     $margin = 8
     $targetX = $base.X + $requiredX
     $targetY = $base.Y + $requiredY
-    $newX = $base.X
-    $newY = $base.Y
 
-    if ($targetX -gt ($screen.Right - $margin)) {
-        $newX = $newX - ($targetX - ($screen.Right - $margin))
-    }
-    if ($targetY -gt ($screen.Bottom - $margin)) {
-        $newY = $newY - ($targetY - ($screen.Bottom - $margin))
-    }
-    if ($newX -lt ($screen.Left + $margin)) {
-        $newX = $screen.Left + $margin
-    }
-    if ($newY -lt ($screen.Top + $margin)) {
-        $newY = $screen.Top + $margin
-    }
-
-    if ($newX -ne $base.X -or $newY -ne $base.Y) {
-        Write-Host "Moving $label window to ($newX, $newY) so click targets stay on-screen..."
-        [Win32]::SetWindowPos($hwnd, [IntPtr]::Zero, $newX, $newY, 0, 0, [Win32]::SWP_NOSIZE -bor [Win32]::SWP_NOZORDER -bor [Win32]::SWP_SHOWWINDOW) | Out-Null
-        Start-Sleep -Milliseconds 500
-        $base = Get-WindowBase $hwnd
-        $windowWidth = $base.Rect.Right - $base.Rect.Left
-        $windowHeight = $base.Rect.Bottom - $base.Rect.Top
+    if ($targetX -gt ($screen.Right - $margin) -or $targetY -gt ($screen.Bottom - $margin)) {
+        Write-Output "ERROR: $label window click targets are off-screen. Move/resize it manually and retake coordinates."
+        exit 1
     }
 
     Write-Host "$label window size: $($windowWidth)x$($windowHeight)"
@@ -397,9 +369,7 @@ if ($fgNow -eq $mainHwnd) {
 
 $mainBase = Get-WindowBase $mainHwnd
 Write-WindowBase $mainBase "Main"
-$mainBase = Move-WindowTopLeft $mainHwnd "Main"
-Write-WindowBase $mainBase "Main"
-$mainBase = Ensure-WindowClickArea $mainHwnd $mainBase "Main" ${MAIN_REQUIRED_X} ${MAIN_REQUIRED_Y} $true
+$mainBase = Ensure-WindowClickArea $mainBase "Main" ${MAIN_REQUIRED_X} ${MAIN_REQUIRED_Y}
 Write-WindowBase $mainBase "Main"
 
 # Step 1: Focus/open search without toggling the search icon closed.
