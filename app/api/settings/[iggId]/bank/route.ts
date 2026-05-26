@@ -43,6 +43,16 @@ const DEFAULT_MANAGE_GUILD_SETTINGS = {
     accountData: [],
 }
 
+function normalizeBankSettings(settings: Record<string, unknown> | null | undefined) {
+    return {
+        ...DEFAULT_BANK_SETTINGS,
+        ...settings,
+        guildCommands: Array.isArray(settings?.guildCommands) ? settings.guildCommands : [],
+        accountData: Array.isArray(settings?.accountData) ? settings.accountData : [],
+        outgoingData: Array.isArray(settings?.outgoingData) ? settings.outgoingData : [],
+    }
+}
+
 export async function GET(
     req: Request,
     { params }: { params: { iggId: string } }
@@ -53,11 +63,11 @@ export async function GET(
     }
 
     try {
-        let bankSettings = DEFAULT_BANK_SETTINGS
+        let bankSettings = normalizeBankSettings(null)
         let manageGuildSettings = DEFAULT_MANAGE_GUILD_SETTINGS
 
         try {
-            bankSettings = await readBankSettingsFile(params.iggId)
+            bankSettings = normalizeBankSettings(await readBankSettingsFile(params.iggId))
         } catch {
             // Return default bank settings if banksettings.json does not exist.
         }
@@ -113,7 +123,7 @@ export async function PUT(
             ...bankSettings
         } = settings
 
-        const bankSync = await writeBankSettingsFile(params.iggId, bankSettings)
+        const bankSync = await writeBankSettingsFile(params.iggId, normalizeBankSettings(bankSettings))
 
         let manageGuildSettings = DEFAULT_MANAGE_GUILD_SETTINGS
         try {

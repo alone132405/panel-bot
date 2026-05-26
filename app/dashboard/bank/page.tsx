@@ -60,6 +60,35 @@ interface BankSettings {
     accountData: AuthorizedUser[]
 }
 
+const DEFAULT_BANK_SETTINGS: BankSettings = {
+    enableBank: false,
+    enableWhiteList: false,
+    enableBlackList: false,
+    allowChatCommands: true,
+    allowMailCommands: true,
+    autoDeleteCmdMail: false,
+    disableMailResponse: false,
+    disableErrorResponse: false,
+    cmdPrefix: '!',
+    maxSendLimit: 40000000,
+    maxSendDistance: 50,
+    useBagRss: false,
+    ignoreBalance: false,
+    allowAdminBalance: false,
+    allowAdminSkipLimit: true,
+    allowExternalCommands: false,
+    BuildspamMinimum: 3,
+    guildCommands: [],
+    accountData: [],
+}
+
+const normalizeBankSettings = (settings: Partial<BankSettings> | null | undefined): BankSettings => ({
+    ...DEFAULT_BANK_SETTINGS,
+    ...settings,
+    guildCommands: Array.isArray(settings?.guildCommands) ? settings.guildCommands : [],
+    accountData: Array.isArray(settings?.accountData) ? settings.accountData : [],
+})
+
 const RANK_OPTIONS = [
     { value: 1, label: 'RANK1' },
     { value: 2, label: 'RANK2' },
@@ -173,7 +202,7 @@ export default function BankSettingsPage() {
         const onBankSettingsUpdated = (data: { iggId: string, settings: BankSettings }) => {
             if (data.iggId === selectedIggId) {
                 // console.log('BankPage: Received external settings update')
-                setSettings(data.settings)
+                setSettings(normalizeBankSettings(data.settings))
             }
         }
 
@@ -237,30 +266,10 @@ export default function BankSettingsPage() {
             const res = await fetch(`/api/settings/${selectedIggId}/bank`)
             if (res.ok) {
                 const data = await res.json()
-                setSettings(data)
+                setSettings(normalizeBankSettings(data))
             } else {
                 // Initialize with defaults if not found
-                setSettings({
-                    enableBank: false,
-                    enableWhiteList: false,
-                    enableBlackList: false,
-                    allowChatCommands: true,
-                    allowMailCommands: true,
-                    autoDeleteCmdMail: false,
-                    disableMailResponse: false,
-                    disableErrorResponse: false,
-                    cmdPrefix: '!',
-                    maxSendLimit: 40000000,
-                    maxSendDistance: 50,
-                    useBagRss: false,
-                    ignoreBalance: false,
-                    allowAdminBalance: false,
-                    allowAdminSkipLimit: true,
-                    allowExternalCommands: false,
-                    BuildspamMinimum: 3,
-                    guildCommands: [],
-                    accountData: []
-                })
+                setSettings(normalizeBankSettings(null))
             }
         } catch (error) {
             toast.error('Failed to load bank settings')
@@ -271,7 +280,7 @@ export default function BankSettingsPage() {
     }
 
     const updateSettings = (newSettings: BankSettings) => {
-        setSettings(newSettings)
+        setSettings(normalizeBankSettings(newSettings))
         setShowApplyButton(false)
     }
 
@@ -318,16 +327,17 @@ export default function BankSettingsPage() {
         }
 
         const displayName = newUser.name.trim()
-        const existingIndex = settings.accountData.findIndex((user) => user.UserID === parsedUserId)
+        const accountData = Array.isArray(settings.accountData) ? settings.accountData : []
+        const existingIndex = accountData.findIndex((user) => user.UserID === parsedUserId)
 
         if (existingIndex >= 0) {
-            const existingUser = settings.accountData[existingIndex]
-            if (existingUser.highAuth && existingUser.AccountName === displayName) {
-                toast.error('This user is already fully authorized in the roster')
+            const existingUser = accountData[existingIndex]
+            if (existingUser.highAuth === newUser.highAuth && existingUser.AccountName === displayName) {
+                toast.error('This user is already in the roster')
                 return
             }
 
-            const updatedAccountData = [...settings.accountData]
+            const updatedAccountData = [...accountData]
             updatedAccountData[existingIndex] = {
                 ...existingUser,
                 AccountName: displayName,
@@ -340,14 +350,14 @@ export default function BankSettingsPage() {
             })
             setNewUser({ iggId: '', name: '', highAuth: true })
             setShowAddUserModal(false)
-            toast.success('Existing user updated and authorized')
+            toast.success('Existing user updated. Save changes to write config.')
             return
         }
 
         updateSettings({
             ...settings,
             accountData: [
-                ...settings.accountData,
+                ...accountData,
                 {
                     UserID: parsedUserId,
                     AccountName: displayName,
@@ -361,45 +371,47 @@ export default function BankSettingsPage() {
         })
         setNewUser({ iggId: '', name: '', highAuth: true })
         setShowAddUserModal(false)
-        toast.success('User added to the roster')
+        toast.success('User added. Save changes to write config.')
     }
 
     const removeUser = (userId: number) => {
         if (!settings) return
+        const accountData = Array.isArray(settings.accountData) ? settings.accountData : []
         updateSettings({
             ...settings,
-            accountData: settings.accountData.filter(u => u.UserID !== userId)
+            accountData: accountData.filter(u => u.UserID !== userId)
         })
-        toast.success('User removed')
+        toast.success('User removed. Save changes to write config.')
     }
 
     const clearAllUsers = () => {
         if (!settings) return
         if (confirm('Are you sure you want to remove all users?')) {
             updateSettings({ ...settings, accountData: [] })
-            toast.success('All users cleared')
+            toast.success('All users cleared. Save changes to write config.')
         }
     }
 
     const toggleCommandEnabled = (index: number) => {
         if (!settings) return
-        const newCommands = [...settings.guildCommands]
+        const newCommands = [...(Array.isArray(settings.guildCommands) ? settings.guildCommands : [])]
         newCommands[index] = { ...newCommands[index], enableCommand: !newCommands[index].enableCommand }
         updateSettings({ ...settings, guildCommands: newCommands })
     }
 
     const updateCommandRank = (index: number, rank: number) => {
         if (!settings) return
-        const newCommands = [...settings.guildCommands]
+        const newCommands = [...(Array.isArray(settings.guildCommands) ? settings.guildCommands : [])]
         newCommands[index] = { ...newCommands[index], minRank: rank }
         updateSettings({ ...settings, guildCommands: newCommands })
     }
 
     const toggleHighAuth = (userId: number) => {
         if (!settings) return
+        const accountData = Array.isArray(settings.accountData) ? settings.accountData : []
         updateSettings({
             ...settings,
-            accountData: settings.accountData.map((u) => u.UserID === userId ? { ...u, highAuth: !u.highAuth } : u)
+            accountData: accountData.map((u) => u.UserID === userId ? { ...u, highAuth: !u.highAuth } : u)
         })
     }
 
@@ -408,10 +420,10 @@ export default function BankSettingsPage() {
         { id: 'commands', label: 'Commands', icon: Terminal },
     ]
 
-    const authorizedUsers = (settings?.accountData ?? []).filter((user) => user.highAuth === true)
-    const filteredCommands = settings?.guildCommands
+    const rosterUsers = Array.isArray(settings?.accountData) ? settings.accountData : []
+    const filteredCommands = (Array.isArray(settings?.guildCommands) ? settings.guildCommands : [])
         .map((cmd, index) => ({ cmd, index }))
-        .filter(({ cmd }) => cmd.commadReference.toLowerCase().includes(commandSearch.toLowerCase())) ?? []
+        .filter(({ cmd }) => cmd.commadReference.toLowerCase().includes(commandSearch.toLowerCase()))
 
     const commandAccessCards = [
         {
@@ -621,7 +633,7 @@ export default function BankSettingsPage() {
                                         <div>
                                             <h3 className="text-[15px] font-bold text-text-primary">Authorized Users</h3>
                                             <p className="mt-1 text-[12px] text-text-muted">
-                                                {authorizedUsers.length} admin users linked
+                                                {rosterUsers.length} users linked
                                             </p>
                                         </div>
                                     </div>
@@ -639,14 +651,14 @@ export default function BankSettingsPage() {
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-border">
-                                                {authorizedUsers.length > 0 ? (
-                                                    authorizedUsers.map((user) => (
+                                                {rosterUsers.length > 0 ? (
+                                                    rosterUsers.map((user) => (
                                                         <tr key={user.UserID} className="hover:bg-white/[0.02]">
                                                             <td className="px-6 py-5 font-mono text-sm font-bold text-white">{user.UserID}</td>
                                                             <td className="px-6 py-5 text-sm text-text-primary">{user.AccountName || `User ${user.UserID}`}</td>
                                                             <td className="px-6 py-5">
-                                                                <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-[12px] font-bold text-emerald-400">
-                                                                    ADMIN
+                                                                <span className={`rounded-full px-3 py-1 text-[12px] font-bold ${user.highAuth ? 'bg-emerald-500/15 text-emerald-400' : 'bg-white/[0.06] text-text-muted'}`}>
+                                                                    {user.highAuth ? 'ADMIN' : 'USER'}
                                                                 </span>
                                                             </td>
                                                             <td className="px-6 py-5">
@@ -682,15 +694,15 @@ export default function BankSettingsPage() {
                                     </div>
 
                                     <div className="space-y-3 p-4 xl:hidden">
-                                        {authorizedUsers.length > 0 ? (
-                                            authorizedUsers.map((user) => (
+                                        {rosterUsers.length > 0 ? (
+                                            rosterUsers.map((user) => (
                                                 <div key={user.UserID} className="rounded-lg border border-border bg-bg-inset/70 p-4">
                                                     <div className="flex items-start justify-between gap-3">
                                                         <div>
                                                             <p className="font-mono text-[16px] font-bold text-white">{user.UserID}</p>
                                                             <p className="mt-1 text-[14px] text-text-primary">{user.AccountName || `User ${user.UserID}`}</p>
-                                                            <span className="mt-3 inline-flex rounded-full bg-emerald-500/15 px-3 py-1 text-[12px] font-bold text-emerald-400">
-                                                                ADMIN
+                                                            <span className={`mt-3 inline-flex rounded-full px-3 py-1 text-[12px] font-bold ${user.highAuth ? 'bg-emerald-500/15 text-emerald-400' : 'bg-white/[0.06] text-text-muted'}`}>
+                                                                {user.highAuth ? 'ADMIN' : 'USER'}
                                                             </span>
                                                             <div className="mt-2 flex items-center gap-2">
                                                                 <span className="text-[12px] font-medium text-text-muted">High Auth:</span>
