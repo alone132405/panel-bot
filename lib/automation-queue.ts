@@ -115,8 +115,6 @@ class AutomationQueue {
         // console.log('Running automation for IGG ID:', iggId)
 
         // Coordinates
-        const SEARCH_ICON_X = 1277
-        const SEARCH_ICON_Y = 143
         const SEARCH_FIELD_X = 1116
         const SEARCH_FIELD_Y = 147
         const FIRST_RESULT_X = 386
@@ -130,8 +128,8 @@ class AutomationQueue {
         const POPUP_FUNCTIONS_Y = 44
         const POPUP_RELOAD_X = 143
         const POPUP_RELOAD_Y = 102
-        const MAIN_REQUIRED_X = Math.max(SEARCH_ICON_X, SEARCH_FIELD_X, FIRST_RESULT_X, OUTSIDE_POPUP_X, POPUP_ANCHOR_X + POPUP_FUNCTIONS_X, POPUP_ANCHOR_X + POPUP_RELOAD_X)
-        const MAIN_REQUIRED_Y = Math.max(SEARCH_ICON_Y, SEARCH_FIELD_Y, FIRST_RESULT_Y, OUTSIDE_POPUP_Y, POPUP_ANCHOR_Y + POPUP_FUNCTIONS_Y, POPUP_ANCHOR_Y + POPUP_RELOAD_Y)
+        const MAIN_REQUIRED_X = Math.max(SEARCH_FIELD_X, FIRST_RESULT_X, OUTSIDE_POPUP_X, POPUP_ANCHOR_X + POPUP_FUNCTIONS_X, POPUP_ANCHOR_X + POPUP_RELOAD_X)
+        const MAIN_REQUIRED_Y = Math.max(SEARCH_FIELD_Y, FIRST_RESULT_Y, OUTSIDE_POPUP_Y, POPUP_ANCHOR_Y + POPUP_FUNCTIONS_Y, POPUP_ANCHOR_Y + POPUP_RELOAD_Y)
         const MIN_WINDOW_WIDTH = 1024
         const MIN_DESKTOP_HEIGHT = 640
 
@@ -404,11 +402,9 @@ Write-WindowBase $mainBase "Main"
 $mainBase = Ensure-WindowClickArea $mainHwnd $mainBase "Main" ${MAIN_REQUIRED_X} ${MAIN_REQUIRED_Y} $true
 Write-WindowBase $mainBase "Main"
 
-# Step 1: Click search icon
-$searchIconX = $mainBase.X + ${SEARCH_ICON_X}
-$searchIconY = $mainBase.Y + ${SEARCH_ICON_Y}
-Write-Output "Step 1: Click search icon at ($searchIconX, $searchIconY)"
-Click $searchIconX $searchIconY
+# Step 1: Focus/open search without toggling the search icon closed.
+Write-Output "Step 1: Focus search with Ctrl+F"
+[System.Windows.Forms.SendKeys]::SendWait("^f")
 Start-Sleep -Milliseconds 500
 
 # Step 2: Click search field and paste IGG ID
