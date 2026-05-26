@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { TacticalSelect } from '@/components/ui/TacticalSelect'
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch'
+import { useSocket } from '@/hooks/useSocket'
 import { Settings, Shield, Package, Globe, Sprout, Moon, Ship, Gem, Target, Users, Building, FlaskConical, Swords, ChevronRight, LogOut, Save, Loader2 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 
@@ -43,6 +44,8 @@ export default function SettingsDetailPage() {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [applying, setApplying] = useState(false)
+    const { automationStatus } = useSocket(iggId || undefined)
+    const isWaitingForRdp = automationStatus?.status === 'waiting'
 
     useEffect(() => {
         if (!session) {
@@ -334,11 +337,11 @@ export default function SettingsDetailPage() {
                                         </button>
                                         <button
                                             onClick={() => void handleApplyChanges()}
-                                            disabled={saving || applying}
+                                            disabled={saving || applying || isWaitingForRdp}
                                             className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/10 px-6 py-3 font-medium text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
                                         >
-                                            {applying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Settings className="h-4 w-4" />}
-                                            {applying ? 'Applying...' : 'Apply Changes'}
+                                            {(applying || isWaitingForRdp) ? <Loader2 className="h-4 w-4 animate-spin" /> : <Settings className="h-4 w-4" />}
+                                            {isWaitingForRdp ? 'Waiting RDP disconnect...' : applying ? 'Applying...' : 'Apply Changes'}
                                         </button>
                                     </div>
                                 </div>

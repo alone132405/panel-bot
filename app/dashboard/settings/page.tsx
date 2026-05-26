@@ -83,6 +83,7 @@ export default function SettingsPage() {
     const [queuePosition, setQueuePosition] = useState(0)
     const [cooldown, setCooldown] = useState(0)
     const { queueStatus, automationStatus, isConnected } = useSocket(selectedIggId || undefined)
+    const isWaitingForRdp = automationStatus?.status === 'waiting'
 
     useEffect(() => {
         // console.log('SettingsPage: mounted/updated. IGG ID:', selectedIggId, 'Socket Connected:', isConnected)
@@ -490,7 +491,7 @@ export default function SettingsPage() {
                     {(applying || queuePosition > 0) ? (
                         <>
                             <Loader2 className="w-5 h-5 animate-spin" />
-                            {queuePosition > 0 ? `Queue Status #${queuePosition}` : 'Applying Changes...'}
+                            {isWaitingForRdp ? 'Waiting RDP disconnect...' : queuePosition > 0 ? `Queue Status #${queuePosition}` : 'Applying Changes...'}
                         </>
                     ) : cooldown > 0 ? (
                         <>

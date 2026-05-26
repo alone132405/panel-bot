@@ -82,6 +82,7 @@ export default function BankSettingsPage() {
     const [queuePosition, setQueuePosition] = useState(0)
     const [cooldown, setCooldown] = useState(0)
     const [showApplyButton, setShowApplyButton] = useState(false)
+    const isWaitingForRdp = automationStatus?.status === 'waiting'
 
     // Load cooldown from local storage
     useEffect(() => {
@@ -953,7 +954,7 @@ export default function BankSettingsPage() {
                     <div className="rounded-lg border border-border bg-bg-surface p-4 shadow-panel sm:p-5">
                         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                             <div className="text-[13px] text-text-muted">
-                                Queue: <span className="font-mono text-text-primary">{queuePosition > 0 ? `#${queuePosition}` : applying ? 'Running' : 'Idle'}</span>
+                                Queue: <span className="font-mono text-text-primary">{isWaitingForRdp ? 'Waiting RDP' : queuePosition > 0 ? `#${queuePosition}` : applying ? 'Running' : 'Idle'}</span>
                                 <span className="mx-2 text-border">|</span>
                                 Cooldown: <span className="font-mono text-text-primary">{cooldown > 0 ? `${Math.floor(cooldown / 60)}:${String(cooldown % 60).padStart(2, '0')}` : 'Ready'}</span>
                             </div>
@@ -974,7 +975,7 @@ export default function BankSettingsPage() {
                                         {(applying || queuePosition > 0) ? (
                                             <>
                                                 <Loader2 className="h-5 w-5 animate-spin" />
-                                                {queuePosition > 0 ? `Queue Status #${queuePosition}` : 'Applying Changes...'}
+                                                {isWaitingForRdp ? 'Waiting RDP disconnect...' : queuePosition > 0 ? `Queue Status #${queuePosition}` : 'Applying Changes...'}
                                             </>
                                         ) : cooldown > 0 ? (
                                             <>
