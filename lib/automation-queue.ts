@@ -73,6 +73,8 @@ class AutomationQueue {
         try {
             this.broadcastQueueStatus(io)
 
+            await this.waitForConsoleSession(io, item.iggId)
+
             if (io) {
                 io.to(`igg-${item.iggId}`).emit('automation_status', {
                     status: 'processing',
@@ -111,25 +113,58 @@ class AutomationQueue {
         }
     }
 
+    private async isConsoleSession(): Promise<boolean> {
+        try {
+            const { stdout } = await execFileAsync('quser', [], { windowsHide: true })
+            const lines = String(stdout || '').split('\n')
+            const currentSessionLine = lines.find(line => line.trim().startsWith('>'))
+
+            if (!currentSessionLine) return true
+
+            const parts = currentSessionLine.trim().split(/\s+/)
+            const sessionName = parts[1]?.toLowerCase() || ''
+
+            return !(sessionName.includes('rdp') || sessionName.includes('tcp'))
+        } catch (error) {
+            console.error('Error checking session:', error)
+            return true
+        }
+    }
+
+    private async waitForConsoleSession(io: any, iggId: string): Promise<void> {
+        let isConsole = await this.isConsoleSession()
+
+        while (!isConsole) {
+            if (io) {
+                io.to(`igg-${iggId}`).emit('automation_status', {
+                    status: 'waiting',
+                    message: 'RDP connected. Waiting for disconnect (use disconnect_headless.bat)...',
+                    timestamp: Date.now()
+                })
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 5000))
+            isConsole = await this.isConsoleSession()
+        }
+    }
+
     private async runAutomation(iggId: string): Promise<void> {
         // console.log('Running automation for IGG ID:', iggId)
 
         // Coordinates
-        const SEARCH_FIELD_X = 1116
-        const SEARCH_FIELD_Y = 147
-        const FIRST_RESULT_X = 386
-        const FIRST_RESULT_Y = 217
-        const OUTSIDE_POPUP_X = 1018
-        const OUTSIDE_POPUP_Y = 149
+        const SEARCH_BOX_X = 994
+        const SEARCH_BOX_Y = 142
+        const ACCOUNT_X = 391
+        const ACCOUNT_Y = 216
+        const CLOSE_X = 450
+        const CLOSE_Y = 14
+        const FINAL_X = 745
+        const FINAL_Y = 145
 
-        const POPUP_ANCHOR_X = 72
-        const POPUP_ANCHOR_Y = 75
-        const POPUP_FUNCTIONS_X = 166
-        const POPUP_FUNCTIONS_Y = 49
-        const POPUP_RELOAD_X = 171
-        const POPUP_RELOAD_Y = 104
-        const MAIN_REQUIRED_X = Math.max(SEARCH_FIELD_X, FIRST_RESULT_X, OUTSIDE_POPUP_X, POPUP_ANCHOR_X + POPUP_FUNCTIONS_X, POPUP_ANCHOR_X + POPUP_RELOAD_X)
-        const MAIN_REQUIRED_Y = Math.max(SEARCH_FIELD_Y, FIRST_RESULT_Y, OUTSIDE_POPUP_Y, POPUP_ANCHOR_Y + POPUP_FUNCTIONS_Y, POPUP_ANCHOR_Y + POPUP_RELOAD_Y)
+        const POPUP_FUNCTIONS_X = 159
+        const POPUP_FUNCTIONS_Y = 60
+        const POPUP_RELOAD_X = 180
+        const POPUP_RELOAD_Y = 111
         const MIN_WINDOW_WIDTH = 1024
         const MIN_DESKTOP_HEIGHT = 640
 
@@ -164,6 +199,9 @@ public class Win32 {
     
     [DllImport("user32.dll")]
     public static extern bool IsIconic(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
 
     [DllImport("user32.dll")]
     public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
@@ -346,13 +384,18 @@ if (-not $botProcess) {
 
 Write-Output "Found: $($botProcess.MainWindowTitle)"
 $mainHwnd = $botProcess.MainWindowHandle
-$botProcessId = [uint32]$botProcess.Id
 
 if ([Win32]::IsIconic($mainHwnd)) {
     Write-Output "Restoring minimized window..."
     [Win32]::ShowWindow($mainHwnd, [Win32]::SW_RESTORE)
     Start-Sleep -Seconds 1
 }
+
+Write-Output "Restoring and resizing window to 1024x768 at (0,0)..."
+[Win32]::ShowWindow($mainHwnd, [Win32]::SW_RESTORE) | Out-Null
+Start-Sleep -Milliseconds 500
+[Win32]::MoveWindow($mainHwnd, 0, 0, 1024, 768, $true) | Out-Null
+Start-Sleep -Milliseconds 500
 
 Write-Output "Forcing window to foreground..."
 ForceForeground $mainHwnd
@@ -369,37 +412,35 @@ if ($fgNow -eq $mainHwnd) {
 
 $mainBase = Get-WindowBase $mainHwnd
 Write-WindowBase $mainBase "Main"
-$mainBase = Ensure-WindowClickArea $mainBase "Main" ${MAIN_REQUIRED_X} ${MAIN_REQUIRED_Y}
-Write-WindowBase $mainBase "Main"
+$baseX = $mainBase.X
+$baseY = $mainBase.Y
 
-# Step 1: Focus/open search without toggling the search icon closed.
-Write-Output "Step 1: Focus search with Ctrl+F"
-[System.Windows.Forms.SendKeys]::SendWait("^f")
+# Step 1: Click search box
+$searchX = $baseX + ${SEARCH_BOX_X}
+$searchY = $baseY + ${SEARCH_BOX_Y}
+Write-Output "Step 1: Click Search at ($searchX, $searchY)"
+Click $searchX $searchY
+Start-Sleep -Milliseconds 500
+Click $searchX $searchY
 Start-Sleep -Milliseconds 500
 
-# Step 2: Click search field and paste IGG ID
-$mainBase = Get-WindowBase $mainHwnd
-Write-WindowBase $mainBase "Main"
-$searchFieldX = $mainBase.X + ${SEARCH_FIELD_X}
-$searchFieldY = $mainBase.Y + ${SEARCH_FIELD_Y}
-Write-Output "Step 2: Paste IGG ID ${iggId} into search field at ($searchFieldX, $searchFieldY)"
-Click $searchFieldX $searchFieldY
-Start-Sleep -Milliseconds 200
+# Step 2: Paste IGG ID
+Write-Output "Step 2: Paste IGG ID ${iggId}"
 Set-Clipboard -Value "${iggId}"
 [System.Windows.Forms.SendKeys]::SendWait("^a")
 Start-Sleep -Milliseconds 100
 [System.Windows.Forms.SendKeys]::SendWait("{DELETE}")
 Start-Sleep -Milliseconds 100
 [System.Windows.Forms.SendKeys]::SendWait("^v")
-Start-Sleep -Seconds 1
+Start-Sleep -Milliseconds 500
+[System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
+Start-Sleep -Seconds 2
 
-# Step 3: Double-click first search result
-$mainBase = Get-WindowBase $mainHwnd
-Write-WindowBase $mainBase "Main"
-$firstResultX = $mainBase.X + ${FIRST_RESULT_X}
-$firstResultY = $mainBase.Y + ${FIRST_RESULT_Y}
-Write-Output "Step 3: Double-click first result at ($firstResultX, $firstResultY)"
-DoubleClick $firstResultX $firstResultY
+# Step 3: Double-click account
+$accX = $baseX + ${ACCOUNT_X}
+$accY = $baseY + ${ACCOUNT_Y}
+Write-Output "Step 3: Double-click Account at ($accX, $accY)"
+DoubleClick $accX $accY
 Start-Sleep -Seconds 3
 
 # Step 4: Detect popup by waiting for foreground window to change from main
@@ -415,63 +456,51 @@ while ($true) {
         break
     }
 
-    $processWindows = [Win32]::GetVisibleWindowsForProcess($botProcessId)
-    foreach ($window in $processWindows) {
-        if ($window -ne $mainHwnd -and $window -ne [IntPtr]::Zero) {
-            $popupHwnd = $window
-            Write-Output "SUCCESS: Account popup detected from process windows. Handle: $popupHwnd"
-            break
-        }
-    }
-    if ($popupHwnd -ne [IntPtr]::Zero) {
-        break
-    }
-    
     if ((New-TimeSpan -Start $startTime -End (Get-Date)).TotalSeconds -gt 10) {
-        Write-Output "ERROR: Timeout waiting for account popup window."
+        Write-Output "WARNING: Timeout waiting for separate popup window."
         $fgTitle = New-Object System.Text.StringBuilder 256
         [Win32]::GetWindowText($currentFg, $fgTitle, $fgTitle.Capacity) | Out-Null
         Write-Output "DEBUG: Current foreground window title: $($fgTitle.ToString())"
-        exit 1
+        Write-Output "Falling back to main window."
+        $popupHwnd = $mainHwnd
+        break
     }
     Start-Sleep -Milliseconds 500
 }
 
-ForceForeground $popupHwnd
-Start-Sleep -Milliseconds 300
+$popupRect = New-Object Win32+RECT
+[Win32]::GetWindowRect($popupHwnd, [ref]$popupRect) | Out-Null
 
-$mainBase = Get-WindowBase $mainHwnd
-$popupBaseX = $mainBase.X + ${POPUP_ANCHOR_X}
-$popupBaseY = $mainBase.Y + ${POPUP_ANCHOR_Y}
-Write-Output "Popup visual anchor at: ($popupBaseX, $popupBaseY)"
+Write-Output "Popup Window Rect: Left=$($popupRect.Left), Top=$($popupRect.Top), Right=$($popupRect.Right), Bottom=$($popupRect.Bottom)"
+Write-Output "Clicking relative to popup at ($($popupRect.Left), $($popupRect.Top))"
 
 # Functions tab (relative to popup)
-$funcX = $popupBaseX + ${POPUP_FUNCTIONS_X}
-$funcY = $popupBaseY + ${POPUP_FUNCTIONS_Y}
+$funcX = $popupRect.Left + ${POPUP_FUNCTIONS_X}
+$funcY = $popupRect.Top + ${POPUP_FUNCTIONS_Y}
 Write-Output "Step 5: Click Functions at ($funcX, $funcY)"
 DoubleClick $funcX $funcY
 Start-Sleep -Seconds 1
 
 # Reload Settings (relative to popup)
-ForceForeground $popupHwnd
-Start-Sleep -Milliseconds 300
-$mainBase = Get-WindowBase $mainHwnd
-$popupBaseX = $mainBase.X + ${POPUP_ANCHOR_X}
-$popupBaseY = $mainBase.Y + ${POPUP_ANCHOR_Y}
-$reloadX = $popupBaseX + ${POPUP_RELOAD_X}
-$reloadY = $popupBaseY + ${POPUP_RELOAD_Y}
+$reloadX = $popupRect.Left + ${POPUP_RELOAD_X}
+$reloadY = $popupRect.Top + ${POPUP_RELOAD_Y}
 Write-Output "Step 6: Click Reload Settings at ($reloadX, $reloadY)"
 Click $reloadX $reloadY
 Start-Sleep -Seconds 2
 
-# Click outside popup.
-$mainBase = Get-WindowBase $mainHwnd
-Write-WindowBase $mainBase "Main"
-$outsideX = $mainBase.X + ${OUTSIDE_POPUP_X}
-$outsideY = $mainBase.Y + ${OUTSIDE_POPUP_Y}
-Write-Output "Step 7: Click outside popup at ($outsideX, $outsideY)"
-Click $outsideX $outsideY
-Start-Sleep -Milliseconds 500
+# Close popup
+$closeX = $baseX + ${CLOSE_X}
+$closeY = $baseY + ${CLOSE_Y}
+Write-Output "Step 7: Click to close at ($closeX, $closeY)"
+Click $closeX $closeY
+Start-Sleep -Seconds 1
+
+# Final cleanup
+$finalX = $baseX + ${FINAL_X}
+$finalY = $baseY + ${FINAL_Y}
+Write-Output "Step 8: Final click at ($finalX, $finalY)"
+Click $finalX $finalY
+Start-Sleep -Seconds 1
 
 Write-Output "=== AUTOMATION COMPLETE ==="
 `
@@ -483,7 +512,7 @@ Write-Output "=== AUTOMATION COMPLETE ==="
             try {
                 const result = await execFileAsync(
                     'powershell.exe',
-                    ['-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass', '-File', scriptPath],
+                    ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', scriptPath],
                     { windowsHide: true }
                 )
                 stdout = String(result.stdout || '');
