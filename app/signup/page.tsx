@@ -149,7 +149,7 @@ export default function SignupPage() {
                     transition={{ duration: 0.5 }}
                     className="w-full max-w-md"
                 >
-                    <div className="panel-solid overflow-hidden rounded-lg p-8">
+                    <div className="panel-solid overflow-hidden rounded-[24px] p-8">
                         
                         {/* Header */}
                         <div className="flex flex-col items-center mb-8">
@@ -197,7 +197,7 @@ export default function SignupPage() {
                                                 id="name"
                                                 value={formData.name}
                                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                                className="peer h-14 w-full rounded-lg border border-border bg-bg-elevated pl-12 pr-4 pt-2 text-text-primary placeholder-transparent transition-all focus:border-accent-1 focus:outline-none focus:shadow-[0_0_15px_rgba(33,243,177,0.15)]"
+                                                className="peer h-14 w-full rounded-[24px] border border-border bg-bg-elevated pl-12 pr-4 pt-2 text-text-primary placeholder-transparent transition-all focus:border-accent-1 focus:outline-none focus:shadow-[0_0_15px_rgba(33,243,177,0.15)]"
                                                 placeholder="Full Name"
                                                 required
                                             />
@@ -217,7 +217,7 @@ export default function SignupPage() {
                                                 id="email"
                                                 value={formData.email}
                                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                                className="peer h-14 w-full rounded-lg border border-border bg-bg-elevated pl-12 pr-4 pt-2 text-text-primary placeholder-transparent transition-all focus:border-accent-1 focus:outline-none focus:shadow-[0_0_15px_rgba(33,243,177,0.15)]"
+                                                className="peer h-14 w-full rounded-[24px] border border-border bg-bg-elevated pl-12 pr-4 pt-2 text-text-primary placeholder-transparent transition-all focus:border-accent-1 focus:outline-none focus:shadow-[0_0_15px_rgba(33,243,177,0.15)]"
                                                 placeholder="Email Address"
                                                 required
                                             />
@@ -249,7 +249,7 @@ export default function SignupPage() {
                                                 id="password"
                                                 value={formData.password}
                                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                                className="peer h-14 w-full rounded-lg border border-border bg-bg-elevated pl-12 pr-12 pt-2 text-text-primary placeholder-transparent transition-all focus:border-accent-1 focus:outline-none focus:shadow-[0_0_15px_rgba(33,243,177,0.15)]"
+                                                className="peer h-14 w-full rounded-[24px] border border-border bg-bg-elevated pl-12 pr-12 pt-2 text-text-primary placeholder-transparent transition-all focus:border-accent-1 focus:outline-none focus:shadow-[0_0_15px_rgba(33,243,177,0.15)]"
                                                 placeholder="Password"
                                                 required
                                             />
@@ -289,7 +289,7 @@ export default function SignupPage() {
                                                 id="confirmPassword"
                                                 value={formData.confirmPassword}
                                                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                                className="peer h-14 w-full rounded-lg border border-border bg-bg-elevated pl-12 pr-4 pt-2 text-text-primary placeholder-transparent transition-all focus:border-accent-1 focus:outline-none focus:shadow-[0_0_15px_rgba(33,243,177,0.15)]"
+                                                className="peer h-14 w-full rounded-[24px] border border-border bg-bg-elevated pl-12 pr-4 pt-2 text-text-primary placeholder-transparent transition-all focus:border-accent-1 focus:outline-none focus:shadow-[0_0_15px_rgba(33,243,177,0.15)]"
                                                 placeholder="Confirm Password"
                                                 required
                                             />
@@ -320,7 +320,7 @@ export default function SignupPage() {
                                                 <button
                                                     type="button"
                                                     onClick={() => setFormData({ ...formData, contactType: 'WHATSAPP', contactValue: '' })}
-                                                    className={`flex-1 py-3 flex flex-col items-center gap-1 rounded-xl border transition-all ${formData.contactType === 'WHATSAPP' ? 'bg-gradient-to-b from-[#25D366]/20 to-[#25D366]/10 border-[#25D366]/50 shadow-[0_0_15px_rgba(37,211,102,0.2)]' : 'bg-bg-elevated border-border hover:border-text-muted'}`}
+                                                    className={`flex-1 py-3 flex flex-col items-center gap-1 rounded-[24px] border transition-all ${formData.contactType === 'WHATSAPP' ? 'bg-gradient-to-b from-[#25D366]/20 to-[#25D366]/10 border-[#25D366]/50 shadow-[0_0_15px_rgba(37,211,102,0.2)]' : 'bg-bg-elevated border-border hover:border-text-muted'}`}
                                                 >
                                                     <Phone className={`w-5 h-5 ${formData.contactType === 'WHATSAPP' ? 'text-[#25D366]' : 'text-text-muted'}`} />
                                                     <span className={`text-[11px] font-bold ${formData.contactType === 'WHATSAPP' ? 'text-[#25D366]' : 'text-text-muted'}`}>WhatsApp</span>
@@ -330,7 +330,7 @@ export default function SignupPage() {
                                                 <button
                                                     type="button"
                                                     onClick={() => setFormData({ ...formData, contactType: 'LINE', contactValue: '' })}
-                                                    className={`flex-1 py-3 flex flex-col items-center gap-1 rounded-xl border transition-all ${formData.contactType === 'LINE' ? 'bg-gradient-to-b from-[#00C300]/20 to-[#00C300]/10 border-[#00C300]/50 shadow-[0_0_15px_rgba(0,195,0,0.2)]' : 'bg-bg-elevated border-border hover:border-text-muted'}`}
+                                                    className={`flex-1 py-3 flex flex-col items-center gap-1 rounded-[24px] border transition-all ${formData.contactType === 'LINE' ? 'bg-gradient-to-b from-[#00C300]/20 to-[#00C300]/10 border-[#00C300]/50 shadow-[0_0_15px_rgba(0,195,0,0.2)]' : 'bg-bg-elevated border-border hover:border-text-muted'}`}
                                                 >
                                                     <MessageCircle className={`w-5 h-5 ${formData.contactType === 'LINE' ? 'text-[#00C300]' : 'text-text-muted'}`} />
                                                     <span className={`text-[11px] font-bold ${formData.contactType === 'LINE' ? 'text-[#00C300]' : 'text-text-muted'}`}>Line</span>
@@ -340,7 +340,7 @@ export default function SignupPage() {
                                                 <button
                                                     type="button"
                                                     onClick={() => setFormData({ ...formData, contactType: 'TELEGRAM', contactValue: '' })}
-                                                    className={`flex-1 py-3 flex flex-col items-center gap-1 rounded-xl border transition-all ${formData.contactType === 'TELEGRAM' ? 'bg-gradient-to-b from-[#0088CC]/20 to-[#0088CC]/10 border-[#0088CC]/50 shadow-[0_0_15px_rgba(0,136,204,0.2)]' : 'bg-bg-elevated border-border hover:border-text-muted'}`}
+                                                    className={`flex-1 py-3 flex flex-col items-center gap-1 rounded-[24px] border transition-all ${formData.contactType === 'TELEGRAM' ? 'bg-gradient-to-b from-[#0088CC]/20 to-[#0088CC]/10 border-[#0088CC]/50 shadow-[0_0_15px_rgba(0,136,204,0.2)]' : 'bg-bg-elevated border-border hover:border-text-muted'}`}
                                                 >
                                                     <MessageCircle className={`w-5 h-5 ${formData.contactType === 'TELEGRAM' ? 'text-[#0088CC]' : 'text-text-muted'}`} />
                                                     <span className={`text-[11px] font-bold ${formData.contactType === 'TELEGRAM' ? 'text-[#0088CC]' : 'text-text-muted'}`}>Telegram</span>
@@ -356,7 +356,7 @@ export default function SignupPage() {
                                                         type="tel"
                                                         value={formData.countryCode}
                                                         onChange={(e) => setFormData({ ...formData, countryCode: e.target.value.replace(/\D/g, '') })}
-                                                        className="h-14 w-full rounded-lg border border-border bg-bg-elevated pl-8 pr-2 text-center text-text-primary transition-all focus:border-[#25D366] focus:outline-none"
+                                                        className="h-14 w-full rounded-[24px] border border-border bg-bg-elevated pl-8 pr-2 text-center text-text-primary transition-all focus:border-[#25D366] focus:outline-none"
                                                         placeholder="91"
                                                         maxLength={4}
                                                     />
@@ -366,7 +366,7 @@ export default function SignupPage() {
                                                         type="tel"
                                                         value={formData.contactValue}
                                                         onChange={(e) => setFormData({ ...formData, contactValue: e.target.value.replace(/\D/g, '') })}
-                                                        className="h-14 w-full rounded-lg border border-border bg-bg-elevated px-4 text-text-primary transition-all focus:border-[#25D366] focus:outline-none"
+                                                        className="h-14 w-full rounded-[24px] border border-border bg-bg-elevated px-4 text-text-primary transition-all focus:border-[#25D366] focus:outline-none"
                                                         placeholder="Phone number"
                                                     />
                                                 </div>
@@ -378,7 +378,7 @@ export default function SignupPage() {
                                                 type="text"
                                                 value={formData.contactValue}
                                                 onChange={(e) => setFormData({ ...formData, contactValue: e.target.value })}
-                                                className="h-14 w-full rounded-lg border border-border bg-bg-elevated px-4 text-text-primary transition-all focus:border-[#00C300] focus:outline-none"
+                                                className="h-14 w-full rounded-[24px] border border-border bg-bg-elevated px-4 text-text-primary transition-all focus:border-[#00C300] focus:outline-none"
                                                 placeholder="Enter Line ID"
                                             />
                                         )}
@@ -388,7 +388,7 @@ export default function SignupPage() {
                                                 type="text"
                                                 value={formData.contactValue}
                                                 onChange={(e) => setFormData({ ...formData, contactValue: e.target.value })}
-                                                className="h-14 w-full rounded-lg border border-border bg-bg-elevated px-4 text-text-primary transition-all focus:border-[#0088CC] focus:outline-none"
+                                                className="h-14 w-full rounded-[24px] border border-border bg-bg-elevated px-4 text-text-primary transition-all focus:border-[#0088CC] focus:outline-none"
                                                 placeholder="Enter Telegram Handle (e.g. @username)"
                                             />
                                         )}
@@ -407,7 +407,7 @@ export default function SignupPage() {
                                 <button
                                     type="button"
                                     onClick={prevStep}
-                                    className="flex items-center justify-center rounded-lg border border-border bg-bg-elevated px-4 py-4 text-text-muted transition-all hover:bg-bg-elevated/80 hover:text-text-primary"
+                                    className="flex items-center justify-center rounded-[24px] border border-border bg-bg-elevated px-4 py-4 text-text-muted transition-all hover:bg-bg-elevated/80 hover:text-text-primary"
                                 >
                                     <ArrowLeft className="w-5 h-5" />
                                 </button>
@@ -417,7 +417,7 @@ export default function SignupPage() {
                                 type={step === 3 ? "submit" : "button"}
                                 onClick={step === 3 ? handleSubmit : nextStep}
                                 disabled={isLoading}
-                                className="flex h-14 flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-accent-1 to-accent-cyan font-orbitron text-[15px] font-bold text-[#031017] transition-all duration-300 hover:brightness-110 hover:shadow-glow-mint disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
+                                className="flex h-14 flex-1 items-center justify-center gap-2 rounded-[24px] bg-gradient-to-r from-accent-1 to-accent-cyan font-orbitron text-[15px] font-bold text-[#031017] transition-all duration-300 hover:brightness-110 hover:shadow-glow-mint disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
                             >
                                 {isLoading ? (
                                     <>
@@ -446,7 +446,7 @@ export default function SignupPage() {
                     </div>
                 </motion.div>
                 
-                <div className="absolute bottom-6 font-mono text-[11px] text-text-muted/50 tracking-widest uppercase text-center w-full">
+                <div className="absolute bottom-6 font-sans text-[11px] text-text-muted/50 tracking-widest uppercase text-center w-full">
                     Copyright Konoha Bazaar
                 </div>
             </div>

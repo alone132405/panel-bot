@@ -160,11 +160,11 @@ export default function SettingsDetailPage() {
     return (
         <div className="min-h-screen bg-background-primary">
             {/* Header */}
-            <header className="border-b border-white/10 bg-background-secondary/50  sticky top-0 z-50">
+            <header className="border-b border-white/10 bg-bg-surface/50  sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center">
+                            <div className="w-10 h-10 bg-gradient-primary rounded-[24px] flex items-center justify-center">
                                 <Shield className="w-6 h-6 text-white" />
                             </div>
                             <div>
@@ -183,7 +183,7 @@ export default function SettingsDetailPage() {
                             </button>
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-sm"
+                                className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-[24px] transition-colors text-sm"
                             >
                                 <LogOut className="w-4 h-4" />
                                 Logout
@@ -216,7 +216,7 @@ export default function SettingsDetailPage() {
                                             key={category.id}
                                             onClick={() => setActiveCategory(category.id)}
                                             whileHover={{ x: 4 }}
-                                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${isActive
+                                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-[24px] text-sm transition-all ${isActive
                                                 ? 'bg-blue-600/20 text-blue-400 border-l-4 border-blue-500 pl-2'
                                                 : 'text-gray-300 hover:bg-white/5 hover:text-white'
                                                 }`}
@@ -330,7 +330,7 @@ export default function SettingsDetailPage() {
                                         <button
                                             onClick={() => void handleSaveSettings()}
                                             disabled={saving || applying}
-                                            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-blue-500 px-6 py-3 font-medium text-white shadow-lg transition-colors hover:bg-blue-600 hover:shadow-blue-500/50 disabled:cursor-not-allowed disabled:opacity-50"
+                                            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[24px] bg-blue-500 px-6 py-3 font-medium text-white shadow-lg transition-colors hover:bg-blue-600 hover:shadow-blue-500/50 disabled:cursor-not-allowed disabled:opacity-50"
                                         >
                                             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                                             {saving ? 'Saving...' : 'Save Changes'}
@@ -338,7 +338,7 @@ export default function SettingsDetailPage() {
                                         <button
                                             onClick={() => void handleApplyChanges()}
                                             disabled={saving || applying || isWaitingForRdp}
-                                            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/10 px-6 py-3 font-medium text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
+                                            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[24px] border border-white/10 bg-white/10 px-6 py-3 font-medium text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
                                         >
                                             {(applying || isWaitingForRdp) ? <Loader2 className="h-4 w-4 animate-spin" /> : <Settings className="h-4 w-4" />}
                                             {isWaitingForRdp ? 'Waiting RDP disconnect...' : applying ? 'Applying...' : 'Apply Changes'}
@@ -369,7 +369,7 @@ function SettingToggle({
     disabled?: boolean
 }) {
     return (
-        <div className="flex items-start gap-4 p-4 rounded-lg bg-background-tertiary/50 border border-white/5 hover:border-white/10 transition-colors">
+        <div className="flex items-start gap-4 p-4 rounded-[24px] bg-background-tertiary/50 border border-white/5 hover:border-white/10 transition-colors">
             <div className="flex-1">
                 <label className="text-sm font-medium text-white cursor-pointer">
                     {label}

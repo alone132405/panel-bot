@@ -11,9 +11,9 @@ interface HeroesModalProps {
     iggId: string | null
 }
 
-type HeroSelection = 'selected' | 'highestEnhanced' | 'highestRank' | 'highestLevel'
+type HeroSelection = 'highestEnhanced' | 'highestRank' | 'highestLevel'
 type ChapterMode = 'sequential' | 'custom'
-type ColosseumHeroSelection = 'selected' | 'autoSelected' | 'bestHeroes'
+type ColosseumHeroSelection = 'autoSelected' | 'bestHeroes'
 type DefenderSelection = 'dontChange' | 'autoSelected'
 
 interface ToggleOption {
@@ -45,7 +45,6 @@ const NO_ID_TABS: TabDef[] = [
 ]
 
 const HERO_SELECTION_OPTIONS = [
-    { value: 'selected' as const, label: 'Selected' },
     { value: 'highestEnhanced' as const, label: 'Enhanced' },
     { value: 'highestRank' as const, label: 'Rank' },
     { value: 'highestLevel' as const, label: 'Level' },
@@ -75,11 +74,9 @@ const CHAPTER_OPTIONS = [
     { value: 'Chapter 6', label: 'Chapter 6' },
     { value: 'Chapter 7', label: 'Chapter 7' },
     { value: 'Chapter 8', label: 'Chapter 8' },
-    { value: 'Chapter 9', label: 'Chapter 9' },
 ]
 
 const COLOSSEUM_HERO_OPTIONS = [
-    { value: 'selected' as const, label: 'Selected' },
     { value: 'autoSelected' as const, label: 'Auto Selected' },
     { value: 'bestHeroes' as const, label: 'Best Heroes' },
 ]
@@ -127,7 +124,7 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
 
     const [autoAttackHeroStages, setAutoAttackHeroStages] = useState(true)
     const [useBraveheartItems, setUseBraveheartItems] = useState(false)
-    const [heroesToUse, setHeroesToUse] = useState<HeroSelection>('selected')
+    const [heroesToUse, setHeroesToUse] = useState<HeroSelection>('highestLevel')
     const [chapterMode, setChapterMode] = useState<ChapterMode>('sequential')
     const [stageType, setStageType] = useState('Elite')
     const [customChapter, setCustomChapter] = useState('Normal')
@@ -185,10 +182,9 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
                     setUsePriorityMode(boolValue(heroStageSettings.priorityMode, true))
 
                     const heroSelectionMap: Record<number, HeroSelection> = {
-                        0: 'selected',
-                        1: 'highestEnhanced',
+                        3: 'highestEnhanced',
                         2: 'highestRank',
-                        3: 'highestLevel',
+                        1: 'highestLevel',
                     }
                     setHeroesToUse(heroSelectionMap[numberValue(heroStageSettings.heroSelection, 0)] || 'selected')
                     setChapterMode(numberValue(heroStageSettings.attackStageType, 0) === 0 ? 'sequential' : 'custom')
@@ -207,7 +203,6 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
                             6: 'Chapter 6',
                             7: 'Chapter 7',
                             8: 'Chapter 8',
-                            9: 'Chapter 9',
                         }
                         const nextChapterNumber = chapterMap[numberValue(selectedChapter.StageChapter, 1)] || "Chapter 1 (Heroes' Assault)"
                         setChapterNumber(nextChapterNumber)
@@ -231,7 +226,6 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
                     setWinChanceMax(numberValue(arenaSettings.maxWinChance, 100))
 
                     const arenaHeroMap: Record<number, ColosseumHeroSelection> = {
-                        0: 'selected',
                         1: 'autoSelected',
                         2: 'bestHeroes',
                     }
@@ -254,13 +248,11 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
         setSaving(true)
         try {
             const heroSelectionMap: Record<HeroSelection, number> = {
-                selected: 0,
-                highestEnhanced: 1,
+                highestEnhanced: 3,
                 highestRank: 2,
-                highestLevel: 3,
+                highestLevel: 1,
             }
             const arenaHeroMap: Record<ColosseumHeroSelection, number> = {
-                selected: 0,
                 autoSelected: 1,
                 bestHeroes: 2,
             }
@@ -380,7 +372,7 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
                         : 'border-accent-gold/20 bg-accent-gold/10 text-accent-gold'
 
                 return (
-                    <div key={stat.label} className={`rounded-lg border p-3 ${toneClass}`}>
+                    <div key={stat.label} className={`rounded-[24px] border p-3 ${toneClass}`}>
                         <div className="mb-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em]">
                             <Icon className="h-3.5 w-3.5" />
                             {stat.label}
@@ -396,7 +388,7 @@ export default function HeroesModal({ isOpen, onClose, iggId }: HeroesModalProps
     const renderSectionContent = (tabId: string, isMobile: boolean, isTablet: boolean) => {
         if (!iggId) {
             return (
-                <div className="rounded-lg border border-accent-gold/20 bg-accent-gold/10 p-6 text-center">
+                <div className="rounded-[24px] border border-accent-gold/20 bg-accent-gold/10 p-6 text-center">
                     <Users2 className="mx-auto mb-3 h-10 w-10 text-accent-gold" />
                     <p className="text-[14px] font-bold text-text-primary">Select an IGG ID to edit hero settings.</p>
                 </div>

@@ -40,7 +40,7 @@ export function TacticalRadioGroup<T extends string | number>({
                                 onChange(option.value)
                             }
                         }}
-                        className={`relative flex min-w-0 items-center gap-2.5 px-3 py-2.5 sm:px-4 rounded-xl text-sm font-medium
+                        className={`relative flex min-w-0 items-center gap-2.5 px-3 py-2.5 sm:px-4 rounded-[24px] text-sm font-medium
                             border transition-all duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00FFB2]/35
                             ${isSelected
                                 ? 'border-[#00FFB2] bg-[rgba(0,255,178,0.06)] text-white shadow-[0_0_12px_rgba(0,255,178,0.1)]'

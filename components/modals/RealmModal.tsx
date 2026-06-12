@@ -192,7 +192,7 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
 
                                     {/* Gathering Section */}
                                     <div className="space-y-4">
-                                        <div className="flex items-center justify-between rounded-md border border-accent-1/20 bg-accent-1/10 p-4">
+                                        <div className="flex items-center justify-between rounded-[24px] border border-accent-1/20 bg-accent-1/10 p-4">
                                             <div>
                                                 <label className="flex items-center gap-3 cursor-pointer">
                                                     <Checkbox checked={gatherResources} onChange={setGatherResources} />
@@ -204,7 +204,7 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
 
                                         {/* Gathering Options */}
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                                            <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
+                                            <div className="rounded-[24px] border border-border bg-bg-inset/70 p-3 sm:p-4">
                                                 <div className="mb-2">
                                                     <SettingInfoLabel label="Max Armies to Gather (0 for all)" className="text-[12px] font-bold text-text-muted" />
                                                 </div>
@@ -225,7 +225,7 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                                                 />
                                             </div>
 
-                                            <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
+                                            <div className="rounded-[24px] border border-border bg-bg-inset/70 p-3 sm:p-4">
                                                 <div className="flex items-center justify-between mb-3">
                                                     <label className="flex items-center gap-2 cursor-pointer">
                                                         <Checkbox checked={leaveSpareArmy} onChange={setLeaveSpareArmy} />
@@ -254,7 +254,7 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                                         </div>
 
                                         {/* Use High Tier Troops */}
-                                        <label className="flex items-center justify-between rounded-md border border-border bg-bg-inset/70 p-4 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
+                                        <label className="flex items-center justify-between rounded-[24px] border border-border bg-bg-inset/70 p-4 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
                                             <SettingInfoLabel label="Use High Tier Troops" />
                                             <Checkbox checked={useHighTierTroops} onChange={setUseHighTierTroops} />
                                         </label>
@@ -273,7 +273,7 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                                                     { label: 'Gold', value: gatherGold, setter: setGatherGold, index: 4 },
                                                     { label: 'Lunite', value: gatherLunite, setter: setGatherLunite, index: 5 },
                                                 ].map((resource) => (
-                                                    <label key={resource.index} className="flex items-center justify-between gap-4 md:gap-2 rounded-md border border-border bg-bg-inset/70 px-4 py-3 md:py-2 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
+                                                    <label key={resource.index} className="flex items-center justify-between gap-4 md:gap-2 rounded-[24px] border border-border bg-bg-inset/70 px-4 py-3 md:py-2 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
                                                         <SettingInfoLabel label={resource.label} />
                                                         <Checkbox checked={resource.value} onChange={resource.setter} />
                                                     </label>
@@ -284,7 +284,7 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
 
                                     {/* Hunting Section */}
                                     <div className="space-y-4 border-t border-border pt-6">
-                                        <div className="flex items-center justify-between rounded-md border border-accent-1/20 bg-accent-1/10 p-4">
+                                        <div className="flex items-center justify-between rounded-[24px] border border-accent-1/20 bg-accent-1/10 p-4">
                                             <div>
                                                 <label className="flex items-center gap-3 cursor-pointer">
                                                     <Checkbox checked={huntMonsters} onChange={setHuntMonsters} />
@@ -296,12 +296,12 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
 
                                         {/* Hunting Options */}
                                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 md:gap-4">
-                                            <label className="flex items-center justify-between rounded-md border border-border bg-bg-inset/70 p-4 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
+                                            <label className="flex items-center justify-between rounded-[24px] border border-border bg-bg-inset/70 p-4 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
                                                 <SettingInfoLabel label="Use Energy Items" />
                                                 <Checkbox checked={useEnergyItems} onChange={setUseEnergyItems} />
                                             </label>
 
-                                            <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
+                                            <div className="rounded-[24px] border border-border bg-bg-inset/70 p-3 sm:p-4">
                                                 <div className="mb-2">
                                                     <SettingInfoLabel label="Kills Per Day" className="text-[12px] font-bold text-text-muted" />
                                                 </div>
@@ -322,7 +322,7 @@ export default function RealmModal({ isOpen, onClose, iggId }: RealmModalProps) 
                                                 />
                                             </div>
 
-                                            <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
+                                            <div className="rounded-[24px] border border-border bg-bg-inset/70 p-3 sm:p-4">
                                                 <div className="mb-2">
                                                     <SettingInfoLabel label="Level" helpText="Monster level to hunt in realm mode." className="text-[12px] font-bold text-text-muted" />
                                                 </div>

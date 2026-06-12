@@ -98,9 +98,9 @@ export default function LoginPage() {
                                 initial={{ opacity: 0, x: -30 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.4 + (idx * 0.15), duration: 0.6 }}
-                                className={`flex items-center gap-4 rounded-lg ${pill.bg} border ${pill.border} p-4 backdrop-blur-sm transition-transform duration-300 hover:translate-x-2`}
+                                className={`flex items-center gap-4 rounded-[24px] ${pill.bg} border ${pill.border} p-4 backdrop-blur-sm transition-transform duration-300 hover:translate-x-2`}
                             >
-                                <div className={`flex h-10 w-10 items-center justify-center rounded-md border border-border bg-bg-surface ${pill.color}`}>
+                                <div className={`flex h-10 w-10 items-center justify-center rounded-[24px] border border-border bg-bg-surface ${pill.color}`}>
                                     <pill.icon className="w-5 h-5" />
                                 </div>
                                 <div>
@@ -114,7 +114,7 @@ export default function LoginPage() {
 
                 <div className="grid grid-cols-3 gap-3 text-center">
                     {['API READY', 'MANUAL SYNC', 'SECURE'].map((item) => (
-                        <div key={item} className="rounded-lg border border-border bg-white/[0.03] px-3 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-text-muted">
+                        <div key={item} className="rounded-[24px] border border-border bg-white/[0.03] px-3 py-3 font-sans text-[11px] font-bold uppercase tracking-[0.18em] text-text-muted">
                             {item}
                         </div>
                     ))}
@@ -129,7 +129,7 @@ export default function LoginPage() {
                     transition={{ duration: 0.5, delay: 0.2 }}
                     className="w-full max-w-md"
                 >
-                    <div className="panel-solid rounded-lg p-8">
+                    <div className="panel-solid rounded-[24px] p-8">
                         <div className="lg:hidden flex flex-col items-center mb-8">
                             <Image src="/logo.png" alt="Konoha Logo" width={80} height={80} className="mb-4 object-contain drop-shadow-[0_0_15px_rgba(33,243,177,0.38)]" />
                             <h2 className="font-orbitron text-2xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-accent-1 to-accent-2">
@@ -151,7 +151,7 @@ export default function LoginPage() {
                                     id="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="peer h-14 w-full rounded-lg border border-border bg-bg-elevated pl-12 pr-4 pt-2 text-text-primary placeholder-transparent transition-all focus:border-accent-1 focus:outline-none focus:shadow-[0_0_15px_rgba(33,243,177,0.15)]"
+                                    className="peer h-14 w-full rounded-[24px] border border-border bg-bg-elevated pl-12 pr-4 pt-2 text-text-primary placeholder-transparent transition-all focus:border-accent-1 focus:outline-none focus:shadow-[0_0_15px_rgba(33,243,177,0.15)]"
                                     placeholder="Email Address"
                                     required
                                 />
@@ -171,7 +171,7 @@ export default function LoginPage() {
                                     id="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="peer h-14 w-full rounded-lg border border-border bg-bg-elevated pl-12 pr-12 pt-2 text-text-primary placeholder-transparent transition-all focus:border-accent-1 focus:outline-none focus:shadow-[0_0_15px_rgba(33,243,177,0.15)]"
+                                    className="peer h-14 w-full rounded-[24px] border border-border bg-bg-elevated pl-12 pr-12 pt-2 text-text-primary placeholder-transparent transition-all focus:border-accent-1 focus:outline-none focus:shadow-[0_0_15px_rgba(33,243,177,0.15)]"
                                     placeholder="Password"
                                     required
                                 />
@@ -193,7 +193,7 @@ export default function LoginPage() {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="flex h-14 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-accent-1 to-accent-cyan font-orbitron text-[15px] font-bold text-[#031017] transition-all duration-300 hover:brightness-110 hover:shadow-glow-mint disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
+                                className="flex h-14 w-full items-center justify-center gap-2 rounded-[24px] bg-gradient-to-r from-accent-1 to-accent-cyan font-orbitron text-[15px] font-bold text-[#031017] transition-all duration-300 hover:brightness-110 hover:shadow-glow-mint disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
                             >
                                 {isLoading ? (
                                     <>
@@ -217,7 +217,7 @@ export default function LoginPage() {
                     </div>
                 </motion.div>
 
-                <div className="absolute bottom-6 font-mono text-[11px] uppercase tracking-widest text-text-muted/50">
+                <div className="absolute bottom-6 font-sans text-[11px] uppercase tracking-widest text-text-muted/50">
                     SYS.V.2.4.1 // SECURE
                 </div>
             </div>

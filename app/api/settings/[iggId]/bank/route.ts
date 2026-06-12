@@ -123,6 +123,20 @@ export async function PUT(
             ...bankSettings
         } = settings
 
+        if (iggIdRecord.subscription?.plan === 'FARM_BOT') {
+            if (bankSettings.accountData && Array.isArray(bankSettings.accountData) && bankSettings.accountData.length > 2) {
+                bankSettings.accountData = bankSettings.accountData.slice(0, 2)
+            }
+
+            const allowedCommands = ['adminfood', 'adminwood', 'adminore', 'adminstone', 'adminrss', 'shield', 'relocate', 'migrate', 'setgather']
+            if (bankSettings.guildCommands && Array.isArray(bankSettings.guildCommands)) {
+                bankSettings.guildCommands = bankSettings.guildCommands.map((cmd: any) => ({
+                    ...cmd,
+                    enableCommand: cmd.commadReference ? allowedCommands.includes(cmd.commadReference.toLowerCase()) : false
+                }))
+            }
+        }
+
         const bankSync = await writeBankSettingsFile(params.iggId, normalizeBankSettings(bankSettings))
 
         let manageGuildSettings = DEFAULT_MANAGE_GUILD_SETTINGS

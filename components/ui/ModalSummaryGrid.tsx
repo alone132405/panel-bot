@@ -28,7 +28,7 @@ export function ModalSummaryGrid({ items }: { items: ModalSummaryItem[] }) {
                 const tone = item.tone || 'mint'
 
                 return (
-                    <div key={item.label} className={`rounded-md border p-3 ${toneClasses[tone]}`}>
+                    <div key={item.label} className={`rounded-[24px] border p-3 ${toneClasses[tone]}`}>
                         <div className="mb-2 flex min-w-0 items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em]">
                             <Icon className="h-3.5 w-3.5 shrink-0" />
                             <span className="truncate">{item.label}</span>

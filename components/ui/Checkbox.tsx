@@ -24,7 +24,7 @@ export function Checkbox({
                 }
             }}
             disabled={disabled}
-            className={`relative flex shrink-0 touch-manipulation items-center justify-center rounded-[6px] transition-all duration-200 ${sizeClass} ${
+            className={`relative flex shrink-0 touch-manipulation items-center justify-center rounded-[24px] transition-all duration-200 ${sizeClass} ${
                 checked 
                 ? 'bg-[#00FFB2] shadow-[0_0_12px_rgba(0,255,178,0.25)] border border-[#00FFB2]' 
                 : 'bg-[#161B25] border border-[rgba(255,255,255,0.08)] shadow-inner hover:border-[rgba(255,255,255,0.2)]'

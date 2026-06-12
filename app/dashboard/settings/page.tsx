@@ -79,6 +79,7 @@ export default function SettingsPage() {
     const [isGearsModalOpen, setIsGearsModalOpen] = useState(false)
     const [selectedCategory, setSelectedCategory] = useState<SettingCategory | null>(null)
     const [selectedIggId, setSelectedIggId] = useState<string | null>(null)
+    const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
     const [applying, setApplying] = useState(false)
     const [queuePosition, setQueuePosition] = useState(0)
     const [cooldown, setCooldown] = useState(0)
@@ -169,7 +170,7 @@ export default function SettingsPage() {
         }
 
         if (cooldown > 0) {
-            toast.warning(`Please wait ${Math.ceil(cooldown / 60)} minutes before applying changes again.`)
+            toast.warning(`Please wait ${cooldown} seconds before applying changes again.`)
             return
         }
 
@@ -186,9 +187,9 @@ export default function SettingsPage() {
 
             if (data.success) {
                 toast.success('Request sent to queue!')
-                const expiry = Date.now() + 5 * 60 * 1000
+                const expiry = Date.now() + 5 * 1000
                 localStorage.setItem(`automation_cooldown_settings_${selectedIggId}`, expiry.toString())
-                setCooldown(300)
+                setCooldown(5)
             } else {
                 toast.error(data.error || 'Failed to apply changes')
                 setApplying(false)
@@ -205,7 +206,7 @@ export default function SettingsPage() {
         return `${m}:${s.toString().padStart(2, '0')}`
     }
 
-    const categories: SettingCategory[] = [
+    const allCategories: SettingCategory[] = [
         {
             id: 'general',
             name: 'General',
@@ -341,6 +342,17 @@ export default function SettingsPage() {
         },
     ]
 
+    const categories = allCategories.filter(cat => {
+        if (selectedPlan === 'FARM_BOT') {
+            const allowedForFarm = [
+                'general', 'protection', 'supply', 'gather', 
+                'construction', 'military', 'research', 'guild-fest', 'schedule'
+            ]
+            return allowedForFarm.includes(cat.id)
+        }
+        return true
+    })
+
     const handleCategoryClick = (category: SettingCategory) => {
         setSelectedCategory(category)
 
@@ -413,15 +425,18 @@ export default function SettingsPage() {
                 <div className="w-full md:w-80">
                     <IggIdSelector
                         selectedIggId={selectedIggId}
-                        onSelect={setSelectedIggId}
+                        onSelect={(id, plan) => {
+                            setSelectedIggId(id)
+                            setSelectedPlan(plan || null)
+                        }}
                     />
                 </div>
             </div>
 
             {/* Info Card */}
-            <div className="bg-accent-1/5 border border-accent-1/20 rounded-[14px] p-6 mb-8">
+            <div className="bg-accent-1/5 border border-accent-1/20 rounded-[24px] p-6 mb-8">
                 <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-accent-1/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 bg-accent-1/10 rounded-[24px] flex items-center justify-center flex-shrink-0">
                         <Settings className="w-5 h-5 text-accent-1" />
                     </div>
                     <div>
@@ -449,11 +464,11 @@ export default function SettingsPage() {
                             variants={itemVariants}
                             whileHover={{ y: -4 }}
                             onClick={() => handleCategoryClick(category)}
-                            className="group relative cursor-pointer overflow-hidden rounded-lg border border-border bg-bg-surface p-4 transition-all duration-200 hover:border-accent-1/40 hover:shadow-glow-mint sm:p-5"
+                            className="group relative cursor-pointer overflow-hidden rounded-[24px] border border-border bg-bg-surface shadow-panel p-4 transition-all duration-200 hover:border-accent-1/40 hover:shadow-glow-mint sm:p-5"
                         >
                             <div className="relative">
                                 {/* Icon */}
-                                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-[10px] border border-border bg-bg-elevated transition-colors duration-300 group-hover:border-accent-1/20 group-hover:bg-accent-1/10 sm:mb-4 sm:h-[44px] sm:w-[44px]">
+                                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-[24px] border border-border bg-bg-elevated transition-colors duration-300 group-hover:border-accent-1/20 group-hover:bg-accent-1/10 sm:mb-4 sm:h-[44px] sm:w-[44px]">
                                     <Icon className={`w-5 h-5 ${category.color} transition-transform group-hover:scale-110`} />
                                 </div>
 
@@ -486,7 +501,7 @@ export default function SettingsPage() {
                 <button
                     onClick={handleApplyChanges}
                     disabled={applying || !selectedIggId || cooldown > 0}
-                    className="group flex items-center gap-3 rounded-lg bg-gradient-to-br from-accent-1 to-accent-cyan px-8 py-4 font-sans text-[15px] font-bold text-[#031017] transition-all duration-200 hover:brightness-110 hover:shadow-glow-mint disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-none"
+                    className="group flex items-center gap-3 rounded-[24px] bg-gradient-to-br from-accent-1 to-accent-cyan px-8 py-4 font-sans text-[15px] font-bold text-[#031017] transition-all duration-200 hover:brightness-110 hover:shadow-glow-mint disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-none"
                 >
                     {(applying || queuePosition > 0) ? (
                         <>

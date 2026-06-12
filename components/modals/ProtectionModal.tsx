@@ -33,7 +33,7 @@ const PREFERRED_SHIELD_OPTIONS = [
 const SHELTER_MODE_OPTIONS = [
     { value: 0, label: "Don't Shelter" },
     { value: 1, label: 'Always Shelter' },
-    { value: 2, label: 'Only Without Shield' },
+    { value: 2, label: 'Shelter when under attack' },
 ]
 
 export default function ProtectionModal({ isOpen, onClose, iggId }: ProtectionModalProps) {
@@ -149,7 +149,7 @@ export default function ProtectionModal({ isOpen, onClose, iggId }: ProtectionMo
     const renderSectionContent = (tabId: string, isMobile: boolean, isTablet: boolean) => {
         if (!iggId) {
             return (
-                <div className="rounded-lg border border-accent-gold/20 bg-accent-gold/10 p-6 text-center">
+                <div className="rounded-[24px] border border-accent-gold/20 bg-accent-gold/10 p-6 text-center">
                     <Shield className="mx-auto mb-3 h-10 w-10 text-accent-gold" />
                     <p className="text-[14px] font-bold text-text-primary">Select an IGG ID to edit protection settings.</p>
                 </div>
@@ -168,15 +168,15 @@ export default function ProtectionModal({ isOpen, onClose, iggId }: ProtectionMo
         return (
             <div className="space-y-4">
                 <div className="grid grid-cols-3 gap-3 sm:grid-cols-3">
-                    <div className="rounded-lg border border-white/10 bg-bg-inset/70 p-3">
+                    <div className="rounded-[24px] border border-white/10 bg-bg-inset/70 p-3">
                         <div className="text-[10px] font-black uppercase tracking-[0.18em] text-text-muted">Rules</div>
                         <div className="mt-1 font-orbitron text-xl font-black text-text-primary">{sectionSettings.length}</div>
                     </div>
-                    <div className="rounded-lg border border-accent-1/20 bg-accent-1/10 p-3">
+                    <div className="rounded-[24px] border border-accent-1/20 bg-accent-1/10 p-3">
                         <div className="text-[10px] font-black uppercase tracking-[0.18em] text-accent-1">Enabled</div>
                         <div className="mt-1 font-orbitron text-xl font-black text-accent-1">{enabledCount}</div>
                     </div>
-                    <div className="rounded-lg border border-accent-cyan/20 bg-accent-cyan/10 p-3">
+                    <div className="rounded-[24px] border border-accent-cyan/20 bg-accent-cyan/10 p-3">
                         <div className="text-[10px] font-black uppercase tracking-[0.18em] text-accent-cyan">Timers</div>
                         <div className="mt-1 font-orbitron text-xl font-black text-accent-cyan">{timerCount}</div>
                     </div>

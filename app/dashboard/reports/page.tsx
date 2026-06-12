@@ -147,6 +147,7 @@ function ViewModal({
                         </pre>
                     )}
                 </div>
+
             </motion.div>
         </div>
     )
@@ -154,6 +155,7 @@ function ViewModal({
 
 export default function ReportsPage() {
     const [selectedIggId, setSelectedIggId] = useState<string | null>(null)
+    const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
     const [files, setFiles] = useState<ReportFile[]>([])
     const [loading, setLoading] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
@@ -310,7 +312,10 @@ export default function ReportsPage() {
                 <div className="w-full md:w-80">
                     <IggIdSelector
                         selectedIggId={selectedIggId}
-                        onSelect={setSelectedIggId}
+                        onSelect={(id, plan) => {
+                            setSelectedIggId(id)
+                            setSelectedPlan(plan || null)
+                        }}
                     />
                 </div>
             </div>
@@ -339,7 +344,9 @@ export default function ReportsPage() {
                         ))}
                     </section>
 
-                    <ReportSettingsPanel iggId={selectedIggId} />
+                    {selectedPlan !== 'FARM_BOT' && (
+                        <ReportSettingsPanel iggId={selectedIggId} />
+                    )}
 
                     <section className="rounded-lg border border-border bg-bg-surface shadow-panel">
                         <div className="flex flex-col gap-3 border-b border-border bg-bg-elevated/55 p-4 lg:flex-row lg:items-center lg:justify-between">

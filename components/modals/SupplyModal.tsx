@@ -84,6 +84,17 @@ export default function SupplyModal({ isOpen, onClose, iggId }: SupplyModalProps
         handleSettingChange(arrayPath, arr)
     }
 
+    const handleAmountChange = (arrayPath: string, index: number, v: string) => {
+        const filtered = v.replace(/[^0-9]/g, '')
+        if (filtered === '') {
+            handleArrayChange(arrayPath, index, 0)
+            return
+        }
+        let num = parseInt(filtered, 10)
+        if (num > 4299999999) num = 4299999999
+        handleArrayChange(arrayPath, index, num)
+    }
+
     const renderSectionContent = (tabId: string, isMobile: boolean, isTablet: boolean) => {
         if (!settings) return null
         
@@ -110,8 +121,11 @@ export default function SupplyModal({ isOpen, onClose, iggId }: SupplyModalProps
                         <div className={gridClass}>
                             <InputControl 
                                 label="Auto Send To (Name)" 
-                                val={settings.supplySettings?.playerToSend || 'F C 1'} 
-                                onChange={(v) => handleSettingChange('supplySettings.playerToSend', v)} 
+                                val={settings.supplySettings?.playerToSend === 'none' ? '' : (settings.supplySettings?.playerToSend ?? '')} 
+                                onChange={(v) => {
+                                    const filtered = v.replace(/[^a-zA-Z0-9 ]/g, '')
+                                    handleSettingChange('supplySettings.playerToSend', filtered === '' ? 'none' : filtered)
+                                }} 
                                 isMobile={isMobile} 
                             />
                             <StepperControl 
@@ -122,10 +136,38 @@ export default function SupplyModal({ isOpen, onClose, iggId }: SupplyModalProps
                                 isMobile={isMobile} 
                             />
                             <InputControl 
-                                label="Supply Speed (0.01 - 0.99)" 
+                                label="Supply Speed (0.1 - 3)" 
                                 type="number"
-                                val={String(settings.supplySettings?.supplySpeed || 0.1)} 
-                                onChange={(v) => handleSettingChange('supplySettings.supplySpeed', Number(v))} 
+                                min={0.1}
+                                max={3}
+                                step={0.01}
+                                val={String(settings.supplySettings?.supplySpeed ?? 0.1)} 
+                                onChange={(v) => {
+                                    let filtered = v.replace(/[^0-9.]/g, '')
+                                    const parts = filtered.split('.')
+                                    if (parts.length > 2) {
+                                        filtered = parts[0] + '.' + parts.slice(1).join('').substring(0, 2)
+                                    } else if (parts.length === 2 && parts[1].length > 2) {
+                                        filtered = parts[0] + '.' + parts[1].substring(0, 2)
+                                    }
+                                    
+                                    if (filtered === '' || filtered === '0' || filtered === '0.') {
+                                        handleSettingChange('supplySettings.supplySpeed', filtered)
+                                        return
+                                    }
+                                    
+                                    const num = parseFloat(filtered)
+                                    if (!isNaN(num) && num > 3) filtered = '3'
+                                    
+                                    handleSettingChange('supplySettings.supplySpeed', filtered)
+                                }} 
+                                onBlur={() => {
+                                    const v = settings.supplySettings?.supplySpeed ?? 0.1
+                                    const num = parseFloat(String(v))
+                                    if (isNaN(num) || num < 0.1) {
+                                        handleSettingChange('supplySettings.supplySpeed', 0.1)
+                                    }
+                                }}
                                 isMobile={isMobile} 
                             />
                         </div>
@@ -170,7 +212,7 @@ export default function SupplyModal({ isOpen, onClose, iggId }: SupplyModalProps
                     
                     <div className="space-y-4">
                         {RESOURCE_NAMES.map((name, i) => (
-                            <div key={name} className="p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] flex flex-col gap-4">
+                            <div key={name} className="p-4 rounded-[24px] bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] flex flex-col gap-4">
                                 <div className="flex items-center gap-3 border-b border-[rgba(255,255,255,0.04)] pb-3">
                                     <ToggleControl 
                                         label={name} 
@@ -183,15 +225,19 @@ export default function SupplyModal({ isOpen, onClose, iggId }: SupplyModalProps
                                     <InputControl 
                                         label="Reserved Amount" 
                                         type="number"
+                                        min={0}
+                                        max={4299999999}
                                         val={String(settings.supplySettings?.reservedRss?.[i] ?? 500000)} 
-                                        onChange={(v) => handleArrayChange('supplySettings.reservedRss', i, Number(v))} 
+                                        onChange={(v) => handleAmountChange('supplySettings.reservedRss', i, v)} 
                                         isMobile={isMobile} 
                                     />
                                     <InputControl 
                                         label="Threshold" 
                                         type="number"
+                                        min={0}
+                                        max={4299999999}
                                         val={String(settings.supplySettings?.supplyMin?.[i] ?? 1000000)} 
-                                        onChange={(v) => handleArrayChange('supplySettings.supplyMin', i, Number(v))} 
+                                        onChange={(v) => handleAmountChange('supplySettings.supplyMin', i, v)} 
                                         isMobile={isMobile} 
                                     />
                                 </div>
@@ -226,7 +272,7 @@ export default function SupplyModal({ isOpen, onClose, iggId }: SupplyModalProps
                     
                     <div className="space-y-4">
                         {RESOURCE_NAMES.map((name, i) => (
-                            <div key={name} className="p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] flex flex-col gap-4">
+                            <div key={name} className="p-4 rounded-[24px] bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] flex flex-col gap-4">
                                 <div className="flex items-center gap-3 border-b border-[rgba(255,255,255,0.04)] pb-3">
                                     <ToggleControl 
                                         label={name} 
@@ -239,8 +285,10 @@ export default function SupplyModal({ isOpen, onClose, iggId }: SupplyModalProps
                                     <InputControl 
                                         label="Reserved Amount" 
                                         type="number"
+                                        min={0}
+                                        max={4299999999}
                                         val={String(settings.supplySettings?.reservedBagRss?.[i] ?? 100)} 
-                                        onChange={(v) => handleArrayChange('supplySettings.reservedBagRss', i, Number(v))} 
+                                        onChange={(v) => handleAmountChange('supplySettings.reservedBagRss', i, v)} 
                                         isMobile={isMobile} 
                                     />
                                 </div>

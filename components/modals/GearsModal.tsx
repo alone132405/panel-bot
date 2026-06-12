@@ -150,7 +150,7 @@ export default function GearsModal({ isOpen, onClose, iggId }: GearsModalProps) 
         >
             {loading ? (
                                 <div className="flex items-center justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-[#00FFB2]" />
+                                    <Loader2 className="w-8 h-8 animate-spin text-accent-1" />
                                 </div>
                             ) : (
                                 <div className="w-full space-y-6">
@@ -165,7 +165,7 @@ export default function GearsModal({ isOpen, onClose, iggId }: GearsModalProps) 
                                     {/* Gear Settings Grid */}
                                     <div className="grid grid-cols-2 gap-3 md:gap-4">
                                         {/* Auto Switch Gears */}
-                                        <div className="flex items-center justify-between p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] hover:bg-[#161626] transition-colors">
+                                        <div className="flex items-center justify-between p-4 rounded-[24px] bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] hover:bg-[#161626] transition-colors">
                                             <label className="flex items-center justify-between w-full cursor-pointer">
                                                 <SettingInfoLabel label="Auto Switch Gears" className="text-sm text-gray-300" />
                                                 <Checkbox checked={autoSwitchGear} onChange={setAutoSwitchGear} />
@@ -173,7 +173,7 @@ export default function GearsModal({ isOpen, onClose, iggId }: GearsModalProps) 
                                         </div>
 
                                         {/* Idle Gear Time */}
-                                        <div className="flex min-w-0 flex-col items-start justify-between gap-3 p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] hover:bg-[#161626] transition-colors md:flex-row md:items-center">
+                                        <div className="flex min-w-0 flex-col items-start justify-between gap-3 p-4 rounded-[24px] bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] hover:bg-[#161626] transition-colors md:flex-row md:items-center">
                                             <SettingInfoLabel label="Idle Gear Time" className="text-sm text-gray-300" />
                                             <input
                                                 type="number"
@@ -189,12 +189,12 @@ export default function GearsModal({ isOpen, onClose, iggId }: GearsModalProps) 
                                                     const val = e.target.value === '' ? 0 : Math.floor(Number(e.target.value))
                                                     setIdleGearTime(Math.min(3600, Math.max(10, val)))
                                                 }}
-                                                className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-[#07070E]/50 border border-[rgba(123,94,255,0.2)] rounded md:rounded-lg text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-[#7B5EFF]/50 disabled:opacity-50"
+                                                className="w-20 md:w-24 px-2 md:px-3 py-1 md:py-2 bg-bg-inset/50 border border-border rounded md:rounded-[24px] text-xs md:text-sm text-white text-center focus:outline-none focus:ring-1 md:focus:ring-2 focus:ring-[#7B5EFF]/50 disabled:opacity-50"
                                             />
                                         </div>
 
                                         {/* Idle Gear Dropdown */}
-                                        <div className="flex min-w-0 flex-col items-start justify-between gap-3 p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] hover:bg-[#161626] transition-colors md:flex-row md:items-center">
+                                        <div className="flex min-w-0 flex-col items-start justify-between gap-3 p-4 rounded-[24px] bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)] hover:bg-[#161626] transition-colors md:flex-row md:items-center">
                                             <SettingInfoLabel label="Idle Gear" className="text-sm text-gray-300" />
                                             <TacticalSelect
                                                 value={String(idleGearSet)}

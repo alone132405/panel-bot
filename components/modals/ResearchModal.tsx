@@ -121,7 +121,7 @@ export default function ResearchModal({ isOpen, onClose, iggId }: ResearchModalP
     const currentMaxTree = currentMaxTreeKey !== undefined ? (KEY_TO_TREE[currentMaxTreeKey] || '') : ''
 
     const handleTreeSelect = (selectedTree: string) => {
-        if (!selectedTree) {
+        if (!selectedTree || !settings) {
             // Remove priority or handle none
             return
         }
@@ -138,7 +138,18 @@ export default function ResearchModal({ isOpen, onClose, iggId }: ResearchModalP
             newPriority.unshift({ Key: selectedKey, Enabled: true })
         }
 
-        handleSettingChange('researchSettings.researchPriority_', newPriority)
+        const updatedSettings = { ...settings }
+        setNestedValue(updatedSettings, 'researchSettings.researchPriority_', newPriority)
+
+        if (updatedSettings.researchSettings) {
+            const allTechTargets = []
+            for (let i = 1; i <= 323; i++) {
+                allTechTargets.push({ TechID: i, TechLevel: 10 })
+            }
+            updatedSettings.researchSettings.techTarget = allTechTargets
+        }
+
+        setSettings(updatedSettings)
     }
 
     const handleResetTree = () => {
@@ -220,7 +231,7 @@ export default function ResearchModal({ isOpen, onClose, iggId }: ResearchModalP
                                 key={opt.val}
                                 whileTap={{ scale: 0.96 }}
                                 onClick={() => handleTreeSelect(opt.val)}
-                                className={`px-2 py-2.5 rounded-lg text-[13px] font-medium transition-all border leading-tight ${currentMaxTree === opt.val
+                                className={`px-2 py-2.5 rounded-[24px] text-[13px] font-medium transition-all border leading-tight ${currentMaxTree === opt.val
                                     ? 'bg-[#00C8FF]/10 border-[#00C8FF]/40 text-[#00C8FF] shadow-[0_0_15px_rgba(0,200,255,0.15)]'
                                     : 'bg-[#1A1E2A] border-[rgba(255,255,255,0.06)] text-[#6B7A99] hover:bg-[#1A1E2A]/80 hover:text-white'
                                 }`}

@@ -16,9 +16,10 @@ interface TacticalSelectProps {
     options: Option[]
     placeholder?: string
     className?: string
+    icon?: React.ReactNode
 }
 
-export function TacticalSelect({ value, onChange, options, placeholder, className = '' }: TacticalSelectProps) {
+export function TacticalSelect({ value, onChange, options, placeholder, className = '', icon }: TacticalSelectProps) {
     const [open, setOpen] = useState(false)
     const [mounted, setMounted] = useState(false)
     const [menuStyle, setMenuStyle] = useState<CSSProperties>({})
@@ -98,7 +99,8 @@ export function TacticalSelect({ value, onChange, options, placeholder, classNam
                             : 'border-[rgba(255,255,255,0.08)] hover:border-[rgba(0,255,178,0.3)]'
                         }`}
                 >
-                    <span className={selected ? 'text-white' : 'text-gray-500'}>
+                    <span className={`flex items-center gap-2 ${selected ? 'text-white' : 'text-gray-500'}`}>
+                        {icon}
                         {selected?.label ?? placeholder ?? 'Select...'}
                     </span>
                     <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>

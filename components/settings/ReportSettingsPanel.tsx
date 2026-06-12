@@ -163,10 +163,10 @@ export default function ReportSettingsPanel({ iggId }: ReportSettingsPanelProps)
 
     return (
         <>
-            <section className="rounded-lg border border-border bg-bg-surface shadow-panel">
+            <section className="rounded-[24px] border border-border bg-bg-surface shadow-panel">
                 <div className="flex flex-col gap-3 border-b border-border bg-bg-elevated/55 p-3 sm:p-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex min-w-0 items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-accent-1/25 bg-accent-1/10 text-accent-1">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[24px] border border-accent-1/25 bg-accent-1/10 text-accent-1">
                             <BarChart3 className="h-5 w-5" />
                         </div>
                         <div className="min-w-0">
@@ -257,7 +257,7 @@ function ReportToggleRow({
     onChange: (value: boolean) => void
 }) {
     return (
-        <div className="flex min-h-[46px] items-center justify-between gap-3 rounded-md border border-border bg-bg-inset/70 px-3 py-2 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] sm:min-h-[58px] sm:px-4 sm:py-3">
+        <div className="flex min-h-[46px] items-center justify-between gap-3 rounded-[24px] border border-border bg-bg-inset/70 px-3 py-2 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] sm:min-h-[58px] sm:px-4 sm:py-3">
             <span className="min-w-0 flex-1 pr-2 text-[13px] font-bold leading-snug text-text-primary sm:text-[14px]">
                 {label}
                 <span className="ml-1.5 inline-flex translate-y-[2px] align-middle sm:ml-2">
@@ -281,14 +281,14 @@ function SettingActionButton({
     onClick: () => void
 }) {
     return (
-        <div className="group relative rounded-md border border-border bg-bg-inset/70 transition-all hover:border-accent-1/30 hover:bg-white/[0.04]">
+        <div className="group relative rounded-[24px] border border-border bg-bg-inset/70 transition-all hover:border-accent-1/30 hover:bg-white/[0.04]">
             <button
                 type="button"
                 onClick={onClick}
-                className="flex min-h-[58px] w-full touch-manipulation items-center justify-between gap-3 rounded-md px-3 py-2.5 pr-12 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-1/35 sm:min-h-[76px] sm:px-4 sm:py-3 sm:pr-14"
+                className="flex min-h-[58px] w-full touch-manipulation items-center justify-between gap-3 rounded-[24px] px-3 py-2.5 pr-12 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-1/35 sm:min-h-[76px] sm:px-4 sm:py-3 sm:pr-14"
             >
                 <span className="flex min-w-0 flex-1 items-center gap-3">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-accent-1/20 bg-accent-1/10 text-accent-1 sm:h-10 sm:w-10">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[24px] border border-accent-1/20 bg-accent-1/10 text-accent-1 sm:h-10 sm:w-10">
                         <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
                     </span>
                     <span className="min-w-0 flex-1">
@@ -333,12 +333,12 @@ function SettingsDialog({
 
             <div
                 onPointerDown={(event) => event.stopPropagation()}
-                className="panel-solid pointer-events-auto relative z-10 flex max-h-[88vh] w-full max-w-[720px] flex-col overflow-hidden rounded-lg"
+                className="panel-solid pointer-events-auto relative z-10 flex max-h-[88vh] w-full max-w-[720px] flex-col overflow-hidden rounded-[24px]"
             >
                 <div className="scan-line opacity-45" />
                 <div className="relative z-10 flex shrink-0 items-center justify-between gap-4 border-b border-border bg-bg-elevated/60 px-4 py-3 md:px-5 md:py-4">
                     <div className="flex min-w-0 items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-accent-1/25 bg-accent-1/10 text-accent-1">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[24px] border border-accent-1/25 bg-accent-1/10 text-accent-1">
                             <Icon className="h-5 w-5" />
                         </div>
                         <div className="flex min-w-0 items-center gap-2">
@@ -351,7 +351,7 @@ function SettingsDialog({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="flex h-9 w-9 shrink-0 touch-manipulation items-center justify-center rounded-md border border-accent-3/20 bg-accent-3/10 text-accent-3 transition-colors hover:bg-accent-3/20"
+                        className="flex h-9 w-9 shrink-0 touch-manipulation items-center justify-center rounded-[24px] border border-accent-3/20 bg-accent-3/10 text-accent-3 transition-colors hover:bg-accent-3/20"
                         aria-label="Close"
                     >
                         <X className="h-4 w-4" />
@@ -412,7 +412,7 @@ function ResetTimeDialog({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="flex min-h-[42px] touch-manipulation items-center justify-center rounded-md border border-border bg-bg-surface px-5 text-[13px] font-bold text-text-soft transition-colors hover:bg-white/[0.05] hover:text-text-primary"
+                        className="flex min-h-[42px] touch-manipulation items-center justify-center rounded-[24px] border border-border bg-bg-surface px-5 text-[13px] font-bold text-text-soft transition-colors hover:bg-white/[0.05] hover:text-text-primary"
                     >
                         Cancel
                     </button>
@@ -437,7 +437,7 @@ function ResetTimeDialog({
             }
         >
             <div className="space-y-4">
-                <div className="rounded-md border border-border bg-bg-inset/70 p-4">
+                <div className="rounded-[24px] border border-border bg-bg-inset/70 p-4">
                     <TacticalRadioGroup
                         name="gift-reset-type"
                         value={resetType}
@@ -446,7 +446,7 @@ function ResetTimeDialog({
                     />
                 </div>
 
-                <div className={`rounded-md border border-border bg-bg-inset/70 p-4 transition-opacity ${isDayBased ? '' : 'opacity-50'}`}>
+                <div className={`rounded-[24px] border border-border bg-bg-inset/70 p-4 transition-opacity ${isDayBased ? '' : 'opacity-50'}`}>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-[1fr_220px_160px] md:items-end">
                         <div className="sm:col-span-2 md:col-span-1">
                             <div className="flex items-center gap-2 text-[13px] font-black text-text-primary">
@@ -474,7 +474,7 @@ function ResetTimeDialog({
                     </div>
                 </div>
 
-                <div className={`rounded-md border border-border bg-bg-inset/70 p-4 transition-opacity ${!isDayBased ? '' : 'opacity-50'}`}>
+                <div className={`rounded-[24px] border border-border bg-bg-inset/70 p-4 transition-opacity ${!isDayBased ? '' : 'opacity-50'}`}>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-[1fr_220px_160px] md:items-end">
                         <div className="sm:col-span-2 md:col-span-1">
                             <div className="flex items-center gap-2 text-[13px] font-black text-text-primary">
@@ -552,7 +552,7 @@ function StatisticSettingsDialog({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="flex min-h-[42px] touch-manipulation items-center justify-center rounded-md border border-border bg-bg-surface px-5 text-[13px] font-bold text-text-soft transition-colors hover:bg-white/[0.05] hover:text-text-primary"
+                        className="flex min-h-[42px] touch-manipulation items-center justify-center rounded-[24px] border border-border bg-bg-surface px-5 text-[13px] font-bold text-text-soft transition-colors hover:bg-white/[0.05] hover:text-text-primary"
                     >
                         Cancel
                     </button>
@@ -616,7 +616,7 @@ function PointGoalGroup({
     onChange: (index: number, value: number) => void
 }) {
     return (
-        <div className="rounded-md border border-border bg-bg-inset/70 p-4">
+        <div className="rounded-[24px] border border-border bg-bg-inset/70 p-4">
             <div className="mb-3 flex items-center gap-2 text-[12px] font-black uppercase tracking-[0.16em] text-text-muted">
                 <span>{title}</span>
                 <SettingHelpButton label={title} />
@@ -656,7 +656,7 @@ function NumberField({
                 max={9999}
                 value={value}
                 onChange={(event) => onChange(clampInteger(event.target.value, 0, 9999))}
-                className="input-field h-11 w-full text-center font-mono text-[14px] font-black text-accent-1"
+                className="input-field h-11 w-full text-center font-sans text-[14px] font-black text-accent-1"
             />
         </div>
     )
@@ -692,7 +692,7 @@ function TimeInput({
             disabled={disabled}
             onChange={(event) => onChange(normalizeTimeValue(event.target.value))}
             onBlur={(event) => onChange(normalizeTimeValue(event.target.value))}
-            className="input-field h-10 w-full font-mono text-[13px] font-black text-accent-1 disabled:cursor-not-allowed disabled:opacity-60"
+            className="input-field h-10 w-full font-sans text-[13px] font-black text-accent-1 disabled:cursor-not-allowed disabled:opacity-60"
         />
     )
 }

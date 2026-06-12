@@ -79,6 +79,7 @@ enum ContactType {
 enum Plan {
   BANK_BOT
   BANK_BOT_WHATSAPP
+  FARM_BOT
 }
 
 enum SubStatus {

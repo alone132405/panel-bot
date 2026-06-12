@@ -601,6 +601,10 @@ export function InputControl({
     type = 'text',
     placeholder = '',
     helpText,
+    min,
+    max,
+    step,
+    onBlur,
 }: {
     label: string
     val: string
@@ -610,6 +614,10 @@ export function InputControl({
     type?: string
     placeholder?: string
     helpText?: string
+    min?: number | string
+    max?: number | string
+    step?: number | string
+    onBlur?: () => void
 }) {
     return (
         <motion.div
@@ -622,10 +630,13 @@ export function InputControl({
                     type={type}
                     value={val}
                     disabled={disabled}
+                    min={min}
+                    max={max}
+                    step={type === 'time' && !step ? '1' : step}
                     onChange={(event) => onChange(event.target.value)}
+                    onBlur={onBlur}
                     placeholder={placeholder}
                     className={`input-field font-mono text-accent-1 disabled:cursor-not-allowed ${isMobile ? 'min-h-[34px] w-[128px] shrink-0 px-2 text-[13px]' : 'min-w-[150px] flex-[1_1_180px] text-[14px]'}`}
-                    {...(type === 'time' ? { step: '1' } : {})}
                 />
             </div>
         </motion.div>

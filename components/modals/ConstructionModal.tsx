@@ -116,7 +116,7 @@ function TargetGrid({
             </div>
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-4">
                 {targets.map((value, index) => (
-                    <div key={`${title}-${index}`} className="rounded-lg border border-white/10 bg-bg-inset/70 p-3">
+                    <div key={`${title}-${index}`} className="rounded-[24px] border border-white/10 bg-bg-inset/70 p-3">
                         <div className="mb-2">
                             <SettingInfoLabel label={`Location ${index + 1}`} className="text-[11px] font-bold uppercase tracking-[0.12em] text-text-muted" />
                         </div>
@@ -304,7 +304,7 @@ export default function ConstructionModal({ isOpen, onClose, iggId }: Constructi
                             {toggleOptions.map((option) => (
                                 <label
                                     key={option.label}
-                                    className="flex min-h-[48px] sm:min-h-[58px] cursor-pointer items-center justify-between gap-4 rounded-lg border border-white/10 bg-bg-inset/70 px-3 py-2 sm:px-4 sm:py-3 transition-colors hover:border-white/20 hover:bg-white/[0.035]"
+                                    className="flex min-h-[48px] sm:min-h-[58px] cursor-pointer items-center justify-between gap-4 rounded-[24px] border border-white/10 bg-bg-inset/70 px-3 py-2 sm:px-4 sm:py-3 transition-colors hover:border-white/20 hover:bg-white/[0.035]"
                                 >
                                     <SettingInfoLabel label={option.label} className="text-[13px] sm:text-[14px]" />
                                     <Checkbox checked={option.value} onChange={option.setter} />
@@ -313,25 +313,25 @@ export default function ConstructionModal({ isOpen, onClose, iggId }: Constructi
                         </div>
 
                         <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-                            <div className="rounded-lg border border-white/10 bg-bg-inset/70 p-4">
+                            <div className="rounded-[24px] border border-white/10 bg-bg-inset/70 p-4">
                                 <div className="mb-2">
                                     <SettingInfoLabel label="Spam Target Type" className="text-[12px] font-black uppercase tracking-[0.14em] text-text-muted" />
                                 </div>
                                 <TacticalSelect value={spamTargetType} onChange={setSpamTargetType} options={SPAM_TARGET_OPTIONS} />
                             </div>
-                            <div className="rounded-lg border border-white/10 bg-bg-inset/70 p-4">
+                            <div className="rounded-[24px] border border-white/10 bg-bg-inset/70 p-4">
                                 <div className="mb-2">
                                     <SettingInfoLabel label="Spam Target Building" className="text-[12px] font-black uppercase tracking-[0.14em] text-text-muted" />
                                 </div>
                                 <TacticalSelect value={spamTargetBuilding} onChange={setSpamTargetBuilding} options={SPAM_BUILDING_OPTIONS} />
                             </div>
-                            <div className="rounded-lg border border-white/10 bg-bg-inset/70 p-4">
+                            <div className="rounded-[24px] border border-white/10 bg-bg-inset/70 p-4">
                                 <div className="mb-2">
                                     <SettingInfoLabel label="Building Priority" className="text-[12px] font-black uppercase tracking-[0.14em] text-text-muted" />
                                 </div>
                                 <TacticalSelect value={buildingPriority} onChange={setBuildingPriority} options={BUILDING_PRIORITY_OPTIONS} />
                             </div>
-                            <div className="rounded-lg border border-white/10 bg-bg-inset/70 p-4">
+                            <div className="rounded-[24px] border border-white/10 bg-bg-inset/70 p-4">
                                 <div className="mb-2">
                                     <SettingInfoLabel label="Max Building Level" className="text-[12px] font-black uppercase tracking-[0.14em] text-text-muted" />
                                 </div>
@@ -341,7 +341,7 @@ export default function ConstructionModal({ isOpen, onClose, iggId }: Constructi
                                     max={50}
                                     value={maxBuildingLevel}
                                     onChange={(event) => setMaxBuildingLevel(clampWholeNumber(Number(event.target.value), 0, 50))}
-                                    className="input-field w-full font-mono text-[14px] font-black text-accent-cyan"
+                                    className="input-field w-full font-sans text-[14px] font-black text-accent-cyan"
                                 />
                             </div>
                         </div>
@@ -359,7 +359,7 @@ export default function ConstructionModal({ isOpen, onClose, iggId }: Constructi
                                 <button
                                     type="button"
                                     onClick={() => toast.success('Build data reset queued')}
-                                    className="inline-flex items-center justify-center gap-2 rounded-md border border-accent-3/25 bg-accent-3/10 px-3 py-2 text-[12px] font-bold text-accent-3 transition-colors hover:bg-accent-3/15"
+                                    className="inline-flex items-center justify-center gap-2 rounded-[24px] border border-accent-3/25 bg-accent-3/10 px-3 py-2 text-[12px] font-bold text-accent-3 transition-colors hover:bg-accent-3/15"
                                 >
                                     <RotateCcw className="h-4 w-4" />
                                     Reset Build Data

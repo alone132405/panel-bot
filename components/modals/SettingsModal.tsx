@@ -111,7 +111,7 @@ export default function SettingsModal({ isOpen, onClose, iggId }: SettingsModalP
 
         if (currentSettings.length === 0) {
             return (
-                <div className="rounded-lg border border-white/10 bg-bg-inset/70 py-12 text-center">
+                <div className="rounded-[24px] border border-white/10 bg-bg-inset/70 py-12 text-center">
                     <Settings className="mx-auto mb-3 h-10 w-10 text-text-muted" />
                     <p className="text-[13px] text-text-muted">No settings available for this category</p>
                 </div>
@@ -180,15 +180,15 @@ export default function SettingsModal({ isOpen, onClose, iggId }: SettingsModalP
         return (
             <div className="space-y-4">
                 <div className="grid gap-3 sm:grid-cols-3">
-                    <div className="rounded-lg border border-white/10 bg-bg-inset/70 p-3">
+                    <div className="rounded-[24px] border border-white/10 bg-bg-inset/70 p-3">
                         <div className="text-[10px] font-black uppercase tracking-[0.18em] text-text-muted">Controls</div>
                         <div className="mt-1 font-orbitron text-xl font-black text-text-primary">{currentSettings.length}</div>
                     </div>
-                    <div className="rounded-lg border border-accent-1/20 bg-accent-1/10 p-3">
+                    <div className="rounded-[24px] border border-accent-1/20 bg-accent-1/10 p-3">
                         <div className="text-[10px] font-black uppercase tracking-[0.18em] text-accent-1">Enabled</div>
                         <div className="mt-1 font-orbitron text-xl font-black text-accent-1">{enabledCount}</div>
                     </div>
-                    <div className="rounded-lg border border-accent-cyan/20 bg-accent-cyan/10 p-3">
+                    <div className="rounded-[24px] border border-accent-cyan/20 bg-accent-cyan/10 p-3">
                         <div className="text-[10px] font-black uppercase tracking-[0.18em] text-accent-cyan">Inputs</div>
                         <div className="mt-1 font-orbitron text-xl font-black text-accent-cyan">{inputCount}</div>
                     </div>

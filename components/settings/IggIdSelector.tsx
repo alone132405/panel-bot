@@ -5,7 +5,7 @@ import { Check, ChevronDown, Server, ShieldAlert } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface IggIdSelectorProps {
-    onSelect: (iggId: string) => void
+    onSelect: (iggId: string, plan?: string | null) => void
     selectedIggId?: string | null
 }
 
@@ -15,6 +15,7 @@ interface IggRecord {
     displayName?: string | null
     subscription?: {
         expiresAt?: string | null
+        plan?: string | null
     } | null
 }
 
@@ -51,9 +52,9 @@ export default function IggIdSelector({ onSelect, selectedIggId }: IggIdSelector
                 if (!selectedIggId) {
                     const savedIggId = ids.find((igg: IggRecord) => igg.iggId === data.selectedIggId)
                     if (savedIggId) {
-                        onSelect(savedIggId.iggId)
+                        onSelect(savedIggId.iggId, savedIggId.subscription?.plan)
                     } else if (ids.length === 1) {
-                        onSelect(ids[0].iggId)
+                        onSelect(ids[0].iggId, ids[0].subscription?.plan)
                     }
                 }
             } catch {
@@ -85,8 +86,8 @@ export default function IggIdSelector({ onSelect, selectedIggId }: IggIdSelector
         return Boolean(expiresAt && new Date(expiresAt) < new Date())
     }
 
-    const handleSelect = (iggId: string) => {
-        onSelect(iggId)
+    const handleSelect = (igg: IggRecord) => {
+        onSelect(igg.iggId, igg.subscription?.plan)
         setIsOpen(false)
     }
 
@@ -157,7 +158,7 @@ export default function IggIdSelector({ onSelect, selectedIggId }: IggIdSelector
                                 <button
                                     type="button"
                                     key={igg.id}
-                                    onClick={() => handleSelect(igg.iggId)}
+                                    onClick={() => handleSelect(igg)}
                                     className={`flex w-full items-center justify-between gap-3 rounded-md px-3 py-3 text-left transition-all ${selected
                                         ? 'bg-accent-1/10 text-accent-1'
                                         : 'text-text-primary hover:bg-white/[0.04]'

@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     if (authError) return authError
 
     try {
-        const { iggId, expiresAt, status } = await req.json()
+        const { iggId, expiresAt, status, plan } = await req.json()
 
         if (!iggId) {
             return NextResponse.json(
@@ -23,10 +23,12 @@ export async function POST(req: Request) {
                 iggId,
                 expiresAt: new Date(expiresAt),
                 status: status || 'ACTIVE',
+                ...(plan && { plan }),
             },
             update: {
                 expiresAt: new Date(expiresAt),
                 status: status || 'ACTIVE',
+                ...(plan && { plan }),
             },
         })
 

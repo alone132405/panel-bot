@@ -238,7 +238,7 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
         >
             {loading ? (
                                 <div className="flex items-center justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-[#00FFB2]" />
+                                    <Loader2 className="w-8 h-8 animate-spin text-accent-1" />
                                 </div>
                             ) : (
                                 <div className="w-full space-y-6">
@@ -252,7 +252,7 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
 
                                     {/* Gems Section */}
                                     <div className="space-y-4">
-                                        <div className="flex items-center justify-between p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                                        <div className="flex items-center justify-between p-4 rounded-[24px] bg-emerald-500/10 border border-emerald-500/20">
                                             <label className="flex items-center gap-3 cursor-pointer">
                                                 <Checkbox checked={useGems} onChange={setUseGems} />
                                                 <SettingInfoLabel label="Use Gems" className="text-sm font-medium text-emerald-300" />
@@ -260,7 +260,7 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
                                         </div>
 
                                         {/* Buy Shield with Duration Selection */}
-                                        <div className="p-3 sm:p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)]">
+                                        <div className="p-3 sm:p-4 rounded-[24px] bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)]">
                                             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                                                 <label className="flex items-center gap-3 cursor-pointer shrink-0">
                                                     <Checkbox checked={buyShield} onChange={setBuyShield} />
@@ -303,7 +303,7 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
                                                 { label: 'Archaic Tome', value: archaicTome, setter: setArchaicTome, key: 'buyArchaicTome' },
                                                 { label: 'Reduce Upkeep', value: reduceUpkeep, setter: setReduceUpkeep, key: 'buyReducedUpKeep' },
                                             ].map((item) => (
-                                                <label key={item.key} className="flex min-h-[48px] md:min-h-0 items-center justify-between md:justify-start gap-4 md:gap-2 px-3 py-2 md:px-4 md:py-2 rounded-lg md:rounded-xl bg-bg-inset/70 md:bg-[#0F0F1A] border border-white/10 md:border-[rgba(123,94,255,0.08)] hover:bg-white/[0.035] md:hover:bg-[#161626] transition-colors cursor-pointer">
+                                                <label key={item.key} className="flex min-h-[48px] md:min-h-0 items-center justify-between md:justify-start gap-4 md:gap-2 px-3 py-2 md:px-4 md:py-2 rounded-[24px] md:rounded-[24px] bg-bg-inset/70 md:bg-[#0F0F1A] border border-white/10 md:border-[rgba(123,94,255,0.08)] hover:bg-white/[0.035] md:hover:bg-[#161626] transition-colors cursor-pointer">
                                                     <SettingInfoLabel label={item.label} className="text-[13px] sm:text-[14px] md:text-sm text-white" />
                                                     <Checkbox checked={item.value} onChange={item.setter} />
                                                 </label>
@@ -313,7 +313,7 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
                                         {/* Reduce Upkeep - Removed standalone version since it's now in the list above */}
 
                                         {/* Buy VIP Points */}
-                                        <div className="p-3 sm:p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)]">
+                                        <div className="p-3 sm:p-4 rounded-[24px] bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)]">
                                             <div className="mb-2">
                                                 <SettingInfoLabel label="Buy VIP Points Up to Level" className="text-xs sm:text-sm text-gray-300" />
                                             </div>
@@ -330,14 +330,14 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
                                                     setGemsBuyVIPLevel(val)
                                                     updateSettingsObject('spendingSettings.gemSettings.buyVIP_Points', val)
                                                 }}
-                                                className="w-32 px-3 py-2 bg-[#07070E]/50 border border-[rgba(123,94,255,0.2)] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#7B5EFF]/50"
+                                                className="w-32 px-3 py-2 bg-bg-inset/50 border border-border rounded-[24px] text-white focus:outline-none focus:ring-2 focus:ring-[#7B5EFF]/50"
                                             />
                                         </div>
                                     </div>
 
                                     {/* Guild Coins Section */}
-                                    <div className="space-y-4 pt-6 border-t border-[rgba(123,94,255,0.2)]">
-                                        <div className="flex items-center justify-between p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                                    <div className="space-y-4 pt-6 border-t border-border">
+                                        <div className="flex items-center justify-between p-4 rounded-[24px] bg-amber-500/10 border border-amber-500/20">
                                             <div>
                                                 <label className="flex items-center gap-3 cursor-pointer">
                                                     <Checkbox checked={useGuildCoins} onChange={setUseGuildCoins} />
@@ -359,7 +359,7 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
                                                 { label: 'Ore Boost', value: oreBoost, setter: setOreBoost, key: 'buyOreBoost' },
                                                 { label: 'Gold Boost', value: goldBoost, setter: setGoldBoost, key: 'buyGoldBoost' },
                                             ].map((boost) => (
-                                                <label key={boost.key} className="flex min-h-[48px] md:min-h-0 items-center justify-between md:justify-start gap-4 md:gap-2 px-3 py-2 md:px-4 md:py-2 rounded-lg md:rounded-xl bg-bg-inset/70 md:bg-[#0F0F1A] border border-white/10 md:border-[rgba(123,94,255,0.08)] hover:bg-white/[0.035] md:hover:bg-[#161626] transition-colors cursor-pointer">
+                                                <label key={boost.key} className="flex min-h-[48px] md:min-h-0 items-center justify-between md:justify-start gap-4 md:gap-2 px-3 py-2 md:px-4 md:py-2 rounded-[24px] md:rounded-[24px] bg-bg-inset/70 md:bg-[#0F0F1A] border border-white/10 md:border-[rgba(123,94,255,0.08)] hover:bg-white/[0.035] md:hover:bg-[#161626] transition-colors cursor-pointer">
                                                     <SettingInfoLabel label={boost.label} className="text-[13px] sm:text-[14px] md:text-sm text-white" />
                                                     <Checkbox checked={boost.value} onChange={boost.setter} />
                                                 </label>
@@ -368,7 +368,7 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
 
                                         {/* Buy VIP Points and Reserve Guild Coins */}
                                         <div className="grid grid-cols-2 gap-3 md:gap-4">
-                                            <div className="p-3 sm:p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)]">
+                                            <div className="p-3 sm:p-4 rounded-[24px] bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)]">
                                                 <div className="mb-2">
                                                     <SettingInfoLabel label="Buy VIP Points Up to Level" className="text-xs sm:text-sm text-gray-300" />
                                                 </div>
@@ -385,11 +385,11 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
                                                         setGuildCoinsBuyVIPLevel(val)
                                                         updateSettingsObject('spendingSettings.gcSettings.buyVIP_Points', val)
                                                     }}
-                                                    className="w-32 px-3 py-2 bg-[#07070E]/50 border border-[rgba(123,94,255,0.2)] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#7B5EFF]/50"
+                                                    className="w-32 px-3 py-2 bg-bg-inset/50 border border-border rounded-[24px] text-white focus:outline-none focus:ring-2 focus:ring-[#7B5EFF]/50"
                                                 />
                                             </div>
 
-                                            <div className="p-3 sm:p-4 rounded-xl bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)]">
+                                            <div className="p-3 sm:p-4 rounded-[24px] bg-[#0F0F1A] border border-[rgba(123,94,255,0.08)]">
                                                 <div className="mb-2">
                                                     <SettingInfoLabel label="Reserve Guild Coins" className="text-xs sm:text-sm text-gray-300" />
                                                 </div>
@@ -406,7 +406,7 @@ export default function GemsCoinsModal({ isOpen, onClose, iggId }: GemsCoinsModa
                                                         setReserveGuildCoins(val)
                                                         updateSettingsObject('spendingSettings.gcSettings.coinReserve', val)
                                                     }}
-                                                    className="w-32 px-3 py-2 bg-[#07070E]/50 border border-[rgba(123,94,255,0.2)] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#7B5EFF]/50"
+                                                    className="w-32 px-3 py-2 bg-bg-inset/50 border border-border rounded-[24px] text-white focus:outline-none focus:ring-2 focus:ring-[#7B5EFF]/50"
                                                 />
                                             </div>
                                         </div>

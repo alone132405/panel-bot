@@ -66,9 +66,9 @@ export default function KonohaModal({
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
                             <motion.div
                                 {...motionProps}
-                                className="panel-solid pointer-events-auto flex w-full max-w-md flex-col items-center rounded-lg p-7 text-center"
+                                className="panel-solid pointer-events-auto flex w-full max-w-md flex-col items-center rounded-[24px] p-7 text-center"
                             >
-                                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-md border border-accent-gold/25 bg-accent-gold/10 text-accent-gold">
+                                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-[24px] border border-accent-gold/25 bg-accent-gold/10 text-accent-gold">
                                     <AlertCircle className="h-6 w-6" />
                                 </div>
                                 <p className="mb-2 text-[18px] font-bold text-text-primary">No IGG ID Selected</p>
@@ -76,7 +76,7 @@ export default function KonohaModal({
                                 <button
                                     type="button"
                                     onClick={onClose}
-                                    className="rounded-md border border-border bg-bg-elevated px-5 py-2 text-[13px] font-bold text-text-primary transition-colors hover:border-accent-1/35 hover:text-accent-1"
+                                    className="rounded-[24px] border border-border bg-bg-elevated px-5 py-2 text-[13px] font-bold text-text-primary transition-colors hover:border-accent-1/35 hover:text-accent-1"
                                 >
                                     Close
                                 </button>
@@ -108,12 +108,12 @@ export default function KonohaModal({
                         <motion.div
                             {...motionProps}
                             style={{ maxWidth }}
-                            className="panel-solid pointer-events-auto flex max-h-[90vh] w-full flex-col overflow-hidden rounded-lg"
+                            className="panel-solid pointer-events-auto flex max-h-[90vh] w-full flex-col overflow-hidden rounded-[24px]"
                         >
                             <div className="flex items-center justify-between gap-4 border-b border-border bg-bg-elevated/60 px-5 py-4 md:px-6">
                                 <div className="flex min-w-0 items-center gap-3">
                                     <div
-                                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md"
+                                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[24px]"
                                         style={{ backgroundColor: iconBg, border: `1px solid ${iconBorder}` }}
                                     >
                                         <Icon style={{ color: iconColor }} className="h-5 w-5" />
@@ -123,7 +123,7 @@ export default function KonohaModal({
                                             <span className="truncate">{title}</span>
                                             {saving && <Loader2 className="h-4 w-4 shrink-0 animate-spin text-accent-1" />}
                                         </h2>
-                                        <p className="mt-0.5 truncate font-mono text-[11px] uppercase tracking-[0.16em] text-text-muted">
+                                        <p className="mt-0.5 truncate font-sans text-[11px] uppercase tracking-[0.16em] text-text-muted">
                                             IGG ID {iggId}
                                         </p>
                                     </div>
@@ -135,7 +135,7 @@ export default function KonohaModal({
                                     <button
                                         type="button"
                                         onClick={onClose}
-                                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-accent-3/20 bg-accent-3/10 text-accent-3 transition-colors hover:bg-accent-3/20"
+                                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[24px] border border-accent-3/20 bg-accent-3/10 text-accent-3 transition-colors hover:bg-accent-3/20"
                                     >
                                         <X className="h-4 w-4" />
                                     </button>

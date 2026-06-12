@@ -101,6 +101,7 @@ const RANK_OPTIONS = [
 export default function BankSettingsPage() {
     const [activeTab, setActiveTab] = useState<'users' | 'commands'>('users')
     const [selectedIggId, setSelectedIggId] = useState<string | null>(null)
+    const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
     const [settings, setSettings] = useState<BankSettings | null>(null)
     const [loading, setLoading] = useState(false)
     const [showAddUserModal, setShowAddUserModal] = useState(false)
@@ -217,7 +218,7 @@ export default function BankSettingsPage() {
         if (!selectedIggId) return
 
         if (cooldown > 0) {
-            toast.warning(`Please wait ${Math.ceil(cooldown / 60)} minutes before applying changes again.`)
+            toast.warning(`Please wait ${cooldown} seconds before applying changes again.`)
             return
         }
 
@@ -240,9 +241,9 @@ export default function BankSettingsPage() {
 
             toast.success('Request sent to queue!')
             // Set cooldown
-            const expiry = Date.now() + 5 * 60 * 1000 // 5 minutes
+            const expiry = Date.now() + 5 * 1000 // 5 seconds
             localStorage.setItem(`automation_cooldown_bank_${selectedIggId}`, expiry.toString())
-            setCooldown(300)
+            setCooldown(5)
 
         } catch (error) {
             toast.error('Failed to connect to automation server')
@@ -329,11 +330,17 @@ export default function BankSettingsPage() {
         const displayName = newUser.name.trim()
         const accountData = Array.isArray(settings.accountData) ? settings.accountData : []
         const existingIndex = accountData.findIndex((user) => user.UserID === parsedUserId)
+        const currentAuthUsers = accountData.filter(u => u.highAuth)
 
         if (existingIndex >= 0) {
             const existingUser = accountData[existingIndex]
             if (existingUser.highAuth === newUser.highAuth && existingUser.AccountName === displayName) {
                 toast.error('This user is already in the roster')
+                return
+            }
+
+            if (!existingUser.highAuth && newUser.highAuth && selectedPlan === 'FARM_BOT' && currentAuthUsers.length >= 2) {
+                toast.error('Farm Bot plans are limited to a maximum of 2 authorized users.')
                 return
             }
 
@@ -351,6 +358,11 @@ export default function BankSettingsPage() {
             setNewUser({ iggId: '', name: '', highAuth: true })
             setShowAddUserModal(false)
             toast.success('Existing user updated. Save changes to write config.')
+            return
+        }
+
+        if (newUser.highAuth && selectedPlan === 'FARM_BOT' && currentAuthUsers.length >= 2) {
+            toast.error('Farm Bot plans are limited to a maximum of 2 authorized users.')
             return
         }
 
@@ -425,9 +437,12 @@ export default function BankSettingsPage() {
     ]
 
     const authorizedUsers = (Array.isArray(settings?.accountData) ? settings.accountData : []).filter((user) => user.highAuth === true)
+    
+    const allowedFarmCommands = ['adminfood', 'adminwood', 'adminore', 'adminstone', 'adminrss', 'shield', 'relocate', 'migrate', 'setgather']
     const filteredCommands = (Array.isArray(settings?.guildCommands) ? settings.guildCommands : [])
         .map((cmd, index) => ({ cmd, index }))
         .filter(({ cmd }) => cmd.commadReference.toLowerCase().includes(commandSearch.toLowerCase()))
+        .filter(({ cmd }) => selectedPlan !== 'FARM_BOT' || allowedFarmCommands.includes(cmd.commadReference.toLowerCase()))
 
     const commandAccessCards = [
         {
@@ -444,7 +459,7 @@ export default function BankSettingsPage() {
             enabled: Boolean(settings?.enableBlackList),
             onToggle: () => settings && updateSettings({ ...settings, enableBlackList: !settings.enableBlackList }),
         },
-    ]
+    ].filter(() => selectedPlan !== 'FARM_BOT')
     const commandChannelOptions = [
         {
             key: 'chat',
@@ -474,7 +489,7 @@ export default function BankSettingsPage() {
             checked: Boolean(settings?.disableErrorResponse),
             onChange: () => settings && updateSettings({ ...settings, disableErrorResponse: !settings.disableErrorResponse }),
         },
-    ]
+    ].filter(item => selectedPlan !== 'FARM_BOT' || ['chat', 'mail'].includes(item.key))
     const commandRuntimeOptions = [
         {
             key: 'external',
@@ -504,7 +519,7 @@ export default function BankSettingsPage() {
             checked: Boolean(settings?.useBagRss),
             onChange: () => settings && updateSettings({ ...settings, useBagRss: !settings.useBagRss }),
         },
-    ]
+    ].filter(item => selectedPlan !== 'FARM_BOT' || ['external', 'bag-rss'].includes(item.key))
 
     return (
         <div className="space-y-5 p-3 sm:p-6">
@@ -527,7 +542,10 @@ export default function BankSettingsPage() {
                     <div className="relative z-40 w-full xl:max-w-[320px]">
                         <IggIdSelector
                             selectedIggId={selectedIggId}
-                            onSelect={setSelectedIggId}
+                            onSelect={(id, plan) => {
+                                setSelectedIggId(id)
+                                setSelectedPlan(plan || null)
+                            }}
                         />
                     </div>
                 </div>
@@ -605,7 +623,12 @@ export default function BankSettingsPage() {
                                             <button
                                                 type="button"
                                                 onClick={() => setShowAddUserModal(true)}
-                                                className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-accent-2/25 bg-accent-2/10 px-4 text-[13px] font-bold text-accent-2 transition-colors hover:bg-accent-2/20"
+                                                disabled={selectedPlan === 'FARM_BOT' && authorizedUsers.length >= 2}
+                                                className={`inline-flex h-10 items-center justify-center gap-2 rounded-md border border-accent-2/25 bg-accent-2/10 px-4 text-[13px] font-bold text-accent-2 transition-colors ${
+                                                    selectedPlan === 'FARM_BOT' && authorizedUsers.length >= 2 
+                                                    ? 'opacity-50 cursor-not-allowed' 
+                                                    : 'hover:bg-accent-2/20'
+                                                }`}
                                             >
                                                 <UserPlus className="h-4 w-4" />
                                                 Add User

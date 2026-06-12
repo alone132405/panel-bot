@@ -76,7 +76,7 @@ export default function AdminPage() {
         nickname: '',
         months: 1,
         years: 0,
-        plan: 'BANK_BOT' as 'BANK_BOT' | 'BANK_BOT_WHATSAPP'
+        plan: 'BANK_BOT' as 'BANK_BOT' | 'BANK_BOT_WHATSAPP' | 'FARM_BOT'
     })
     const [isAssigning, setIsAssigning] = useState(false)
     const [isApproving, setIsApproving] = useState(false)
@@ -330,7 +330,7 @@ export default function AdminPage() {
 
     return (
         <div className="space-y-4 p-2.5 sm:space-y-5 sm:p-6">
-            <div className="overflow-hidden rounded-xl border border-border bg-bg-surface shadow-panel">
+            <div className="overflow-hidden rounded-[24px] border border-border bg-bg-surface shadow-panel shadow-panel">
                 <div className="border-b border-border bg-[linear-gradient(135deg,rgba(33,243,177,0.08),rgba(88,101,242,0.04))] px-4 py-3 sm:px-6 sm:py-5">
                     <div className="w-fit rounded-full border border-accent-1/20 bg-accent-1/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-accent-1 sm:text-[11px]">
                         Control Center
@@ -346,10 +346,10 @@ export default function AdminPage() {
                 {adminMetrics.map((metric) => {
                     const Icon = metric.icon
                     return (
-                        <div key={metric.label} className="rounded-lg border border-border bg-bg-surface p-3 shadow-panel sm:p-4">
+                        <div key={metric.label} className="rounded-[24px] border border-border bg-bg-surface shadow-panel p-3 shadow-panel sm:p-4">
                             <div className="mb-3 flex items-start justify-between gap-2 sm:mb-4 sm:items-center sm:gap-3">
                                 <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted sm:text-[11px] sm:tracking-[0.16em]">{metric.label}</p>
-                                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border sm:h-9 sm:w-9 ${metric.iconClass}`}>
+                                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-[24px] border sm:h-9 sm:w-9 ${metric.iconClass}`}>
                                     <Icon className="h-4 w-4" />
                                 </div>
                             </div>
@@ -359,7 +359,7 @@ export default function AdminPage() {
                 })}
             </section>
 
-            <section className="rounded-lg border border-border bg-bg-surface shadow-panel">
+            <section className="rounded-[24px] border border-border bg-bg-surface shadow-panel shadow-panel">
                 <div className="grid grid-cols-2 gap-2 border-b border-border bg-bg-elevated/55 p-2.5 sm:p-3 xl:grid-cols-4">
                     {adminTabs.map((tab) => {
                         const Icon = tab.icon
@@ -369,7 +369,7 @@ export default function AdminPage() {
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex min-h-[54px] items-center justify-between gap-2 rounded-md border px-2.5 text-left transition-all sm:min-h-[48px] sm:gap-3 sm:px-3 ${isActive
+                                className={`flex min-h-[54px] items-center justify-between gap-2 rounded-[24px] border px-2.5 text-left transition-all sm:min-h-[48px] sm:gap-3 sm:px-3 ${isActive
                                     ? 'border-accent-1/35 bg-accent-1/10 text-accent-1 shadow-glow-mint'
                                     : 'border-border bg-bg-inset text-text-muted hover:border-accent-2/30 hover:text-text-primary'
                                     }`}
@@ -378,7 +378,7 @@ export default function AdminPage() {
                                     <Icon className="h-4 w-4 shrink-0" />
                                     <span className="truncate text-[12px] font-bold sm:text-[13px]">{tab.label}</span>
                                 </span>
-                                <span className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[10px] sm:text-[11px] ${isActive ? 'border-accent-1/20 bg-accent-1/10' : 'border-border bg-bg-surface'}`}>
+                                <span className={`shrink-0 rounded-full border px-2 py-0.5 font-sans text-[10px] sm:text-[11px] ${isActive ? 'border-accent-1/20 bg-accent-1/10' : 'border-border bg-bg-surface'}`}>
                                     {tab.count}
                                 </span>
                             </button>
@@ -394,7 +394,7 @@ export default function AdminPage() {
                             placeholder={activeTab === 'adminRequests' ? 'Search requests by IGG, admin name, or ID...' : 'Search users by name or email...'}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="h-11 w-full rounded-md border border-border bg-bg-inset px-4 pl-10 text-sm text-text-primary placeholder-text-muted transition-all focus:border-accent-2 focus:outline-none focus:shadow-glow-violet"
+                            className="h-11 w-full rounded-[24px] border border-border bg-bg-inset px-4 pl-10 text-sm text-text-primary placeholder-text-muted transition-all focus:border-accent-2 focus:outline-none focus:shadow-glow-violet"
                         />
                     </div>
                     <span className="w-fit rounded-full border border-border bg-bg-inset px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted sm:text-[11px]">
@@ -404,7 +404,7 @@ export default function AdminPage() {
             </section>
 
             {activeTab === 'adminRequests' ? (
-                <section className="overflow-hidden rounded-lg border border-border bg-bg-surface shadow-panel">
+                <section className="overflow-hidden rounded-[24px] border border-border bg-bg-surface shadow-panel shadow-panel">
                     <div className="flex flex-col gap-2 border-b border-border bg-bg-elevated/55 p-3 sm:p-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h2 className="text-[15px] font-bold text-text-primary">Admin Requests</h2>
@@ -417,7 +417,7 @@ export default function AdminPage() {
 
                     {filteredAdminRequests.length === 0 ? (
                         <div className="p-8 text-center sm:p-12">
-                            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-md border border-border bg-bg-inset text-text-muted">
+                            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-[24px] border border-border bg-bg-inset text-text-muted">
                                 <UserPlus className="h-6 w-6" />
                             </div>
                             <p className="font-bold text-text-primary">No pending admin requests</p>
@@ -436,16 +436,16 @@ export default function AdminPage() {
                                 {filteredAdminRequests.map((request) => (
                                     <div
                                         key={request.id}
-                                        className="grid gap-3 rounded-lg border border-border bg-bg-inset/50 p-3 transition-colors hover:bg-white/[0.025] sm:rounded-none sm:border-0 sm:bg-transparent sm:p-4 xl:grid-cols-[minmax(110px,0.8fr)_minmax(180px,1fr)_110px_minmax(180px,1fr)_180px] xl:items-center"
+                                        className="grid gap-3 rounded-[24px] border border-border bg-bg-inset/50 p-3 transition-colors hover:bg-white/[0.025] sm:rounded-[24px] sm:border-0 sm:bg-transparent sm:p-4 xl:grid-cols-[minmax(110px,0.8fr)_minmax(180px,1fr)_110px_minmax(180px,1fr)_180px] xl:items-center"
                                     >
                                         <div>
                                             <span className="mb-1 block text-[11px] font-bold uppercase tracking-[0.14em] text-text-muted xl:hidden">IGG ID</span>
-                                            <span className="font-mono text-[13px] font-bold text-text-primary">{request.iggId}</span>
+                                            <span className="font-sans text-[13px] font-bold text-text-primary">{request.iggId}</span>
                                         </div>
                                         <div className="min-w-0">
                                             <span className="mb-1 block text-[11px] font-bold uppercase tracking-[0.14em] text-text-muted xl:hidden">Requested Admin</span>
                                             <p className="truncate text-[14px] font-bold text-text-primary">{request.adminName}</p>
-                                            <p className="truncate font-mono text-[12px] text-text-muted">{request.adminUserId}</p>
+                                            <p className="truncate font-sans text-[12px] text-text-muted">{request.adminUserId}</p>
                                         </div>
                                         <div>
                                             <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] ${request.requestType === 'DELETE'
@@ -463,7 +463,7 @@ export default function AdminPage() {
                                             <button
                                                 type="button"
                                                 onClick={() => handleApproveAdminRequest(request.id)}
-                                                className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-accent-1/30 bg-accent-1/10 px-3 text-[12px] font-bold text-accent-1 transition-colors hover:bg-accent-1/20"
+                                                className="inline-flex h-9 items-center justify-center gap-2 rounded-[24px] border border-accent-1/30 bg-accent-1/10 px-3 text-[12px] font-bold text-accent-1 transition-colors hover:bg-accent-1/20"
                                             >
                                                 <Check className="h-4 w-4" />
                                                 Approve
@@ -471,7 +471,7 @@ export default function AdminPage() {
                                             <button
                                                 type="button"
                                                 onClick={() => handleRejectAdminRequest(request.id)}
-                                                className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-accent-3/30 bg-accent-3/10 px-3 text-[12px] font-bold text-accent-3 transition-colors hover:bg-accent-3/20"
+                                                className="inline-flex h-9 items-center justify-center gap-2 rounded-[24px] border border-accent-3/30 bg-accent-3/10 px-3 text-[12px] font-bold text-accent-3 transition-colors hover:bg-accent-3/20"
                                             >
                                                 <X className="h-4 w-4" />
                                                 Reject
@@ -484,7 +484,7 @@ export default function AdminPage() {
                     )}
                 </section>
             ) : (
-                <section className="overflow-hidden rounded-lg border border-border bg-bg-surface shadow-panel">
+                <section className="overflow-hidden rounded-[24px] border border-border bg-bg-surface shadow-panel shadow-panel">
                     <div className="flex flex-col gap-2 border-b border-border bg-bg-elevated/55 p-3 sm:p-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h2 className="text-[15px] font-bold text-text-primary">User Accounts</h2>
@@ -497,7 +497,7 @@ export default function AdminPage() {
 
                     {filteredUsers.length === 0 ? (
                         <div className="p-8 text-center sm:p-12">
-                            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-md border border-border bg-bg-inset text-text-muted">
+                            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-[24px] border border-border bg-bg-inset text-text-muted">
                                 <Users className="h-6 w-6" />
                             </div>
                             <p className="font-bold text-text-primary">No users found</p>
@@ -529,10 +529,10 @@ export default function AdminPage() {
                                                 setIsUserModalOpen(true)
                                             }
                                         }}
-                                        className="grid cursor-pointer gap-3 rounded-lg border border-border bg-bg-inset/50 p-3 transition-colors hover:bg-white/[0.025] sm:gap-4 sm:rounded-none sm:border-0 sm:bg-transparent sm:p-4 2xl:grid-cols-[minmax(220px,1.25fr)_minmax(190px,1fr)_minmax(220px,1.15fr)_minmax(170px,0.95fr)_minmax(180px,0.95fr)] 2xl:items-center"
+                                        className="grid cursor-pointer gap-3 rounded-[24px] border border-border bg-bg-inset/50 p-3 transition-colors hover:bg-white/[0.025] sm:gap-4 sm:rounded-[24px] sm:border-0 sm:bg-transparent sm:p-4 2xl:grid-cols-[minmax(220px,1.25fr)_minmax(190px,1fr)_minmax(220px,1.15fr)_minmax(170px,0.95fr)_minmax(180px,0.95fr)] 2xl:items-center"
                                     >
                                         <div className="flex min-w-0 items-start gap-3">
-                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-accent-1/20 bg-accent-1/10 font-orbitron text-[14px] text-accent-1">
+                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[24px] border border-accent-1/20 bg-accent-1/10 font-orbitron text-[14px] text-accent-1">
                                                 {user.name.charAt(0).toUpperCase()}
                                             </div>
                                             <div className="min-w-0">
@@ -554,7 +554,7 @@ export default function AdminPage() {
                                                     <span className={`rounded-full border px-2 py-1 text-[11px] font-bold ${contactClass(user.contactType)}`}>
                                                         {user.contactType}
                                                     </span>
-                                                    <span className="min-w-0 truncate font-mono text-[12px] text-text-muted">{user.contactValue}</span>
+                                                    <span className="min-w-0 truncate font-sans text-[12px] text-text-muted">{user.contactValue}</span>
                                                 </div>
                                             ) : (
                                                 <span className="text-sm text-text-muted">Not set</span>
@@ -568,9 +568,9 @@ export default function AdminPage() {
                                                     user.iggIds.map((igg) => (
                                                         <div
                                                             key={igg.id}
-                                                            className="flex max-w-full items-center gap-2 rounded-md border border-accent-1/20 bg-accent-1/10 px-2.5 py-1 text-[12px] font-bold text-accent-1"
+                                                            className="flex max-w-full items-center gap-2 rounded-[24px] border border-accent-1/20 bg-accent-1/10 px-2.5 py-1 text-[12px] font-bold text-accent-1"
                                                         >
-                                                            <span className="truncate font-mono">{igg.iggId}</span>
+                                                            <span className="truncate font-sans">{igg.iggId}</span>
                                                             <button
                                                                 type="button"
                                                                 onClick={(event) => {
@@ -595,7 +595,7 @@ export default function AdminPage() {
                                                 <div className="space-y-1">
                                                     {user.iggIds.filter(igg => igg.subscription).map((igg) => (
                                                         <div key={igg.id} className="flex min-w-0 items-center gap-2">
-                                                            <span className="shrink-0 font-mono text-[11px] text-text-muted">{igg.iggId}:</span>
+                                                            <span className="shrink-0 font-sans text-[11px] text-text-muted">{igg.iggId}:</span>
                                                             <span className="truncate text-[12px] text-text-primary">
                                                                 {new Date(igg.subscription!.expiresAt).toLocaleDateString()}
                                                             </span>
@@ -617,7 +617,7 @@ export default function AdminPage() {
                                                             setSelectedUser(user)
                                                             setShowApprovalModal(true)
                                                         }}
-                                                        className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-accent-1/30 bg-accent-1/10 px-3 text-[12px] font-bold text-accent-1 transition-colors hover:bg-accent-1/20"
+                                                        className="inline-flex h-9 items-center justify-center gap-2 rounded-[24px] border border-accent-1/30 bg-accent-1/10 px-3 text-[12px] font-bold text-accent-1 transition-colors hover:bg-accent-1/20"
                                                     >
                                                         <Check className="h-4 w-4" />
                                                         Approve
@@ -628,7 +628,7 @@ export default function AdminPage() {
                                                             event.stopPropagation()
                                                             handleRejectUser(user)
                                                         }}
-                                                        className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-accent-3/30 bg-accent-3/10 px-3 text-[12px] font-bold text-accent-3 transition-colors hover:bg-accent-3/20"
+                                                        className="inline-flex h-9 items-center justify-center gap-2 rounded-[24px] border border-accent-3/30 bg-accent-3/10 px-3 text-[12px] font-bold text-accent-3 transition-colors hover:bg-accent-3/20"
                                                     >
                                                         <X className="h-4 w-4" />
                                                         Reject
@@ -642,7 +642,7 @@ export default function AdminPage() {
                                                         setSelectedUser(user)
                                                         setShowAssignModal(true)
                                                     }}
-                                                    className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-accent-2/30 bg-accent-2/10 px-3 text-[12px] font-bold text-accent-2 transition-colors hover:bg-accent-2/20"
+                                                    className="inline-flex h-9 items-center justify-center gap-2 rounded-[24px] border border-accent-2/30 bg-accent-2/10 px-3 text-[12px] font-bold text-accent-2 transition-colors hover:bg-accent-2/20"
                                                 >
                                                     <Plus className="h-4 w-4" />
                                                     Assign IGG
@@ -660,9 +660,9 @@ export default function AdminPage() {
             )}
 
             <section className="grid gap-3 sm:gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-                <div className="rounded-lg border border-accent-3/25 bg-bg-surface p-3 shadow-panel sm:p-4">
+                <div className="rounded-[24px] border border-accent-3/25 bg-bg-surface p-3 shadow-panel sm:p-4">
                     <div className="mb-4 flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-md border border-accent-3/25 bg-accent-3/10 text-accent-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-[24px] border border-accent-3/25 bg-accent-3/10 text-accent-3">
                             <Activity className="h-5 w-5" />
                         </div>
                         <div>
@@ -670,19 +670,19 @@ export default function AdminPage() {
                             <p className="text-[12px] text-text-muted">Stop all active proxy servers and bot instances.</p>
                         </div>
                     </div>
-                    <button className="inline-flex min-h-[42px] w-full items-center justify-center rounded-md border border-accent-3/35 bg-accent-3/10 px-4 text-[13px] font-bold text-accent-3 transition-colors hover:bg-accent-3/20 active:scale-[0.99]">
+                    <button className="inline-flex min-h-[42px] w-full items-center justify-center rounded-[24px] border border-accent-3/35 bg-accent-3/10 px-4 text-[13px] font-bold text-accent-3 transition-colors hover:bg-accent-3/20 active:scale-[0.99]">
                         Emergency Stop
                     </button>
                 </div>
 
-                <div className="flex h-[200px] flex-col overflow-hidden rounded-lg border border-border bg-bg-surface shadow-panel sm:h-[220px]">
+                <div className="flex h-[200px] flex-col overflow-hidden rounded-[24px] border border-border bg-bg-surface shadow-panel shadow-panel sm:h-[220px]">
                     <div className="flex items-center justify-between border-b border-border bg-bg-elevated/55 px-3 py-3 sm:px-4">
                         <h3 className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-[0.16em] text-text-primary">
                             <span className="h-2 w-2 rounded-full bg-accent-1 shadow-glow-mint" />
                             Real-Time Telemetry
                         </h3>
                     </div>
-                    <div className="flex-1 space-y-1 overflow-auto bg-[#030507] p-3 font-mono text-[11px] text-text-muted scrollbar-thin sm:p-4">
+                    <div className="flex-1 space-y-1 overflow-auto bg-[#030507] p-3 font-sans text-[11px] text-text-muted scrollbar-thin sm:p-4">
                         <p className="text-accent-1">[SYS] Telemetry stream initialized...</p>
                         <p>[NET] Proxy connection established on port 8080</p>
                         <p>[AUT] Instance #142 reported status OK</p>
@@ -699,11 +699,11 @@ export default function AdminPage() {
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="bg-background-secondary rounded-2xl border border-border p-6 max-w-lg w-full shadow-xl"
+                        className="bg-bg-surface rounded-[24px] border border-border p-6 max-w-lg w-full shadow-xl"
                     >
                         {/* Header */}
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-12 h-12 bg-gradient-to-br from-accent-emerald to-emerald-600 rounded-xl flex items-center justify-center">
+                            <div className="w-12 h-12 bg-gradient-to-br from-accent-emerald to-emerald-600 rounded-[24px] flex items-center justify-center">
                                 <UserPlus className="w-6 h-6 text-white" />
                             </div>
                             <div>
@@ -724,7 +724,7 @@ export default function AdminPage() {
                                     value={approvalFormData.iggId}
                                     onChange={(e) => setApprovalFormData(prev => ({ ...prev, iggId: e.target.value }))}
                                     placeholder="Enter IGG ID (e.g., 1234567890)"
-                                    className="w-full px-4 py-3 bg-surface border border-border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                    className="w-full px-4 py-3 bg-surface border border-border rounded-[24px] text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                 />
                             </div>
 
@@ -738,7 +738,7 @@ export default function AdminPage() {
                                     value={approvalFormData.nickname}
                                     onChange={(e) => setApprovalFormData(prev => ({ ...prev, nickname: e.target.value }))}
                                     placeholder="Display name for this account"
-                                    className="w-full px-4 py-3 bg-surface border border-border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                    className="w-full px-4 py-3 bg-surface border border-border rounded-[24px] text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                 />
                             </div>
 
@@ -750,7 +750,8 @@ export default function AdminPage() {
         onChange={(v) => setApprovalFormData(prev => ({ ...prev, plan: v as any }))}
         options={[
             { value: 'BANK_BOT', label: 'Bank Bot' },
-            { value: 'BANK_BOT_WHATSAPP', label: 'Bank Bot + WhatsApp Bot' }
+            { value: 'BANK_BOT_WHATSAPP', label: 'Bank Bot + WhatsApp Bot' },
+            { value: 'FARM_BOT', label: 'Farm Bot' }
         ]}
     />
                             </div>
@@ -768,7 +769,7 @@ export default function AdminPage() {
                                             min="0"
                                             value={approvalFormData.months}
                                             onChange={(e) => setApprovalFormData(prev => ({ ...prev, months: parseInt(e.target.value) || 0 }))}
-                                            className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                            className="w-full px-3 py-2 bg-surface border border-border rounded-[24px] text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                         />
                                     </div>
                                     <div>
@@ -778,7 +779,7 @@ export default function AdminPage() {
                                             min="0"
                                             value={approvalFormData.years}
                                             onChange={(e) => setApprovalFormData(prev => ({ ...prev, years: parseInt(e.target.value) || 0 }))}
-                                            className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                                            className="w-full px-3 py-2 bg-surface border border-border rounded-[24px] text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                                         />
                                     </div>
                                 </div>
@@ -793,14 +794,14 @@ export default function AdminPage() {
                                         setApprovalFormData({ iggId: '', nickname: '', months: 1, years: 0, plan: 'BANK_BOT' })
                                         setSelectedUser(null)
                                     }}
-                                    className="flex-1 px-4 py-3 bg-surface hover:bg-surface-hover rounded-xl text-gray-300 font-medium transition-colors"
+                                    className="flex-1 px-4 py-3 bg-surface hover:bg-surface-hover rounded-[24px] text-gray-300 font-medium transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleApproveUser}
                                     disabled={isApproving || !approvalFormData.iggId.trim()}
-                                    className="flex-1 px-4 py-3 bg-gradient-to-r from-accent-emerald to-emerald-600 hover:opacity-90 rounded-xl text-white font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    className="flex-1 px-4 py-3 bg-gradient-to-r from-accent-emerald to-emerald-600 hover:opacity-90 rounded-[24px] text-white font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
                                     {isApproving ? (
                                         <>
@@ -826,11 +827,11 @@ export default function AdminPage() {
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="bg-background-secondary rounded-2xl border border-border p-6 max-w-md w-full shadow-xl"
+                        className="bg-bg-surface rounded-[24px] border border-border p-6 max-w-md w-full shadow-xl"
                     >
                         {/* Header */}
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center">
+                            <div className="w-12 h-12 bg-gradient-primary rounded-[24px] flex items-center justify-center">
                                 <Plus className="w-6 h-6 text-white" />
                             </div>
                             <div>
@@ -859,7 +860,7 @@ export default function AdminPage() {
                                     value={assignFormData.nickname}
                                     onChange={(e) => setAssignFormData(prev => ({ ...prev, nickname: e.target.value }))}
                                     placeholder="Enter a display name..."
-                                    className="w-full px-4 py-3 bg-surface border border-border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50 transition-all"
+                                    className="w-full px-4 py-3 bg-surface border border-border rounded-[24px] text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50 transition-all"
                                 />
                             </div>
 
@@ -874,7 +875,7 @@ export default function AdminPage() {
                                     onChange={(e) => setAssignFormData(prev => ({ ...prev, iggId: e.target.value }))}
                                     placeholder="Enter IGG ID (e.g., 1234567890)"
                                     required
-                                    className="w-full px-4 py-3 bg-surface border border-border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50 transition-all"
+                                    className="w-full px-4 py-3 bg-surface border border-border rounded-[24px] text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50 transition-all"
                                 />
                             </div>
 
@@ -886,14 +887,14 @@ export default function AdminPage() {
                                         setShowAssignModal(false)
                                         setAssignFormData({ nickname: '', iggId: '' })
                                     }}
-                                    className="flex-1 px-4 py-3 bg-surface hover:bg-surface-hover rounded-xl text-gray-300 font-medium transition-colors"
+                                    className="flex-1 px-4 py-3 bg-surface hover:bg-surface-hover rounded-[24px] text-gray-300 font-medium transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isAssigning || !assignFormData.iggId.trim()}
-                                    className="flex-1 px-4 py-3 bg-gradient-primary hover:opacity-90 rounded-xl text-white font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    className="flex-1 px-4 py-3 bg-gradient-primary hover:opacity-90 rounded-[24px] text-white font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
                                     {isAssigning ? (
                                         <>

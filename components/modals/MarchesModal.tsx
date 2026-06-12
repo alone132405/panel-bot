@@ -228,7 +228,7 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                     />
 
                                     {/* Main Toggle */}
-                                    <div className="flex items-center justify-between rounded-md border border-accent-1/20 bg-accent-1/10 p-4">
+                                    <div className="flex items-center justify-between rounded-[24px] border border-accent-1/20 bg-accent-1/10 p-4">
                                         <label className="flex items-center justify-between w-full cursor-pointer">
                                             <SettingInfoLabel label="Join Rallies (Darknest Only)" />
                                             <Checkbox checked={joinRallies} onChange={setJoinRallies} />
@@ -237,7 +237,7 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
 
                                     {/* Rally Settings */}
                                     <div className="grid grid-cols-2 gap-3 md:gap-4">
-                                        <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
+                                        <div className="rounded-[24px] border border-border bg-bg-inset/70 p-3 sm:p-4">
                                             <div className="mb-2">
                                                 <SettingInfoLabel label="Rally Limit" className="text-[12px] font-bold text-text-muted" />
                                             </div>
@@ -257,7 +257,7 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                             />
                                         </div>
 
-                                        <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
+                                        <div className="rounded-[24px] border border-border bg-bg-inset/70 p-3 sm:p-4">
                                             <div className="mb-2">
                                                 <SettingInfoLabel label="Max Travel Time (Minutes)" className="text-[12px] font-bold text-text-muted" />
                                             </div>
@@ -286,7 +286,7 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                         </h3>
                                         <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:gap-3">
                                             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((level) => (
-                                                <label key={level} className="flex items-center justify-between w-full gap-2 rounded-md border border-border bg-bg-inset/70 px-4 py-2 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
+                                                <label key={level} className="flex items-center justify-between w-full gap-2 rounded-[24px] border border-border bg-bg-inset/70 px-4 py-2 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
                                                     <SettingInfoLabel label={`Level ${level}`} helpText={`Allows joining level ${level} Darknest rallies.`} />
                                                     <Checkbox
                                                         checked={darkestLevels[`level${level}` as keyof typeof darkestLevels]}
@@ -314,7 +314,7 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                                 { label: 'Send One Type', value: sendOneType, setter: setSendOneType, key: 'sendOneType' },
                                                 { label: 'Add Buffers', value: addBuffers, setter: setAddBuffers, key: 'addBuffers' },
                                             ].map((option) => (
-                                                <label key={option.key} className="flex items-center justify-between rounded-md border border-border bg-bg-inset/70 p-4 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
+                                                <label key={option.key} className="flex items-center justify-between rounded-[24px] border border-border bg-bg-inset/70 p-4 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
                                                     <SettingInfoLabel label={option.label} />
                                                     <Checkbox checked={option.value} onChange={option.setter} />
                                                 </label>
@@ -325,7 +325,7 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
 
                                     {/* Additional Settings */}
                                     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
-                                        <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
+                                        <div className="rounded-[24px] border border-border bg-bg-inset/70 p-3 sm:p-4">
                                             <div className="mb-2">
                                                 <SettingInfoLabel label="Maximum Rally Time" className="text-[12px] font-bold text-text-muted" />
                                             </div>
@@ -341,7 +341,7 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                             />
                                         </div>
 
-                                        <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
+                                        <div className="rounded-[24px] border border-border bg-bg-inset/70 p-3 sm:p-4">
                                             <div className="mb-2">
                                                 <SettingInfoLabel label="Leave Extra Space" className="text-[12px] font-bold text-text-muted" />
                                             </div>
@@ -362,7 +362,7 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                             />
                                         </div>
 
-                                        <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
+                                        <div className="rounded-[24px] border border-border bg-bg-inset/70 p-3 sm:p-4">
                                             <div className="mb-2">
                                                 <SettingInfoLabel label="Wait Before Rejoining (Minutes)" className="text-[12px] font-bold text-text-muted" />
                                             </div>
@@ -406,17 +406,17 @@ export default function MarchesModal({ isOpen, onClose, iggId }: MarchesModalPro
                                             <SettingInfoLabel label="Essence Options" className="text-[11px] font-black uppercase tracking-[0.18em] text-text-muted" />
                                         </h3>
                                         <div className="grid grid-cols-2 gap-3">
-                                            <label className="flex items-center justify-between rounded-md border border-border bg-bg-inset/70 p-4 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
+                                            <label className="flex items-center justify-between rounded-[24px] border border-border bg-bg-inset/70 p-4 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
                                                 <SettingInfoLabel label="Transmute Dark Essences" />
                                                 <Checkbox checked={transmuteDarkEssences} onChange={setTransmuteDarkEssences} />
                                             </label>
 
-                                            <label className="flex items-center justify-between rounded-md border border-border bg-bg-inset/70 p-4 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
+                                            <label className="flex items-center justify-between rounded-[24px] border border-border bg-bg-inset/70 p-4 transition-colors hover:border-accent-1/25 hover:bg-white/[0.035] cursor-pointer">
                                                 <SettingInfoLabel label="Keep One Slot Free" />
                                                 <Checkbox checked={keepOneSlotFree} onChange={setKeepOneSlotFree} />
                                             </label>
 
-                                            <div className="rounded-md border border-border bg-bg-inset/70 p-3 sm:p-4">
+                                            <div className="rounded-[24px] border border-border bg-bg-inset/70 p-3 sm:p-4">
                                                 <div className="mb-2">
                                                     <SettingInfoLabel label="Delete Essences Lower Than" className="text-[12px] font-bold text-text-muted" />
                                                 </div>

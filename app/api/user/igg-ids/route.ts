@@ -26,7 +26,8 @@ export async function GET(req: Request) {
                         subscription: {
                             select: {
                                 status: true,
-                                expiresAt: true
+                                expiresAt: true,
+                                plan: true
                             }
                         }
                     },

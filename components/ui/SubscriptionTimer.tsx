@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Clock3, KeyRound, ShieldCheck } from 'lucide-react'
+import { CheckCircle2, Clock, CalendarDays, Loader2, Play, Square } from 'lucide-react'
 
 interface SubscriptionTimerProps {
     expiresAt: string | Date
@@ -75,12 +76,12 @@ export default function SubscriptionTimer({ expiresAt, plan, status, iggId, nick
     ]
 
     return (
-        <div className="panel-solid relative overflow-hidden rounded-lg p-5">
+        <div className="panel-solid relative overflow-hidden rounded-[24px] p-5">
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent-1/60 to-transparent" />
 
             <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex min-w-0 items-start gap-4">
-                    <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-md border ${isExpired
+                    <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[24px] border ${isExpired
                         ? 'border-accent-3/25 bg-accent-3/10 text-accent-3'
                         : 'border-accent-1/25 bg-accent-1/10 text-accent-1'
                         }`}
@@ -101,11 +102,16 @@ export default function SubscriptionTimer({ expiresAt, plan, status, iggId, nick
                             </span>
                         </div>
                         <div className="mt-2 flex flex-wrap items-center gap-3 text-[12px] text-text-muted">
-                            <span className="inline-flex items-center gap-1 font-mono">
+                            <span className="inline-flex items-center gap-1 font-sans">
                                 <KeyRound className="h-3.5 w-3.5 text-accent-cyan" />
                                 {iggId ? `ID ${iggId}` : 'No ID linked'}
                             </span>
                             <span>Expires {formattedExpiry}</span>
+                            {iggId && !isExpired && (
+                                <div className="ml-2 pl-2 border-l border-white/10">
+
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -115,7 +121,7 @@ export default function SubscriptionTimer({ expiresAt, plan, status, iggId, nick
                         {timerBlocks.map((block) => (
                             <div
                                 key={block.label}
-                                className="flex min-w-[58px] flex-col items-center justify-center rounded-md border border-accent-1/15 bg-accent-1/10 px-2 py-2"
+                                className="flex min-w-[58px] flex-col items-center justify-center rounded-[24px] border border-accent-1/15 bg-accent-1/10 px-2 py-2"
                             >
                                 <AnimatePresence mode="popLayout">
                                     <motion.span
@@ -136,7 +142,7 @@ export default function SubscriptionTimer({ expiresAt, plan, status, iggId, nick
                         ))}
                     </div>
                 ) : (
-                    <div className="rounded-md border border-accent-3/25 bg-accent-3/10 px-4 py-3 text-center">
+                    <div className="rounded-[24px] border border-accent-3/25 bg-accent-3/10 px-4 py-3 text-center">
                         <span className="font-orbitron text-[12px] uppercase tracking-[0.22em] text-accent-3">
                             License expired
                         </span>
