@@ -13,13 +13,15 @@ import {
     Search,
     Loader2,
     Clock,
-    Settings
+    Settings,
+    Target
 } from 'lucide-react'
 import { toast } from 'sonner'
 import IggIdSelector from '@/components/settings/IggIdSelector'
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch'
 import { TacticalSelect } from '@/components/ui/TacticalSelect'
 import { useSocket } from '@/hooks/useSocket'
+import { DEFAULT_GUILD_COMMANDS } from '@/lib/defaultGuildCommands'
 
 interface AuthorizedUser {
     UserID: number
@@ -78,14 +80,14 @@ const DEFAULT_BANK_SETTINGS: BankSettings = {
     allowAdminSkipLimit: true,
     allowExternalCommands: false,
     BuildspamMinimum: 3,
-    guildCommands: [],
+    guildCommands: DEFAULT_GUILD_COMMANDS,
     accountData: [],
 }
 
 const normalizeBankSettings = (settings: Partial<BankSettings> | null | undefined): BankSettings => ({
     ...DEFAULT_BANK_SETTINGS,
     ...settings,
-    guildCommands: Array.isArray(settings?.guildCommands) ? settings.guildCommands : [],
+    guildCommands: Array.isArray(settings?.guildCommands) && settings.guildCommands.length > 0 ? settings.guildCommands : DEFAULT_GUILD_COMMANDS,
     accountData: Array.isArray(settings?.accountData) ? settings.accountData : [],
 })
 
@@ -264,7 +266,7 @@ export default function BankSettingsPage() {
         if (!selectedIggId) return
         setLoading(true)
         try {
-            const res = await fetch(`/api/settings/${selectedIggId}/bank`)
+            const res = await fetch(`/api/settings/${selectedIggId}/bank`, { cache: 'no-store' })
             if (res.ok) {
                 const data = await res.json()
                 setSettings(normalizeBankSettings(data))
@@ -391,7 +393,7 @@ export default function BankSettingsPage() {
         const accountData = Array.isArray(settings.accountData) ? settings.accountData : []
         updateSettings({
             ...settings,
-            accountData: accountData.map((u) => u.UserID === userId ? { ...u, highAuth: false } : u)
+            accountData: accountData.filter((u) => Number(u.UserID) !== Number(userId))
         })
         toast.success('User removed from authorized list. Save changes to write config.')
     }
@@ -427,7 +429,7 @@ export default function BankSettingsPage() {
         const accountData = Array.isArray(settings.accountData) ? settings.accountData : []
         updateSettings({
             ...settings,
-            accountData: accountData.map((u) => u.UserID === userId ? { ...u, highAuth: !u.highAuth } : u)
+            accountData: accountData.map((u) => Number(u.UserID) === Number(userId) ? { ...u, highAuth: !u.highAuth } : u)
         })
     }
 
@@ -438,11 +440,15 @@ export default function BankSettingsPage() {
 
     const authorizedUsers = (Array.isArray(settings?.accountData) ? settings.accountData : []).filter((user) => user.highAuth === true)
     
-    const allowedFarmCommands = ['adminfood', 'adminwood', 'adminore', 'adminstone', 'adminrss', 'shield', 'relocate', 'migrate', 'setgather']
+    const allowedFarmCommands = [
+        'adminfood', 'adminwood', 'adminore', 'adminstone', 'adminrss', 'admingold', 'shield', 'relocate', 'migrate', 'setgather',
+        'pos', 'bal', 'food', 'stone', 'wood', 'ore', 'gold', 'rss', 'stop', 'guild', 'abort', 'relocatekvk',
+        'joingvg', 'leavegvg', 'joinda', 'leaveda', 'gryphon', 'recall'
+    ]
     const filteredCommands = (Array.isArray(settings?.guildCommands) ? settings.guildCommands : [])
         .map((cmd, index) => ({ cmd, index }))
-        .filter(({ cmd }) => cmd.commadReference.toLowerCase().includes(commandSearch.toLowerCase()))
-        .filter(({ cmd }) => selectedPlan !== 'FARM_BOT' || allowedFarmCommands.includes(cmd.commadReference.toLowerCase()))
+        .filter(({ cmd }) => cmd.commadReference && cmd.commadReference.toLowerCase().includes(commandSearch.toLowerCase()))
+        .filter(({ cmd }) => selectedPlan !== 'FARM_BOT' || (cmd.commadReference && allowedFarmCommands.includes(cmd.commadReference.toLowerCase())))
 
     const commandAccessCards = [
         {

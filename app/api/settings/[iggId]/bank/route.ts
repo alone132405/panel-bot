@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/authOptions'
@@ -9,6 +11,7 @@ import {
     writeBankSettingsFile,
     writeManageGuildSettingsFile,
 } from '@/lib/fileSync'
+import { DEFAULT_GUILD_COMMANDS } from '@/lib/defaultGuildCommands'
 
 const DEFAULT_BANK_SETTINGS = {
     enableBank: false,
@@ -31,7 +34,7 @@ const DEFAULT_BANK_SETTINGS = {
     maxSendDistance: 50,
     BuildspamMinimum: 3,
     allowExternalCommands: false,
-    guildCommands: [],
+    guildCommands: DEFAULT_GUILD_COMMANDS,
     accountData: [],
     outgoingData: [],
 }
@@ -47,7 +50,7 @@ function normalizeBankSettings(settings: Record<string, unknown> | null | undefi
     return {
         ...DEFAULT_BANK_SETTINGS,
         ...settings,
-        guildCommands: Array.isArray(settings?.guildCommands) ? settings.guildCommands : [],
+        guildCommands: Array.isArray(settings?.guildCommands) && settings.guildCommands.length > 0 ? settings.guildCommands : DEFAULT_GUILD_COMMANDS,
         accountData: Array.isArray(settings?.accountData) ? settings.accountData : [],
         outgoingData: Array.isArray(settings?.outgoingData) ? settings.outgoingData : [],
     }
@@ -128,16 +131,22 @@ export async function PUT(
                 bankSettings.accountData = bankSettings.accountData.slice(0, 2)
             }
 
-            const allowedCommands = ['adminfood', 'adminwood', 'adminore', 'adminstone', 'adminrss', 'shield', 'relocate', 'migrate', 'setgather']
+            const allowedCommands = [
+                'adminfood', 'adminwood', 'adminore', 'adminstone', 'adminrss', 'admingold', 'shield', 'relocate', 'migrate', 'setgather',
+                'pos', 'bal', 'food', 'stone', 'wood', 'ore', 'gold', 'rss', 'stop', 'guild', 'abort', 'relocatekvk',
+                'joingvg', 'leavegvg', 'joinda', 'leaveda', 'gryphon', 'recall'
+            ]
             if (bankSettings.guildCommands && Array.isArray(bankSettings.guildCommands)) {
                 bankSettings.guildCommands = bankSettings.guildCommands.map((cmd: any) => ({
                     ...cmd,
-                    enableCommand: cmd.commadReference ? allowedCommands.includes(cmd.commadReference.toLowerCase()) : false
+                    enableCommand: cmd.commadReference && allowedCommands.includes(cmd.commadReference.toLowerCase()) ? Boolean(cmd.enableCommand) : false
                 }))
             }
         }
 
-        const bankSync = await writeBankSettingsFile(params.iggId, normalizeBankSettings(bankSettings))
+
+
+        const bankSync = await writeBankSettingsFile(params.iggId, normalizeBankSettings(bankSettings), false)
 
         let manageGuildSettings = DEFAULT_MANAGE_GUILD_SETTINGS
         try {
